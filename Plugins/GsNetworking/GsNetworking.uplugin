@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "GsNetworking",
+	"Description": "Thread-safe networking plugin with dedicated I/O worker",
+	"Category": "Networking",
+	"CreatedBy": "bak1210",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "GsNetworking",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

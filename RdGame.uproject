@@ -1,0 +1,47 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{B99C14CD-4E93-A050-35EC-0B8E66574C19}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "RdGame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"AIModule",
+				"UMG"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "StateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "DungeonGenerator",
+			"Enabled": true
+		},
+		{
+			"Name": "GsMessaging",
+			"Enabled": true
+		},
+		{
+			"Name": "GsNetworking",
+			"Enabled": true
+		}
+	]
+}
