@@ -48,9 +48,11 @@ void ARdRemoteCharacter::SetNetworkDriverMode(ENetworkDriverMode NewMode) {
     // 2. 물리/이동 모드 설정
     // CustomTCP 모드에서는 직접 Transform을 보간하므로 물리 시뮬레이션 간섭을
     // 최소화 하지만 애니메이션을 위해 Walking 모드는 유지
-    if (GetCharacterMovement()) {
-      // 중력 등은 보간에 방해될 수 있으므로 필요시 커스텀 모드 사용 고려
-      // 일단은 기본 Walking 유지하되, 보간 로직에서 위치를 강제 할당함
+    if (auto *CMC = GetCharacterMovement()) {
+      // 마찰력과 제동력을 0으로 설정하여 Velocity가 물리 엔진에 의해 초기화되는
+      // 것을 방지
+      CMC->GroundFriction = 0.0f;
+      CMC->BrakingDecelerationWalking = 0.0f;
     }
 
     // 3. 커스텀 컴포넌트 활성화
@@ -61,6 +63,12 @@ void ARdRemoteCharacter::SetNetworkDriverMode(ENetworkDriverMode NewMode) {
     break;
 
   case ENetworkDriverMode::UnrealUDP:
+    // 0. 물리 설정 복구 (기본값)
+    if (auto *CMC = GetCharacterMovement()) {
+      CMC->GroundFriction = 8.0f;                // 기본값 복구
+      CMC->BrakingDecelerationWalking = 2048.0f; // 기본값 복구
+    }
+
     // 1. 커스텀 컴포넌트 비활성화
     if (MoveComp) {
       MoveComp->SetComponentTickEnabled(false);
