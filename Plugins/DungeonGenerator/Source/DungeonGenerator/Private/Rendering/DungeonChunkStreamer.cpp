@@ -3,7 +3,6 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 
-
 UDungeonChunkStreamer::UDungeonChunkStreamer() {
   PrimaryComponentTick.bCanEverTick = true;
   PrimaryComponentTick.TickInterval =
@@ -50,26 +49,40 @@ void UDungeonChunkStreamer::UpdateActiveChunks(const FVector &CameraLocation) {
   // 청크맵 상태 로그 (디버그용)
   // UE_LOG(LogTemp, Log, TEXT("DungeonChunkStreamer: Camera at chunk (%d, %d),
   // ChunkHISMMap has %d entries"), 	CameraChunk.X, CameraChunk.Y,
-  //ChunkHISMMap.Num());
+  // ChunkHISMMap.Num());
 
-  // [New Logic] First Run Check: If ActiveChunks is empty but we have map data,
-  // it implies all chunks were set to Visible by RebuildChunkMaps.
-  // We must populate ActiveChunks with EVERYTHING so the difference logic below
-  // will turn off the distant ones.
+  // [FIXED] First Run Check: 첫 실행 시 모든 청크를 숨기고 카메라 주변만 활성화
   if (ActiveChunks.Num() == 0 &&
       (ChunkHISMMap.Num() > 0 || ChunkMergedMeshMap.Num() > 0)) {
-    TSet<FIntPoint> AllKeys;
-    ChunkHISMMap.GetKeys(AllKeys);
-    for (const auto &Pair : ChunkMergedMeshMap) {
-      AllKeys.Add(Pair.Key);
+
+    UE_LOG(LogTemp, Warning,
+           TEXT("[DungeonChunkStreamer] First Run: Initializing streaming with "
+                "%d chunks"),
+           ChunkHISMMap.Num());
+
+    // 1. 먼저 모든 청크를 숨김 (초기 상태 정리)
+    for (const auto &Pair : ChunkHISMMap) {
+      SetChunkVisible(Pair.Key, false);
     }
-    for (const auto &Pair : ChunkFloorMap) {
-      AllKeys.Add(Pair.Key);
+    for (const auto &Pair : ChunkMergedMeshMap) {
+      SetChunkVisible(Pair.Key, false);
     }
 
-    ActiveChunks = AllKeys;
-    // UE_LOG(LogTemp, Warning, TEXT("[DungeonChunkStreamer] First Run detected.
-    // Initialized ActiveChunks with %d existing chunks."), ActiveChunks.Num());
+    // 2. 카메라 주변 청크만 활성화
+    for (int32 Y = -StreamingDistance; Y <= StreamingDistance; Y++) {
+      for (int32 X = -StreamingDistance; X <= StreamingDistance; X++) {
+        FIntPoint ChunkCoord = CameraChunk + FIntPoint(X, Y);
+        SetChunkVisible(ChunkCoord, true);
+        ActiveChunks.Add(ChunkCoord);
+      }
+    }
+
+    UE_LOG(LogTemp, Warning,
+           TEXT("[DungeonChunkStreamer] First Run complete: %d chunks active "
+                "around (%d, %d)"),
+           ActiveChunks.Num(), CameraChunk.X, CameraChunk.Y);
+
+    return; // 첫 실행 완료, 일반 로직 건너뛰기
   }
 
   // 새롭게 활성화할 청크 계산
@@ -117,8 +130,9 @@ void UDungeonChunkStreamer::SetChunkVisible(FIntPoint ChunkCoord,
     }
 
     // UE_LOG(LogTemp, Warning, TEXT("SetChunkVisible: Chunk (%d,%d) -> %s,
-    // affected %d HISMs out of %d"), 	ChunkCoord.X, ChunkCoord.Y, 	bVisible ?
-    //TEXT("SHOW") : TEXT("HIDE"), 	AffectedHISMCount, HISMs->Num());
+    // affected %d HISMs out of %d"), 	ChunkCoord.X, ChunkCoord.Y, 	bVisible
+    // ?
+    // TEXT("SHOW") : TEXT("HIDE"), 	AffectedHISMCount, HISMs->Num());
   } else {
     // UE_LOG(LogTemp, Warning, TEXT("SetChunkVisible: Chunk (%d,%d) NOT FOUND
     // in ChunkHISMMap!"), 	ChunkCoord.X, ChunkCoord.Y);
