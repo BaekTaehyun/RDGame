@@ -3,9 +3,9 @@
 #include "Strategies/ReceiverStrategy.h"
 #include "Strategies/SenderStrategy.h"
 
-
 UGsNetworkMovementComponent::UGsNetworkMovementComponent() {
   PrimaryComponentTick.bCanEverTick = true;
+  PrimaryComponentTick.TickGroup = TG_PostPhysics;
 }
 
 void UGsNetworkMovementComponent::BeginPlay() {

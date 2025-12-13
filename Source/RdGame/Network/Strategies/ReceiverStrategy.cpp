@@ -1,4 +1,6 @@
 #include "ReceiverStrategy.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -11,8 +13,8 @@ void FReceiverStrategy::Initialize(ACharacter *InCharacter) {
     // Receiver는 물리를 끄거나 최소화해야 함
     if (auto *MoveComp = Char->GetCharacterMovement()) {
       // 중력 등 물리 연산 방해 금지 (선택 사항)
-      // MoveComp->GravityScale = 0.0f;
-      // MoveComp->SetMovementMode(MOVE_Custom);
+      MoveComp->GravityScale = 0.0f;
+      // MoveComp->SetMovementMode(MOVE_Custom); // Tick에서 동적으로 설정함
     }
   }
 }
@@ -51,13 +53,37 @@ void FReceiverStrategy::Tick(float DeltaTime) {
     FVector RealVelocity = (NewLoc - CurrentLoc) / DeltaTime;
 
     // B. 서버 속도와 혼합하거나(Blending), 특정 상태에서는 강제 설정
-    // 여기서는 실제 이동 속도 반영이 애니메이션에 가장 자연스러움
     // Z축은 점프 등을 위해 서버 속도 참고 가능하나, 단순화를 위해 RealVelocity
     // 사용
     MoveComp->Velocity = RealVelocity;
 
     // UpdateComponent를 호출하여 파생 데이터 갱신
     MoveComp->UpdateComponentVelocity();
+
+    // 4. Ground Check & Movement Mode Update for Animation
+    // 캡슐 하단으로 레이캐스트하여 바닥 여부 확인
+    float CapsuleHalfHeight =
+        Char->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+    FVector Start = NewLoc;
+    FVector End =
+        Start - FVector(0.0f, 0.0f, CapsuleHalfHeight + 10.0f); // 10cm 여유
+
+    FHitResult Hit;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(Char);
+
+    bool bHit = Char->GetWorld()->LineTraceSingleByChannel(
+        Hit, Start, End, ECC_WorldStatic, Params);
+
+    if (bHit) {
+      if (MoveComp->MovementMode != MOVE_Walking) {
+        MoveComp->SetMovementMode(MOVE_Walking);
+      }
+    } else {
+      if (MoveComp->MovementMode != MOVE_Falling) {
+        MoveComp->SetMovementMode(MOVE_Falling);
+      }
+    }
   }
 }
 
