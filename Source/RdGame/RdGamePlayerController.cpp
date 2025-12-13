@@ -1,67 +1,58 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "RdGamePlayerController.h"
-#include "EnhancedInputSubsystems.h"
-#include "Engine/LocalPlayer.h"
-#include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
+#include "Engine/LocalPlayer.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "RdGame.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
-void ARdGamePlayerController::BeginPlay()
-{
-	Super::BeginPlay();
+void ARdGamePlayerController::BeginPlay() {
+  Super::BeginPlay();
 
-	// only spawn touch controls on local player controllers
-	if (ShouldUseTouchControls() && IsLocalPlayerController())
-	{
-		// spawn the mobile controls widget
-		MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
+  // only spawn touch controls on local player controllers
+  if (ShouldUseTouchControls() && IsLocalPlayerController()) {
+    // spawn the mobile controls widget
+    MobileControlsWidget =
+        CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
 
-		if (MobileControlsWidget)
-		{
-			// add the controls to the player screen
-			MobileControlsWidget->AddToPlayerScreen(0);
+    if (MobileControlsWidget) {
+      // add the controls to the player screen
+      MobileControlsWidget->AddToPlayerScreen(0);
 
-		} else {
+    } else {
 
-			UE_LOG(LogRdGame, Error, TEXT("Could not spawn mobile controls widget."));
-
-		}
-
-	}
+      UE_LOG(LogRdGame, Error, TEXT("Could not spawn mobile controls widget."));
+    }
+  }
 }
 
-void ARdGamePlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
+void ARdGamePlayerController::SetupInputComponent() {
+  Super::SetupInputComponent();
 
-	// only add IMCs for local player controllers
-	if (IsLocalPlayerController())
-	{
-		// Add Input Mapping Contexts
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-		{
-			for (UInputMappingContext* CurrentContext : DefaultMappingContexts)
-			{
-				Subsystem->AddMappingContext(CurrentContext, 0);
-			}
+  // only add IMCs for local player controllers
+  if (IsLocalPlayerController()) {
+    // Add Input Mapping Contexts
+    if (UEnhancedInputLocalPlayerSubsystem *Subsystem =
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+                GetLocalPlayer())) {
+      for (UInputMappingContext *CurrentContext : DefaultMappingContexts) {
+        Subsystem->AddMappingContext(CurrentContext, 0);
+      }
 
-			// only add these IMCs if we're not using mobile touch input
-			if (!ShouldUseTouchControls())
-			{
-				for (UInputMappingContext* CurrentContext : MobileExcludedMappingContexts)
-				{
-					Subsystem->AddMappingContext(CurrentContext, 0);
-				}
-			}
-		}
-	}
+      // only add these IMCs if we're not using mobile touch input
+      if (!ShouldUseTouchControls()) {
+        for (UInputMappingContext *CurrentContext :
+             MobileExcludedMappingContexts) {
+          Subsystem->AddMappingContext(CurrentContext, 0);
+        }
+      }
+    }
+  }
 }
 
-bool ARdGamePlayerController::ShouldUseTouchControls() const
-{
-	// are we on a mobile platform? Should we force touch?
-	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+bool ARdGamePlayerController::ShouldUseTouchControls() const {
+  // are we on a mobile platform? Should we force touch?
+  return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
 }
