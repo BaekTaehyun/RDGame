@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타 유저 캐릭터 구현 및 동기화 계획</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--accent-blue);
+            border-bottom: none;
+        }
+
+        h2 {
+            margin-top: 2rem;
+            color: var(--accent-purple);
+        }
+
+        h3 {
+            margin-top: 1.5rem;
+            font-size: 1.3rem;
+            color: var(--accent-green);
+            border-bottom: none;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        code {
+            background: rgba(110, 118, 129, 0.4);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            background: var(--border-color);
+            margin-right: 0.5rem;
+        }
+
+        .tag.pros {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--accent-green);
+        }
+
+        .tag.cons {
+            background: rgba(248, 81, 73, 0.2);
+            color: #ff7b72;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 타 유저 캐릭터 구현 및 동기화 계획</h1>
+    <p><strong>작성일:</strong> 2025-12-13 | <strong>목표:</strong> 네비게이션 기반 타 유저 이동 동기화</p>
+
+    <div class="card">
+        <h3>SUMMARY</h3>
+        <p>
+            사용자께서는 <code>Variant_Combat</code>의 AI 로직을 참고하여, 서버로부터 받은 위치 정보를 바탕으로
+            <strong>타 유저(Remote Player) 캐릭터</strong>를 이동시키고자 합니다.<br>
+            단순 좌표 동기화가 아닌, <strong>AI Controller를 활용한 네비게이션 이동</strong> 방식을 채택하여
+            지형지물에 자연스럽게 반응하는 움직임을 구현하는 계획입니다.
+        </p>
+    </div>
+
+    <h2>1. 시스템 구조 제안</h2>
+
+    <h3>1.1 클래스 구조</h3>
+    <p>타 유저를 표현하기 위해 두 가지 새로운 클래스가 필요합니다.</p>
+
+    <ul>
+        <li>
+            <strong><code>ARdRemoteCharacter</code></strong> (Character)
+            <ul>
+                <li><code>ARdGameCharacter</code>와 외형/애니메이션 공유 (또는 공통 부모 사용)</li>
+                <li>직접 입력(Input)을 받지 않음</li>
+                <li><code>GsNetworkMovementComponent</code>를 통해 목표 지점 수신</li>
+            </ul>
+        </li>
+        <li>
+            <strong><code>ARdRemoteController</code></strong> (AIController)
+            <ul>
+                <li>타 유저 캐릭터에 빙의(Possess)되는 AI 컨트롤러</li>
+                <li><strong>역할:</strong> 수신된 좌표로 <code>MoveToLocation</code> 명령 수행</li>
+                <li>네비게이션 메시(NavMesh)를 사용하여 장애물 회피 가능</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>1.2 데이터 흐름</h3>
+    <pre>
+[Server] → (Packet: SC_Move) → [GsNetworkManager] 
+                                    ↓
+                           [GsNetworkMovementComponent] (RemoteCharacter 내)
+                                    ↓ 목표 좌표 전달
+                           [RdRemoteController] (AIController)
+                                    ↓ MoveToLocation(Dest)
+                           [RdRemoteCharacter] (안전하게 이동)
+    </pre>
+
+    <h2>2. 이동 처리 방식 비교 및 선택</h2>
+
+    <div class="card">
+        <h3>옵션 A: 직접 좌표 보간 (Simulation)</h3>
+        <p><code>SetActorLocation</code>을 사용하여 현재 위치에서 목표 위치로 <code>Lerp</code>(선형 보간) 합니다.</p>
+        <p><span class="tag pros">장점</span> 반응 속도가 빠름, 구현이 단순함.</p>
+        <p><span class="tag cons">단점</span> 벽을 뚫고 가거나 공중에 뜰 수 있음. 발 미끄러짐(Sliding) 현상 발생.</p>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <h3>🎯 옵션 B: AI 네비게이션 이동 (권장)</h3>
+        <p><code>AAIController::MoveToLocation</code>을 사용합니다.</p>
+        <p><span class="tag pros">장점</span> <strong>Variant_Combat AI와 유사한 자연스러운 움직임.</strong> 장애물 회피. 애니메이션(걷기/뛰기) 자동
+            처리.</p>
+        <p><span class="tag cons">단점</span> NavMesh가 필수. 통신 지연 시 멈칫거릴 수 있음. (예측 이동으로 보완 필요)</p>
+    </div>
+
+    <h2>3. 구현 상세 계획</h2>
+
+    <h3>Step 1: 캐릭터 클래스 분리 및 생성</h3>
+    <pre><code class="cpp">// RdRemoteCharacter.h
+UCLASS()
+class ARdRemoteCharacter : public ARdGameCharacter // 또는 공통 부모
+{
+    GENERATED_BODY()
+public:
+    ARdRemoteCharacter();
+    // AIController 클래스 지정
+    // AIControllerClass = ARdRemoteController::StaticClass();
+    // AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+};</code></pre>
+
+    <h3>Step 2: 리모트 컨트롤러 구현</h3>
+    <pre><code class="cpp">// RdRemoteController.h
+UCLASS()
+class ARdRemoteController : public AAIController
+{
+    GENERATED_BODY()
+public:
+    // 목표 지점으로 이동 명령
+    void MoveToTarget(const FVector& TargetLocation);
+};</code></pre>
+
+    <h3>Step 3: GsNetworkMovementComponent의 역할 변경</h3>
+    <p>기존에는 직접 <code>UpdateComponent</code>를 했지만, 이제는 <strong>전략(Strategy) 패턴</strong>을 사용하여 역할을 분리합니다.</p>
+    <ul>
+        <li><strong>Sender (내 캐릭터):</strong> 내 위치를 서버로 전송</li>
+        <li><strong>Receiver (타 캐릭터):</strong> 받은 위치를 <code>RemoteController</code>에게 <code>MoveTo</code> 명령으로 전달</li>
+    </ul>
+
+    <h3>Step 4: GsNetworkManager 스폰 로직</h3>
+    <p><code>HandleUserEnter</code> 패킷 수신 시:</p>
+    <ol>
+        <li><code>GetWorld()->SpawnActor&lt;ARdRemoteCharacter&gt;(...)</code></li>
+        <li>스폰된 캐릭터의 <code>GetController()</code>를 <code>ARdRemoteController</code>로 캐스팅</li>
+        <li>Map에 <code>SessionID</code>와 액터 저장</li>
+    </ol>
+
+    <h2>4. 싱크(Sync) 이슈 해결 방안</h2>
+    <p>유저가 보고 있는 화면과 실제 서버 위치가 다를 때의 대처:</p>
+    <ul>
+        <li><strong>오차 보정:</strong> <code>MoveTo</code>로 이동 중, 실제 좌표와 너무 많이 벌어지면(예: 2m 이상) 강제로
+            <code>SetActorLocation</code> 하여 위치를 맞춥니다. (텔레포트)</li>
+        <li><strong>속도 동기화:</strong> 패킷에 포함된 <code>Velocity</code>를 참고하여 <code>CharacterMovement->MaxWalkSpeed</code>를
+            조정, 도착 시간을 맞춥니다.</li>
+    </ul>
+
+</body>
+
+</html>

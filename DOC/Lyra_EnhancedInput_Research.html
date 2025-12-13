@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyra Enhanced Input 시스템 연구 보고서</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --border-color: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent-blue);
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            color: var(--accent-blue);
+        }
+
+        h2::before {
+            content: '§ ';
+            color: var(--accent-purple);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: var(--accent-green);
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 30px 0;
+        }
+
+        code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        ul,
+        ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .mermaid {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .phase-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .badge-state {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            margin-right: 8px;
+        }
+
+        .difficulty-1 {
+            color: var(--accent-green);
+        }
+
+        .difficulty-2 {
+            color: var(--accent-blue);
+        }
+
+        .difficulty-3 {
+            color: var(--accent-orange);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .check-icon {
+            color: var(--accent-green);
+            font-size: 1.2em;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            padding: 5px 0;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .toc a::before {
+            content: '→';
+            color: var(--accent-purple);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 Lyra Enhanced Input 시스템 연구 보고서</h1>
+        <div class="toc">
+            <h3>📋 목차</h3>
+            <ul>
+                <li><a href="#overview">초기화 흐름 개요</a></li>
+                <li><a href="#init-chain">핵심 초기화 순서</a></li>
+                <li><a href="#classes">필요한 클래스 구조</a></li>
+                <li><a href="#roles">핵심 클래스 역할</a></li>
+                <li><a href="#approach">ReBirth 적용 방안</a></li>
+                <li><a href="#guide">단계별 적용 가이드</a></li>
+                <li><a href="#conclusion">결론</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">1. 초기화 흐름 개요</h2>
+        <div class="mermaid">
+            sequenceDiagram
+            participant GM as GameMode
+            participant GS as GameState
+            participant EMC as ExperienceManagerComponent
+            participant Pawn as Pawn
+            participant PEC as PawnExtensionComponent
+            participant HC as HeroComponent
+            GM->>GS: GameState 생성
+            GS->>EMC: Experience 로드
+            GM->>Pawn: SpawnDefaultPawnAtTransform()
+            Pawn->>PEC: BeginPlay() → InitState_Spawned
+            PEC->>PEC: CheckDefaultInitialization()
+            PEC-->>HC: OnActorInitStateChanged
+            HC->>HC: InitializePlayerInput()
+        </div>
+
+        <hr>
+
+        <h2 id="init-chain">2. 핵심 초기화 순서</h2>
+        <table>
+            <tr>
+                <th>순서</th>
+                <th>상태</th>
+                <th>조건</th>
+                <th>수행 작업</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><span class="badge-state">Spawned</span></td>
+                <td>Pawn 유효</td>
+                <td>InitStateFeature 등록</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><span class="badge-state">DataAvailable</span></td>
+                <td>PawnData + Controller</td>
+                <td>데이터 준비 확인</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><span class="badge-state">DataInitialized</span></td>
+                <td>모든 Feature 준비</td>
+                <td><strong>입력 초기화</strong></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><span class="badge-state">GameplayReady</span></td>
+                <td>어빌리티 준비</td>
+                <td>게임플레이 시작</td>
+            </tr>
+        </table>
+
+        <h3>입력 초기화 시점</h3>
+        <pre><code>// ULyraHeroComponent::HandleChangeInitState()
+if (Pawn->InputComponent != nullptr)
+{
+    InitializePlayerInput(Pawn->InputComponent);  // ← 입력 바인딩
+}</code></pre>
+
+        <hr>
+
+        <h2 id="classes">3. 필요한 클래스 구조</h2>
+        <div class="mermaid">
+            graph TB
+            subgraph Pawn_Layer["Pawn Layer"]
+            ALyraChar[ALyraCharacter]
+            PEC[PawnExtensionComponent]
+            HC[HeroComponent]
+            end
+            subgraph Input_System["Input System"]
+            LIC[LyraInputComponent]
+            LIConfig[LyraInputConfig]
+            end
+            ALyraChar --> PEC
+            ALyraChar --> HC
+            HC -->|사용| LIC
+            LIC -->|참조| LIConfig
+        </div>
+
+        <hr>
+
+        <h2 id="roles">4. 핵심 클래스 역할</h2>
+        <table>
+            <tr>
+                <th>클래스</th>
+                <th>역할</th>
+            </tr>
+            <tr>
+                <td><code>ULyraPawnExtensionComponent</code></td>
+                <td>초기화 조정, ASC 관리</td>
+            </tr>
+            <tr>
+                <td><code>ULyraHeroComponent</code></td>
+                <td><strong>입력 바인딩</strong>, 카메라 관리</td>
+            </tr>
+            <tr>
+                <td><code>ULyraInputConfig</code></td>
+                <td>GameplayTag ↔ InputAction 매핑</td>
+            </tr>
+            <tr>
+                <td><code>ULyraInputComponent</code></td>
+                <td>Enhanced Input 래퍼</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2 id="approach">5. ReBirth 적용 방안</h2>
+        <div class="phase-card">
+            <h3>최소 구현 순서</h3>
+            <ol>
+                <li>ReBirthGameplayTags 정의</li>
+                <li>ReBirthInputConfig 생성 (DataAsset)</li>
+                <li>ReBirthInputComponent 구현</li>
+                <li>ReBirthHeroComponent 구현</li>
+                <li>Character에 컴포넌트 추가</li>
+            </ol>
+        </div>
+
+        <hr>
+
+        <h2 id="guide">6. 단계별 적용 가이드</h2>
+        <div class="phase-card">
+            <h3>Phase 1: GameplayTags</h3>
+            <pre><code>namespace ReBirthGameplayTags
+{
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Move);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Look_Mouse);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_Spawned);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_DataInitialized);
+}</code></pre>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 2: InputConfig</h3>
+            <pre><code>UCLASS(BlueprintType)
+class UReBirthInputConfig : public UDataAsset
+{
+    UPROPERTY(EditDefaultsOnly)
+    TArray&lt;FReBirthInputAction&gt; NativeInputActions;
+};</code></pre>
+        </div>
+
+        <div class="phase-card">
+            <h3>Phase 3: HeroComponent</h3>
+            <pre><code>UCLASS()
+class UReBirthHeroComponent : public UPawnComponent, 
+                               public IGameFrameworkInitStateInterface
+{
+    void InitializePlayerInput(UInputComponent* PlayerInputComponent);
+    void Input_Move(const FInputActionValue& InputActionValue);
+};</code></pre>
+        </div>
+
+        <table>
+            <tr>
+                <th>단계</th>
+                <th>작업</th>
+                <th>난이도</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>GameplayTags 정의</td>
+                <td class="difficulty-1">⭐</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>InputConfig DataAsset</td>
+                <td class="difficulty-2">⭐⭐</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>InputComponent 구현</td>
+                <td class="difficulty-2">⭐⭐</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>HeroComponent (Init State)</td>
+                <td class="difficulty-3">⭐⭐⭐</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2 id="conclusion">7. 결론</h2>
+        <div class="highlight-box">
+            <h3>핵심 포인트</h3>
+            <div class="check-item"><span class="check-icon">✅</span><strong>ModularGameplay 플러그인</strong> 활성화</div>
+            <div class="check-item"><span class="check-icon">✅</span><strong>GameplayTags</strong> 기반 입력 매핑</div>
+            <div class="check-item"><span class="check-icon">✅</span><strong>UPawnComponent +
+                    IGameFrameworkInitStateInterface</strong> 상속</div>
+            <div class="check-item"><span class="check-icon">✅</span><strong>InitState_DataInitialized</strong> 시점에 입력
+                바인딩</div>
+            <p style="margin-top:20px;"><strong>추천:</strong> Phase 1~4 최소 구현부터 시작</p>
+        </div>
+        <p style="text-align:center;color:var(--text-secondary);margin-top:40px;">📅 2025-12-07 | Lyra Enhanced Input
+            Research</p>
+    </div>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+
+</html>

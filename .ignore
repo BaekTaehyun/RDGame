@@ -1,0 +1,12 @@
+/.git
+/.vs
+/.vscode
+/Content
+/DOC
+/Intermediate
+/NetServer
+/Saved
+/Plugins/DungeonGenerator/Doc
+/Plugins/DungeonGenerator/Intermediate
+/Plugins/GsMessaging/Intermediate
+/Plugins/GsNetworking/Intermediate

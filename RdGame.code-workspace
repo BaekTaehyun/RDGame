@@ -6,16 +6,16 @@
 		},
 		{
 			"name": "UE5",
-			"path": "D:\\UnrealEngine5\\UnrealEngine"
+			"path": "F:\\UnrealEngine"
 		}
 	],
 	"settings": {
 		"typescript.tsc.autoDetect": "off",
 		"npm.autoDetect": "off",
 		"terminal.integrated.env.windows": {
-			"PATH": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64;${env:PATH}",
-			"DOTNET_ROOT": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64",
-			"DOTNET_HOST_PATH": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64\\dotnet.exe",
+			"PATH": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64;${env:PATH}",
+			"DOTNET_ROOT": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64",
+			"DOTNET_HOST_PATH": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64\\dotnet.exe",
 			"DOTNET_MULTILEVEL_LOOKUP": "0",
 			"DOTNET_ROLL_FORWARD": "LatestMajor"
 		}
@@ -37,13 +37,13 @@
 					"RdGame",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -54,7 +54,7 @@
 					"RdGame",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -63,7 +63,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -74,13 +74,13 @@
 					"RdGame",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -91,13 +91,13 @@
 					"RdGame",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -108,7 +108,7 @@
 					"RdGame",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -117,7 +117,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -128,13 +128,13 @@
 					"RdGame",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -145,13 +145,13 @@
 					"RdGame",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -162,7 +162,7 @@
 					"RdGame",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -171,7 +171,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -182,13 +182,13 @@
 					"RdGame",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -199,13 +199,13 @@
 					"RdGame",
 					"Win64",
 					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -216,7 +216,7 @@
 					"RdGame",
 					"Win64",
 					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -225,7 +225,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -236,13 +236,13 @@
 					"RdGame",
 					"Win64",
 					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -253,13 +253,13 @@
 					"RdGame",
 					"Win64",
 					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -270,7 +270,7 @@
 					"RdGame",
 					"Win64",
 					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -279,7 +279,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -290,823 +290,13 @@
 					"RdGame",
 					"Win64",
 					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Debug Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Debug Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame Mac Debug Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Debug Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac DebugGame Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac DebugGame Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame Mac DebugGame Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac DebugGame Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Development Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Development Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame Mac Development Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Development Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Test Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Test Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame Mac Test Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Test Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Shipping Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Shipping Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame Mac Shipping Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame Mac Shipping Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"Mac",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Debug Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Debug Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame IOS Debug Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Debug Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS DebugGame Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS DebugGame Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame IOS DebugGame Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS DebugGame Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Development Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Development Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame IOS Development Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Development Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Test Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Test Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame IOS Test Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Test Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Shipping Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Shipping Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame IOS Shipping Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame IOS Shipping Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"IOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Debug Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Debug Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame TVOS Debug Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Debug Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS DebugGame Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS DebugGame Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame TVOS DebugGame Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS DebugGame Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Development Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Development Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame TVOS Development Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Development Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Test Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Test Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame TVOS Test Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Test Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Test",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Shipping Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Shipping Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGame TVOS Shipping Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGame TVOS Shipping Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGame",
-					"TVOS",
-					"Shipping",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1117,13 +307,13 @@
 					"RdGameEditor",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1134,7 +324,7 @@
 					"RdGameEditor",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -1143,7 +333,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1154,13 +344,13 @@
 					"RdGameEditor",
 					"Win64",
 					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1171,13 +361,13 @@
 					"RdGameEditor",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1188,7 +378,7 @@
 					"RdGameEditor",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -1197,7 +387,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1208,13 +398,13 @@
 					"RdGameEditor",
 					"Win64",
 					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1225,13 +415,13 @@
 					"RdGameEditor",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1242,7 +432,7 @@
 					"RdGameEditor",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
@@ -1251,7 +441,7 @@
 				],
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			},
 			{
@@ -1262,175 +452,13 @@
 					"RdGameEditor",
 					"Win64",
 					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"F:\\Projects\\RDGame\\RdGame.uproject",
 					"-waitmutex"
 				],
 				"problemMatcher": "$msCompile",
 				"type": "shell",
 				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Debug Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Debug Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGameEditor Mac Debug Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Debug Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Debug",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac DebugGame Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac DebugGame Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGameEditor Mac DebugGame Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac DebugGame Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"DebugGame",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Development Build",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Development Rebuild",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Build.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"dependsOn": [
-					"RdGameEditor Mac Development Clean"
-				],
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
-				}
-			},
-			{
-				"label": "RdGameEditor Mac Development Clean",
-				"group": "build",
-				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
-				"args": [
-					"RdGameEditor",
-					"Mac",
-					"Development",
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
-					"-waitmutex"
-				],
-				"problemMatcher": "$msCompile",
-				"type": "shell",
-				"options": {
-					"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+					"cwd": "F:\\UnrealEngine"
 				}
 			}
 		]
@@ -1441,134 +469,134 @@
 			{
 				"name": "Launch RdGame (Debug)",
 				"request": "launch",
-				"program": "C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\Binaries\\Win64\\RdGame-Win64-Debug.exe",
+				"program": "F:\\Projects\\RDGame\\Binaries\\Win64\\RdGame-Win64-Debug.exe",
 				"preLaunchTask": "RdGame Win64 Debug Build",
 				"args": [
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGame (DebugGame)",
 				"request": "launch",
-				"program": "C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\Binaries\\Win64\\RdGame-Win64-DebugGame.exe",
+				"program": "F:\\Projects\\RDGame\\Binaries\\Win64\\RdGame-Win64-DebugGame.exe",
 				"preLaunchTask": "RdGame Win64 DebugGame Build",
 				"args": [
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGame (Development)",
 				"request": "launch",
-				"program": "C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\Binaries\\Win64\\RdGame.exe",
+				"program": "F:\\Projects\\RDGame\\Binaries\\Win64\\RdGame.exe",
 				"preLaunchTask": "RdGame Win64 Development Build",
 				"args": [
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGame (Test)",
 				"request": "launch",
-				"program": "C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\Binaries\\Win64\\RdGame-Win64-Test.exe",
+				"program": "F:\\Projects\\RDGame\\Binaries\\Win64\\RdGame-Win64-Test.exe",
 				"preLaunchTask": "RdGame Win64 Test Build",
 				"args": [
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGame (Shipping)",
 				"request": "launch",
-				"program": "C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\Binaries\\Win64\\RdGame-Win64-Shipping.exe",
+				"program": "F:\\Projects\\RDGame\\Binaries\\Win64\\RdGame-Win64-Shipping.exe",
 				"preLaunchTask": "RdGame Win64 Shipping Build",
 				"args": [
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGameEditor (Debug)",
 				"request": "launch",
-				"program": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-Debug.exe",
+				"program": "F:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-Debug.exe",
 				"preLaunchTask": "RdGameEditor Win64 Debug Build",
 				"args": [
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject"
+					"F:\\Projects\\RDGame\\RdGame.uproject"
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGameEditor (DebugGame)",
 				"request": "launch",
-				"program": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-DebugGame.exe",
+				"program": "F:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-DebugGame.exe",
 				"preLaunchTask": "RdGameEditor Win64 DebugGame Build",
 				"args": [
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject"
+					"F:\\Projects\\RDGame\\RdGame.uproject"
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Launch RdGameEditor (Development)",
 				"request": "launch",
-				"program": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
+				"program": "F:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
 				"preLaunchTask": "RdGameEditor Win64 Development Build",
 				"args": [
-					"C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject"
+					"F:\\Projects\\RDGame\\RdGame.uproject"
 				],
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine",
+				"cwd": "F:\\UnrealEngine",
 				"stopAtEntry": false,
 				"console": "integratedTerminal",
 				"type": "cppvsdbg",
-				"visualizerFile": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
+				"visualizerFile": "F:\\UnrealEngine\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis"
 			},
 			{
 				"name": "Generate Project Files",
 				"type": "coreclr",
 				"request": "launch",
 				"preLaunchTask": "UnrealBuildTool Win64 Development Build",
-				"program": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Build\\BatchFiles\\RunUBT.bat",
+				"program": "F:\\UnrealEngine\\Engine\\Build\\BatchFiles\\RunUBT.bat",
 				"args": [
 					"-projectfiles",
 					"-vscode",
-					"-project=C:\\Users\\COM2US\\Documents\\Unreal Projects\\RdGame\\RdGame.uproject",
+					"-project=F:\\Projects\\RDGame\\RdGame.uproject",
 					"-game",
 					"-engine",
 					"-dotnet"
 				],
 				"env": {
-					"PATH": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64;${env:PATH}",
-					"DOTNET_ROOT": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64",
-					"DOTNET_HOST_PATH": "D:\\UnrealEngine5\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64\\dotnet.exe",
+					"PATH": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64;${env:PATH}",
+					"DOTNET_ROOT": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64",
+					"DOTNET_HOST_PATH": "F:\\UnrealEngine\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.412\\win-x64\\dotnet.exe",
 					"DOTNET_MULTILEVEL_LOOKUP": "0",
 					"DOTNET_ROLL_FORWARD": "LatestMajor"
 				},
 				"console": "integratedTerminal",
 				"stopAtEntry": false,
-				"cwd": "D:\\UnrealEngine5\\UnrealEngine"
+				"cwd": "F:\\UnrealEngine"
 			}
 		]
 	}

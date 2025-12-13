@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타 유저(Remote Character) 설정 가이드</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --text-primary: #d4d4d4;
+            --accent-blue: #569cd6;
+            --accent-green: #6a9955;
+            --border-color: #3e3e42;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: #dcdcaa;
+            margin-top: 2rem;
+        }
+
+        .step {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        code {
+            background: #3c3c3c;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #9cdcfe;
+        }
+
+        img {
+            max-width: 100%;
+            border: 1px solid var(--border-color);
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .note {
+            background: rgba(106, 153, 85, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🛠️ 타 유저(Remote Character) 설정 가이드</h1>
+    <p>이 문서는 C++로 구현된 <code>ARdRemoteCharacter</code>를 기반으로, 언리얼 에디터에서 실제 사용할 블루프린트 캐릭터를 생성하고 설정하는 방법을 안내합니다.</p>
+
+    <div class="step">
+        <span class="step-title">Step 1. C++ 클래스 파생하기</span>
+        <ol>
+            <li>언리얼 에디터의 <strong>Content Browser</strong>로 이동합니다.</li>
+            <li><strong>C++ Classes</strong> 폴더에서 <code>RdRemoteCharacter</code>를 검색합니다. (Source/RdGame/Network 경로에 위치)
+            </li>
+            <li>우클릭 후 <strong>Create Blueprint class based on RdRemoteCharacter</strong>를 선택합니다.</li>
+            <li>이름을 <code>BP_RemoteCharacter</code>로 지정하고 원하는 경로(예: Blueprints/Network)에 저장합니다.</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <span class="step-title">Step 2. 메시 및 애니메이션 설정</span>
+        <ol>
+            <li>생성된 <code>BP_RemoteCharacter</code>를 더블 클릭하여 엽니다.</li>
+            <li><strong>Mesh</strong> 컴포넌트를 선택합니다.</li>
+            <li><strong>Details</strong> 패널의 <code>Skeletal Mesh Asset</code> 항목에 로컬 플레이어와 동일한 메시(예: SKM_Manny)를 할당합니다.
+            </li>
+            <li><code>Anim Class</code> 항목에 로컬 플레이어와 동일한 <strong>ABP(AnimInstance)</strong>를 할당합니다.</li>
+            <div class="note">
+                💡 <strong>Tip:</strong> <code>GsNetworkMovementComponent</code>가 자동으로 <code>Velocity</code>를 업데이트해주므로,
+                기존 ABP의 걷기/뛰기 블렌드 스페이스가 별도 수정 없이도(거의) 그대로 작동합니다.
+            </div>
+            <li>(선택 사항) 로컬 로직과 분리된 순수 '비주얼용' ABP를 따로 만들어 할당하면 성능 최적화에 도움이 됩니다. (불필요한 입력/노티파이 제거 등)</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <span class="step-title">Step 3. 불필요한 컴포넌트 정리</span>
+        <p>타 유저는 내 화면에서 카메라를 가질 필요가 없습니다.</p>
+        <ol>
+            <li>컴포넌트 리스트에서 <strong>CameraBoom</strong>과 <strong>FollowCamera</strong>를 확인합니다.</li>
+            <li>이들은 C++ 부모(RdGameCharacter)에서 상속받았으므로 삭제는 불가능하지만, <strong>비활성화</strong>할 수 있습니다.</li>
+            <li>각 카메라 컴포넌트를 선택하고 Details 패널에서:
+                <ul>
+                    <li><code>Auto Activate</code> 체크 해제</li>
+                    <li><code>Component Tick Enabled</code> 체크 해제 (성능 최적화)</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <span class="step-title">Step 4. GsNetworkManager에 등록 (경로 수정)</span>
+        <p>현재 C++ 코드(<code>GsNetworkManager.cpp</code>)에는 기본값이 <code>ARdRemoteCharacter::StaticClass()</code>로 되어 있습니다.
+        </p>
+        <p>하지만 우리가 만든 <code>BP_RemoteCharacter</code>를 사용하려면, <strong>코드의 경로를 수정하거나 동적 로딩을 활성화</strong>해야 합니다.</p>
+
+        <h4>방법 A: C++ 코드 수정 (추천)</h4>
+        <pre><code class="cpp">// GsNetworkManager.cpp의 Initialize 함수 수정
+// 경로를 방금 만든 BP 경로로 맞춰주세요.
+FString ClassPath = TEXT("/Game/RdGame/Blueprints/Network/BP_RemoteCharacter.BP_RemoteCharacter_C");
+RemoteActorClass = LoadClass<AActor>(nullptr, *ClassPath);</code></pre>
+
+        <h4>방법 B: 하드코딩 없이 데이터 에셋 사용 (고급)</h4>
+        <p>추후에는 <code>DefaultGame.ini</code>나 별도의 DataAsset을 통해 경로를 설정하는 것이 좋습니다.</p>
+    </div>
+
+    <div class="step">
+        <span class="step-title">Step 5. 테스트</span>
+        <ol>
+            <li>에디터에서 <strong>Play (PIE)</strong>를 실행합니다.</li>
+            <li>(서버 코드가 준비되었다면) <code>~</code> 키를 눌러 콘솔을 열고 <code>connect_server</code> 등의 명령어로 로그인합니다.</li>
+            <li>다른 클라이언트로 접속하여 내 화면에 <code>BP_RemoteCharacter</code>가 스폰되고 움직이는지 확인합니다.</li>
+        </ol>
+    </div>
+
+</body>
+
+</html>

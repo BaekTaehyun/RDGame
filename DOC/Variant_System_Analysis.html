@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RdGame Variant 시스템 분석</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem 0;
+            padding-left: 1rem;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        h3 {
+            color: var(--accent-green);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        h4 {
+            color: var(--accent-orange);
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .card-icon.combat { background: linear-gradient(135deg, #f85149, #da3633); }
+        .card-icon.platforming { background: linear-gradient(135deg, #58a6ff, #1f6feb); }
+        .card-icon.sidescrolling { background: linear-gradient(135deg, #3fb950, #238636); }
+        .card-icon.interface { background: linear-gradient(135deg, #a371f7, #8957e5); }
+        .card-icon.ai { background: linear-gradient(135deg, #d29922, #9e6a03); }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        code {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .feature-item {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .feature-item h5 {
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tag.character { background: #1f6feb; color: white; }
+        .tag.gamemode { background: #238636; color: white; }
+        .tag.controller { background: #9e6a03; color: white; }
+        .tag.interface { background: #8957e5; color: white; }
+        .tag.ai { background: #da3633; color: white; }
+        .tag.gameplay { background: #3fb950; color: white; }
+        .tag.animation { background: #f85149; color: white; }
+        .tag.ui { background: #a371f7; color: white; }
+
+        .diagram {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .diagram-box {
+            display: inline-block;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            margin: 0.5rem;
+            position: relative;
+        }
+
+        .diagram-box.highlight {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+
+        .arrow {
+            color: var(--accent-green);
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 0.5rem 0;
+        }
+
+        .toc a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .summary-box h4 {
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 RdGame Variant 시스템 분석</h1>
+        <p class="subtitle">Variant_Combat, Variant_Platforming, Variant_SideScrolling 모듈 구조 및 활용 가이드</p>
+
+        <!-- 목차 -->
+        <div class="toc">
+            <h3>📑 목차</h3>
+            <ul>
+                <li><a href="#overview">1. 개요 - Variant 시스템이란?</a></li>
+                <li><a href="#combat">2. Variant_Combat - 3인칭 근접 전투 시스템</a></li>
+                <li><a href="#platforming">3. Variant_Platforming - 3인칭 플랫포머 시스템</a></li>
+                <li><a href="#sidescrolling">4. Variant_SideScrolling - 2D 횡스크롤 시스템</a></li>
+                <li><a href="#comparison">5. 각 Variant 비교 분석</a></li>
+                <li><a href="#usage">6. 활용 가이드 및 확장 방법</a></li>
+            </ul>
+        </div>
+
+        <!-- 1. 개요 -->
+        <section id="overview">
+            <h2>1. 개요 - Variant 시스템이란?</h2>
+            
+            <p>
+                <strong>Variant 시스템</strong>은 RdGame 프로젝트에서 다양한 게임플레이 스타일을 모듈화하여 관리하는 아키텍처입니다.
+                각 Variant는 특정 게임 장르에 맞춤화된 캐릭터, 컨트롤러, 게임모드, AI, 게임플레이 요소들을 포함합니다.
+            </p>
+
+            <div class="summary-box">
+                <h4>💡 핵심 설계 원칙</h4>
+                <ul>
+                    <li><strong>모듈화</strong>: 각 게임플레이 스타일이 독립적인 폴더로 분리</li>
+                    <li><strong>인터페이스 기반</strong>: 공통 기능은 인터페이스로 추상화</li>
+                    <li><strong>확장성</strong>: 기본 클래스(ACharacter)를 상속하여 특화 기능 추가</li>
+                    <li><strong>재사용성</strong>: 공통 컴포넌트와 유틸리티는 공유</li>
+                </ul>
+            </div>
+
+            <h3>전체 구조도</h3>
+            <div class="diagram">
+                <div class="diagram-box">ACharacter (엔진)</div>
+                <span class="arrow">→</span>
+                <div class="diagram-box">ARdGameCharacter (공통 베이스)</div>
+                <br><br>
+                <div class="diagram-box highlight">ACombatCharacter</div>
+                <div class="diagram-box highlight">APlatformingCharacter</div>
+                <div class="diagram-box highlight">ASideScrollingCharacter</div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Variant</th>
+                    <th>게임 장르</th>
+                    <th>카메라 시점</th>
+                    <th>주요 기능</th>
+                </tr>
+                <tr>
+                    <td><code>Variant_Combat</code></td>
+                    <td>액션 RPG / 핵앤슬래시</td>
+                    <td>3인칭 TPS</td>
+                    <td>콤보 공격, 차지 공격, 데미지 시스템</td>
+                </tr>
+                <tr>
+                    <td><code>Variant_Platforming</code></td>
+                    <td>3D 플랫포머</td>
+                    <td>3인칭 TPS</td>
+                    <td>더블점프, 벽점프, 대시, 코요테 타임</td>
+                </tr>
+                <tr>
+                    <td><code>Variant_SideScrolling</code></td>
+                    <td>2D 횡스크롤 액션</td>
+                    <td>2D 사이드뷰</td>
+                    <td>멀티점프, 소프트 플랫폼, NPC 상호작용</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 2. Variant_Combat -->
+        <section id="combat">
+            <h2>2. Variant_Combat - 근접 전투 시스템</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon combat">⚔️</div>
+                    <div class="card-title">Combat System Overview</div>
+                </div>
+                <p>
+                    3인칭 시점의 근접 전투 시스템을 구현한 Variant입니다.
+                    콤보 공격 연계, 차지 공격, 데미지/힐링, 사망/리스폰 등 액션 RPG의 핵심 기능을 제공합니다.
+                </p>
+                <div>
+                    <span class="tag character">Character</span>
+                    <span class="tag ai">AI</span>
+                    <span class="tag animation">Animation</span>
+                    <span class="tag interface">Interface</span>
+                    <span class="tag gameplay">Gameplay</span>
+                    <span class="tag ui">UI</span>
+                </div>
+            </div>
+
+            <h3>📁 폴더 구조</h3>
+            <pre><code>Variant_Combat/
+├── AI/                        # AI 관련 클래스
+│   ├── CombatAIController.*   # 적 AI 컨트롤러
+│   ├── CombatEnemy.*          # 적 캐릭터 클래스
+│   ├── CombatEnemySpawner.*   # 적 스포너
+│   ├── CombatStateTreeUtility.*  # StateTree AI 유틸리티
+│   ├── EnvQueryContext_*.*    # EQS 컨텍스트 (플레이어, 위험)
+├── Animation/                 # 애니메이션 노티파이
+│   ├── AnimNotify_CheckChargedAttack.*   # 차지 공격 체크
+│   ├── AnimNotify_CheckCombo.*           # 콤보 연계 체크
+│   ├── AnimNotify_DoAttackTrace.*        # 공격 충돌 트레이스
+├── Gameplay/                  # 게임플레이 오브젝트
+│   ├── CombatActivationVolume.*   # 활성화 볼륨
+│   ├── CombatCheckpointVolume.*   # 체크포인트 볼륨
+│   ├── CombatDamageableBox.*      # 파괴 가능 박스
+│   ├── CombatDummy.*              # 훈련용 더미
+│   ├── CombatLavaFloor.*          # 용암 바닥
+├── Interfaces/                # 인터페이스 정의
+│   ├── CombatAttacker.*       # 공격자 인터페이스
+│   ├── CombatDamageable.*     # 피격 가능 인터페이스
+│   ├── CombatActivatable.*    # 활성화 가능 인터페이스
+├── UI/                        # UI 위젯
+│   ├── CombatLifeBar.*        # HP 바 위젯
+├── CombatCharacter.*          # 전투 캐릭터 메인 클래스
+├── CombatGameMode.*           # 전투 게임모드
+├── CombatPlayerController.*   # 플레이어 컨트롤러</code></pre>
+
+            <h3>🔑 핵심 클래스: ACombatCharacter</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h5>⚔️ 콤보 공격 시스템</h5>
+                    <p>AnimMontage 기반 콤보 연계 공격. 타이밍에 맞춰 입력하면 다음 콤보 단계로 전환.</p>
+                    <code>ComboAttackMontage</code>, <code>ComboSectionNames</code>
+                </div>
+                <div class="feature-item">
+                    <h5>🔋 차지 공격 시스템</h5>
+                    <p>버튼 홀드로 차지, 릴리즈로 강력한 공격 발동.</p>
+                    <code>ChargedAttackMontage</code>, <code>ChargeLoopSection</code>
+                </div>
+                <div class="feature-item">
+                    <h5>💔 데미지 시스템</h5>
+                    <p>HP 관리, 넉백, 래그돌 물리, 사망/리스폰 처리.</p>
+                    <code>ApplyDamage()</code>, <code>HandleDeath()</code>
+                </div>
+                <div class="feature-item">
+                    <h5>🎯 공격 트레이스</h5>
+                    <p>구체(Sphere) 트레이스로 공격 판정. 적에게 데미지 전달.</p>
+                    <code>DoAttackTrace()</code>, <code>MeleeTraceDistance</code>
+                </div>
+            </div>
+
+            <h3>🤖 AI 시스템: ACombatEnemy</h3>
+            <p>
+                <code>ACombatEnemy</code>는 StateTree를 사용한 AI 적 캐릭터입니다.
+                플레이어를 추적하고, 콤보/차지 공격을 수행하며, 위험 감지 시 회피 행동을 합니다.
+            </p>
+            <table>
+                <tr>
+                    <th>클래스</th>
+                    <th>역할</th>
+                </tr>
+                <tr>
+                    <td><code>ACombatAIController</code></td>
+                    <td>StateTree 기반 AI 로직 실행</td>
+                </tr>
+                <tr>
+                    <td><code>CombatStateTreeUtility</code></td>
+                    <td>StateTree에서 사용할 유틸리티 태스크</td>
+                </tr>
+                <tr>
+                    <td><code>EnvQueryContext_Player</code></td>
+                    <td>EQS에서 플레이어 위치 참조</td>
+                </tr>
+                <tr>
+                    <td><code>EnvQueryContext_Danger</code></td>
+                    <td>EQS에서 위험 위치 참조</td>
+                </tr>
+            </table>
+
+            <h3>🔌 인터페이스 설계</h3>
+            <div class="card">
+                <h4>ICombatAttacker - 공격자 인터페이스</h4>
+                <pre><code class="cpp">class ICombatAttacker {
+    // 공격 충돌 체크 (AnimNotify에서 호출)
+    virtual void DoAttackTrace(FName DamageSourceBone) = 0;
+    
+    // 콤보 연계 체크
+    virtual void CheckCombo() = 0;
+    
+    // 차지 공격 루프 체크
+    virtual void CheckChargedAttack() = 0;
+};</code></pre>
+            </div>
+
+            <div class="card">
+                <h4>ICombatDamageable - 피격 가능 인터페이스</h4>
+                <pre><code class="cpp">class ICombatDamageable {
+    // 데미지 및 넉백 처리
+    virtual void ApplyDamage(float Damage, AActor* DamageCauser, 
+                             const FVector& DamageLocation, 
+                             const FVector& DamageImpulse) = 0;
+    
+    // 사망 처리
+    virtual void HandleDeath() = 0;
+    
+    // 힐링 처리
+    virtual void ApplyHealing(float Healing, AActor* Healer) = 0;
+    
+    // 위험 알림 (적이 공격 대비)
+    virtual void NotifyDanger(const FVector& DangerLocation, 
+                              AActor* DangerSource) = 0;
+};</code></pre>
+            </div>
+        </section>
+
+        <!-- 3. Variant_Platforming -->
+        <section id="platforming">
+            <h2>3. Variant_Platforming - 3D 플랫포머 시스템</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon platforming">🏃</div>
+                    <div class="card-title">Platforming System Overview</div>
+                </div>
+                <p>
+                    마리오 스타일의 3D 플랫포머 이동 시스템입니다.
+                    더블점프, 벽점프, 대시 등 플랫포머 게임의 핵심 기동성 기능을 제공합니다.
+                </p>
+                <div>
+                    <span class="tag character">Character</span>
+                    <span class="tag animation">Animation</span>
+                    <span class="tag controller">Controller</span>
+                    <span class="tag gamemode">GameMode</span>
+                </div>
+            </div>
+
+            <h3>📁 폴더 구조</h3>
+            <pre><code>Variant_Platforming/
+├── Animation/
+│   ├── AnimNotify_EndDash.*   # 대시 종료 노티파이
+├── PlatformingCharacter.*     # 플랫포밍 캐릭터 메인 클래스
+├── PlatformingGameMode.*      # 플랫포밍 게임모드
+├── PlatformingPlayerController.*  # 플레이어 컨트롤러</code></pre>
+
+            <h3>🔑 핵심 클래스: APlatformingCharacter</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h5>🦘 더블점프</h5>
+                    <p>공중에서 한 번 더 점프 가능. <code>bHasDoubleJumped</code> 플래그로 관리.</p>
+                </div>
+                <div class="feature-item">
+                    <h5>🧱 벽점프</h5>
+                    <p>벽에 닿으면 반대 방향으로 점프. 구체 트레이스로 벽 감지.</p>
+                    <code>WallJumpTraceDistance</code>, <code>WallJumpBounceImpulse</code>
+                </div>
+                <div class="feature-item">
+                    <h5>💨 대시</h5>
+                    <p>AnimMontage 기반 순간 이동. 한 번 착지하면 리셋.</p>
+                    <code>DashMontage</code>, <code>bHasDashed</code>
+                </div>
+                <div class="feature-item">
+                    <h5>⏱️ 코요테 타임</h5>
+                    <p>플랫폼에서 떨어진 직후 일정 시간 내 점프 허용.</p>
+                    <code>MaxCoyoteTime</code>, <code>LastFallTime</code>
+                </div>
+            </div>
+
+            <h3>구현 세부사항</h3>
+            <pre><code class="cpp">// 멀티점프 로직 (더블점프 + 벽점프)
+void APlatformingCharacter::MultiJump()
+{
+    // 1. 지면이거나 코요테 타임 내이면 일반 점프
+    // 2. 벽 감지 시 벽점프 (반대 방향 임펄스)
+    // 3. 더블점프 미사용 시 더블점프
+}</code></pre>
+
+            <table>
+                <tr>
+                    <th>속성</th>
+                    <th>설명</th>
+                    <th>기본값</th>
+                </tr>
+                <tr>
+                    <td><code>WallJumpTraceDistance</code></td>
+                    <td>벽 감지 트레이스 거리</td>
+                    <td>50 cm</td>
+                </tr>
+                <tr>
+                    <td><code>WallJumpBounceImpulse</code></td>
+                    <td>벽에서 튕기는 수평 임펄스</td>
+                    <td>800 cm/s</td>
+                </tr>
+                <tr>
+                    <td><code>WallJumpVerticalImpulse</code></td>
+                    <td>벽점프 수직 임펄스</td>
+                    <td>900 cm/s</td>
+                </tr>
+                <tr>
+                    <td><code>MaxCoyoteTime</code></td>
+                    <td>코요테 타임 허용 시간</td>
+                    <td>0.16 초</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 4. Variant_SideScrolling -->
+        <section id="sidescrolling">
+            <h2>4. Variant_SideScrolling - 2D 횡스크롤 시스템</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon sidescrolling">🎮</div>
+                    <div class="card-title">Side-Scrolling System Overview</div>
+                </div>
+                <p>
+                    클래식한 2D 횡스크롤 액션 게임 시스템입니다.
+                    소프트 플랫폼, NPC 상호작용, 픽업 아이템 등 횡스크롤 게임의 필수 요소를 제공합니다.
+                </p>
+                <div>
+                    <span class="tag character">Character</span>
+                    <span class="tag ai">AI/NPC</span>
+                    <span class="tag gameplay">Gameplay</span>
+                    <span class="tag interface">Interface</span>
+                    <span class="tag ui">UI</span>
+                </div>
+            </div>
+
+            <h3>📁 폴더 구조</h3>
+            <pre><code>Variant_SideScrolling/
+├── AI/
+│   ├── SideScrollingAIController.*       # NPC AI 컨트롤러
+│   ├── SideScrollingNPC.*                # NPC 캐릭터
+│   ├── SideScrollingStateTreeUtility.*   # StateTree 유틸리티
+├── Gameplay/
+│   ├── SideScrollingJumpPad.*        # 점프 패드
+│   ├── SideScrollingMovingPlatform.* # 이동 플랫폼
+│   ├── SideScrollingPickup.*         # 픽업 아이템
+│   ├── SideScrollingSoftPlatform.*   # 통과 가능 플랫폼
+├── Interfaces/
+│   ├── SideScrollingInteractable.*   # 상호작용 인터페이스
+├── UI/
+│   ├── SideScrollingUI.*             # 게임 UI
+├── SideScrollingCameraManager.*      # 카메라 매니저
+├── SideScrollingCharacter.*          # 메인 캐릭터
+├── SideScrollingGameMode.*           # 게임모드
+├── SideScrollingPlayerController.*   # 플레이어 컨트롤러</code></pre>
+
+            <h3>🔑 핵심 클래스: ASideScrollingCharacter</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h5>🔲 소프트 플랫폼</h5>
+                    <p>아래 버튼으로 통과 가능한 플랫폼. 콜리전 채널 동적 변경.</p>
+                    <code>SoftCollisionObjectType</code>, <code>SetSoftCollision()</code>
+                </div>
+                <div class="feature-item">
+                    <h5>🤝 상호작용 시스템</h5>
+                    <p>주변 오브젝트와 상호작용. 인터페이스 기반 구현.</p>
+                    <code>DoInteract()</code>, <code>InteractionRadius</code>
+                </div>
+                <div class="feature-item">
+                    <h5>🏃 2D 이동</h5>
+                    <p>X축(전후)으로만 이동. 캐릭터 자동 회전.</p>
+                    <code>DoMove(float Forward)</code>
+                </div>
+                <div class="feature-item">
+                    <h5>📸 고정 카메라</h5>
+                    <p>사이드뷰 고정 카메라. SpringArm 없이 직접 부착.</p>
+                    <code>UCameraComponent* Camera</code>
+                </div>
+            </div>
+
+            <h3>게임플레이 오브젝트</h3>
+            <table>
+                <tr>
+                    <th>클래스</th>
+                    <th>기능</th>
+                </tr>
+                <tr>
+                    <td><code>SideScrollingJumpPad</code></td>
+                    <td>밟으면 캐릭터를 위로 발사하는 점프 패드</td>
+                </tr>
+                <tr>
+                    <td><code>SideScrollingMovingPlatform</code></td>
+                    <td>경로를 따라 이동하는 플랫폼</td>
+                </tr>
+                <tr>
+                    <td><code>SideScrollingPickup</code></td>
+                    <td>획득 가능한 아이템 (코인, 파워업 등)</td>
+                </tr>
+                <tr>
+                    <td><code>SideScrollingSoftPlatform</code></td>
+                    <td>아래 입력으로 통과 가능한 플랫폼</td>
+                </tr>
+            </table>
+
+            <h3>🔌 ISideScrollingInteractable 인터페이스</h3>
+            <pre><code class="cpp">class ISideScrollingInteractable {
+    // 상호작용 트리거
+    virtual void Interaction(AActor* Interactor) = 0;
+};</code></pre>
+            <p>NPC, 문, 스위치 등 상호작용 가능한 오브젝트가 이 인터페이스를 구현합니다.</p>
+        </section>
+
+        <!-- 5. 비교 분석 -->
+        <section id="comparison">
+            <h2>5. 각 Variant 비교 분석</h2>
+
+            <table>
+                <tr>
+                    <th>항목</th>
+                    <th>Combat</th>
+                    <th>Platforming</th>
+                    <th>SideScrolling</th>
+                </tr>
+                <tr>
+                    <td><strong>카메라</strong></td>
+                    <td>3인칭 SpringArm</td>
+                    <td>3인칭 SpringArm</td>
+                    <td>2D 고정 카메라</td>
+                </tr>
+                <tr>
+                    <td><strong>이동</strong></td>
+                    <td>8방향 자유 이동</td>
+                    <td>8방향 자유 이동</td>
+                    <td>좌우 2방향만</td>
+                </tr>
+                <tr>
+                    <td><strong>점프</strong></td>
+                    <td>기본 점프</td>
+                    <td>더블점프 + 벽점프</td>
+                    <td>더블점프 + 벽점프</td>
+                </tr>
+                <tr>
+                    <td><strong>전투</strong></td>
+                    <td>콤보/차지 공격</td>
+                    <td>없음</td>
+                    <td>없음</td>
+                </tr>
+                <tr>
+                    <td><strong>주요 기능</strong></td>
+                    <td>데미지, 힐링, 리스폰</td>
+                    <td>대시, 코요테타임</td>
+                    <td>소프트 플랫폼, 상호작용</td>
+                </tr>
+                <tr>
+                    <td><strong>AI</strong></td>
+                    <td>StateTree + EQS 전투 AI</td>
+                    <td>없음</td>
+                    <td>StateTree NPC</td>
+                </tr>
+                <tr>
+                    <td><strong>인터페이스</strong></td>
+                    <td>Attacker, Damageable, Activatable</td>
+                    <td>없음</td>
+                    <td>Interactable</td>
+                </tr>
+            </table>
+
+            <div class="summary-box">
+                <h4>🔍 핵심 차이점</h4>
+                <ul>
+                    <li><strong>Combat</strong>: 가장 복잡한 시스템. 인터페이스 기반 전투 메카닉에 집중</li>
+                    <li><strong>Platforming</strong>: 이동 및 기동성에 집중. 전투 시스템 없음</li>
+                    <li><strong>SideScrolling</strong>: 2D 게임플레이에 최적화. 가장 단순한 카메라 시스템</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 6. 활용 가이드 -->
+        <section id="usage">
+            <h2>6. 활용 가이드 및 확장 방법</h2>
+
+            <h3>🎮 새로운 게임 모드 추가하기</h3>
+            <div class="card">
+                <h4>1단계: 폴더 구조 생성</h4>
+                <pre><code>Variant_MyNewGame/
+├── AI/
+├── Animation/
+├── Gameplay/
+├── Interfaces/
+├── UI/
+├── MyNewGameCharacter.h/.cpp
+├── MyNewGameGameMode.h/.cpp
+├── MyNewGamePlayerController.h/.cpp</code></pre>
+            </div>
+
+            <div class="card">
+                <h4>2단계: 캐릭터 클래스 생성</h4>
+                <pre><code class="cpp">UCLASS(abstract)
+class AMyNewGameCharacter : public ACharacter
+{
+    GENERATED_BODY()
+    
+    // 필요한 컴포넌트 추가
+    UPROPERTY(VisibleAnywhere)
+    USpringArmComponent* CameraBoom;
+    
+    UPROPERTY(VisibleAnywhere)
+    UCameraComponent* Camera;
+    
+    // 고유 기능 구현
+    virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+};</code></pre>
+            </div>
+
+            <div class="card">
+                <h4>3단계: Build.cs에 경로 추가</h4>
+                <pre><code class="csharp">PublicIncludePaths.AddRange(new string[] {
+    "RdGame",
+    "RdGame/Variant_MyNewGame",  // 추가
+    // ...
+});</code></pre>
+            </div>
+
+            <h3>⚔️ Combat 시스템 확장 예시: 새로운 공격 추가</h3>
+            <pre><code class="cpp">// 1. 캐릭터에 새로운 공격 타입 추가
+UPROPERTY(EditAnywhere, Category="Melee Attack|Special")
+UAnimMontage* SpecialAttackMontage;
+
+UFUNCTION(BlueprintCallable)
+void DoSpecialAttack();
+
+// 2. 새로운 AnimNotify 생성 (필요시)
+UCLASS()
+class UAnimNotify_CheckSpecialAttack : public UAnimNotify
+{
+    virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+};</code></pre>
+
+            <h3>📦 인터페이스 활용 패턴</h3>
+            <pre><code class="cpp">// 피격 가능한 모든 액터에 데미지 적용
+void ACombatCharacter::DoAttackTrace(FName DamageSourceBone)
+{
+    // 스피어 트레이스 수행
+    TArray<FHitResult> Hits;
+    // ...
+    
+    for (const FHitResult& Hit : Hits)
+    {
+        // 인터페이스를 통한 다형성 활용
+        if (ICombatDamageable* Damageable = Cast<ICombatDamageable>(Hit.GetActor()))
+        {
+            Damageable->ApplyDamage(MeleeDamage, this, Hit.Location, KnockbackDir);
+        }
+    }
+}</code></pre>
+
+            <div class="summary-box">
+                <h4>✅ 권장 사항</h4>
+                <ul>
+                    <li>공통 기능은 <code>ARdGameCharacter</code> 베이스 클래스에 구현</li>
+                    <li>Variant별 고유 기능은 해당 캐릭터 클래스에서 확장</li>
+                    <li>상호작용이 필요한 기능은 인터페이스로 추상화</li>
+                    <li>AI는 StateTree + EQS 조합 권장 (복잡한 BT 대신)</li>
+                    <li>애니메이션 이벤트는 AnimNotify 클래스로 분리</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>📅 생성일: 2025-12-13 | 프로젝트: RdGame</p>
+            <p>이 문서는 Variant_* 폴더의 C++ 소스 코드를 분석하여 자동 생성되었습니다.</p>
+        </footer>
+    </div>
+</body>
+</html>

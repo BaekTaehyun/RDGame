@@ -21,7 +21,10 @@ public class RdGame : ModuleRules
             "Slate",
             "SlateCore",
             "GsMessaging",
-            "GsNetworking"
+            "GsNetworking",
+            "GameplayTags",
+            "ModularGameplay",
+            "DeveloperSettings"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

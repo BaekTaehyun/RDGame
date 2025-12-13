@@ -22,7 +22,11 @@
 #include "TimerManager.h"
 #include "Variant_Combat/UI/CombatLifeBar.h"
 
-ARdGameCharacter::ARdGameCharacter() {
+ARdGameCharacter::ARdGameCharacter()
+    : ARdGameCharacter(FObjectInitializer::Get()) {}
+
+ARdGameCharacter::ARdGameCharacter(const FObjectInitializer &ObjectInitializer)
+    : Super(ObjectInitializer) {
   // Set size for collision capsule
   GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -47,7 +51,8 @@ ARdGameCharacter::ARdGameCharacter() {
   GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
   // Create a camera boom (pulls in towards the player if there is a collision)
-  CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+  CameraBoom = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(
+      this, TEXT("CameraBoom"));
   CameraBoom->SetupAttachment(RootComponent);
   CameraBoom->TargetArmLength =
       400.0f; // The camera follows at this distance behind the character
@@ -55,7 +60,8 @@ ARdGameCharacter::ARdGameCharacter() {
       true; // Rotate the arm based on the controller
 
   // Create a follow camera
-  FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+  FollowCamera = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(
+      this, TEXT("FollowCamera"));
   FollowCamera->SetupAttachment(
       CameraBoom,
       USpringArmComponent::SocketName); // Attach the camera to the end of the
@@ -65,15 +71,17 @@ ARdGameCharacter::ARdGameCharacter() {
       false; // Camera does not rotate relative to arm
 
   // Create Network Movement Component
-  CreateDefaultSubobject<UGsNetworkMovementComponent>(
-      TEXT("NetworkMovementComponent"));
+  NetworkMovementComponent =
+      ObjectInitializer.CreateDefaultSubobject<UGsNetworkMovementComponent>(
+          this, TEXT("NetworkMovementComponent"));
 
   // Create Hero Component
-  HeroComponent =
-      CreateDefaultSubobject<URdHeroComponent>(TEXT("HeroComponent"));
+  HeroComponent = ObjectInitializer.CreateDefaultSubobject<URdHeroComponent>(
+      this, TEXT("HeroComponent"));
 
   // create the life bar widget component
-  LifeBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar"));
+  LifeBar = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(
+      this, TEXT("LifeBar"));
   LifeBar->SetupAttachment(RootComponent);
 
   // set the player tag

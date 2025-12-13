@@ -1,194 +1,343 @@
-#include <iostream>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <map>
-#include <WinSock2.h>
 #include "Protocol.h"
+#include "Session.h"
+#include <WinSock2.h>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <thread>
 
 #pragma comment(lib, "ws2_32.lib")
 
-// 전방 선언
 void ClientHandler(SOCKET clientSock, uint32_t sessionId);
-void BroadcastPacket(char* data, int len, uint32_t excludeId);
+void BroadcastPacket(char *data, int len, uint32_t excludeId);
 
-// 전역 변수 (동기화 필요)
 std::mutex g_sessionMutex;
-std::map<uint32_t, SOCKET> g_sessions; // SessionID -> Socket
+std::map<uint32_t, std::shared_ptr<GsNet::ClientSession>> g_sessions;
 uint32_t g_idCounter = 1;
 
-int main()
-{
-    // 1. 윈속 초기화
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-    {
-        std::cerr << "WSAStartup failed." << std::endl;
-        return 1;
-    }
+int main() {
+  if (sodium_init() < 0) {
+    std::cerr << "[Server] libsodium initialization failed." << std::endl;
+    return 1;
+  }
+  std::cout << "[Server] libsodium initialized." << std::endl;
 
-    // 2. 리슨 소켓 생성
-    SOCKET listenSock = socket(AF_INET, SOCK_STREAM, 0);
-    if (listenSock == INVALID_SOCKET) {
-        std::cerr << "Socket creation failed." << std::endl;
-        WSACleanup();
-        return 1;
-    }
+  WSADATA wsaData;
+  if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    std::cerr << "WSAStartup failed." << std::endl;
+    return 1;
+  }
 
-    SOCKADDR_IN serverAddr;
-    memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serverAddr.sin_port = htons(9000); // 9000번 포트
+  SOCKET listenSock = socket(AF_INET, SOCK_STREAM, 0);
+  if (listenSock == INVALID_SOCKET) {
+    std::cerr << "Socket creation failed." << std::endl;
+    WSACleanup();
+    return 1;
+  }
 
-    if (bind(listenSock, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Bind failed." << std::endl;
-        closesocket(listenSock);
-        WSACleanup();
-        return 1;
-    }
+  SOCKADDR_IN serverAddr;
+  memset(&serverAddr, 0, sizeof(serverAddr));
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serverAddr.sin_port = htons(9000);
 
-    if (listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "Listen failed." << std::endl;
-        closesocket(listenSock);
-        WSACleanup();
-        return 1;
-    }
-
-    std::cout << "[Server] Listening on port 9000..." << std::endl;
-
-    // 3. 연결 수락 루프
-    while (true)
-    {
-        SOCKADDR_IN clientAddr;
-        int addrLen = sizeof(clientAddr);
-        SOCKET clientSock = accept(listenSock, (SOCKADDR*)&clientAddr, &addrLen);
-
-        if (clientSock == INVALID_SOCKET) {
-            std::cerr << "Accept failed." << std::endl;
-            continue;
-        }
-
-        // Nagle 알고리즘 비활성화 (반응성 향상)
-        BOOL opt = TRUE;
-        setsockopt(clientSock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt, sizeof(opt));
-
-        // 세션 ID 부여 및 관리 목록 추가
-        uint32_t newSessionId = 0;
-        {
-            std::lock_guard<std::mutex> lock(g_sessionMutex);
-            newSessionId = g_idCounter++;
-            g_sessions[newSessionId] = clientSock;
-        }
-
-        std::cout << "[Server] Client Connected. SessionID: " << newSessionId << std::endl;
-
-        // 클라이언트 처리를 위한 스레드 분리
-        std::thread t(ClientHandler, clientSock, newSessionId);
-        t.detach();
-    }
-
+  if (bind(listenSock, (SOCKADDR *)&serverAddr, sizeof(serverAddr)) ==
+      SOCKET_ERROR) {
+    std::cerr << "Bind failed." << std::endl;
     closesocket(listenSock);
     WSACleanup();
-    return 0;
-}
+    return 1;
+  }
 
-void ClientHandler(SOCKET clientSock, uint32_t sessionId)
-{
-    char buffer[1024]; // 수신 버퍼
+  if (listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
+    std::cerr << "Listen failed." << std::endl;
+    closesocket(listenSock);
+    WSACleanup();
+    return 1;
+  }
 
-    while (true)
-    {
-        // 1. 헤더 읽기 (패킷 크기를 알기 위해)
-        int recvLen = recv(clientSock, buffer, sizeof(PacketHeader), 0);
-        
-        if (recvLen <= 0) break; // 연결 종료 또는 에러
+  std::cout << "[Server] Listening on port 9000... (Encryption Enabled)"
+            << std::endl;
 
-        PacketHeader* header = (PacketHeader*)buffer;
-        
-        // 2. 패킷 내용물이 더 있다면 마저 읽기 (TCP 스트림 처리)
-        // 주의: 실제 상용 서버에서는 recv가 요청한만큼 오지 않을 수 있으므로
-        //      원하는 bodySize만큼 찰 때까지 루프를 돌며 recv해야 함.
-        //      여기서는 간단한 예제로 한 번에 온다고 가정하거나, 블로킹 소켓 특성 활용.
-        int bodySize = header->size - sizeof(PacketHeader);
-        if (bodySize > 0)
-        {
-            int totalBodyRead = 0;
-            while(totalBodyRead < bodySize)
-            {
-                int ret = recv(clientSock, buffer + sizeof(PacketHeader) + totalBodyRead, bodySize - totalBodyRead, 0);
-                if(ret <= 0) {
-                    recvLen = 0; // 루프 탈출 유도
-                    break;
-                }
-                totalBodyRead += ret;
-            }
-        }
-        
-        if (recvLen <= 0) break;
+  while (true) {
+    SOCKADDR_IN clientAddr;
+    int addrLen = sizeof(clientAddr);
+    SOCKET clientSock = accept(listenSock, (SOCKADDR *)&clientAddr, &addrLen);
 
-        // 3. 패킷 핸들링
-        PacketType type = (PacketType)header->type;
-
-        switch (type)
-        {
-        case PacketType::C2S_LOGIN_REQ:
-            {
-                // 로그인 요청 처리 -> 응답 전송
-                Pkt_LoginRes res;
-                res.size = sizeof(Pkt_LoginRes);
-                res.type = (uint16_t)PacketType::S2C_LOGIN_RES;
-                res.mySessionId = sessionId; // 너의 ID는 이것이다.
-                res.success = true;
-                send(clientSock, (char*)&res, res.size, 0);
-            }
-            break;
-
-        case PacketType::C2S_MOVE_UPDATE:
-            {
-                // 이동 패킷 수신
-                Pkt_MoveUpdate* pkt = (Pkt_MoveUpdate*)buffer;
-                
-                // **중요**: 보낸 사람의 SessionID를 서버가 강제로 기입 (위조 방지)
-                pkt->sessionId = sessionId; 
-                pkt->type = (uint16_t)PacketType::S2C_MOVE_BROADCAST; // 타입 변경
-
-                // 다른 모든 사람에게 브로드캐스팅
-                BroadcastPacket(buffer, pkt->size, sessionId);
-            }
-            break;
-            
-        case PacketType::C2S_ATTACK:
-            {
-               // 공격 패킷 수신 및 브로드캐스트 예시
-               // 실제로는 여기서 판정 로직이 들어갈 수 있음
-               Pkt_Attack* pkt = (Pkt_Attack*)buffer;
-               pkt->sessionId = sessionId;
-               pkt->type = (uint16_t)PacketType::S2C_ATTACK_BROADCAST;
-               
-               BroadcastPacket(buffer, pkt->size, sessionId);
-            }
-            break;
-        }
+    if (clientSock == INVALID_SOCKET) {
+      std::cerr << "Accept failed." << std::endl;
+      continue;
     }
 
-    // 연결 종료 처리
-    {
-        std::lock_guard<std::mutex> lock(g_sessionMutex);
-        g_sessions.erase(sessionId);
+    BOOL opt = TRUE;
+    setsockopt(clientSock, IPPROTO_TCP, TCP_NODELAY, (char *)&opt, sizeof(opt));
+
+    auto session = std::make_shared<GsNet::ClientSession>();
+    session->Socket = clientSock;
+
+    if (!session->Initialize()) {
+      std::cerr << "[Server] Session initialization failed." << std::endl;
+      closesocket(clientSock);
+      continue;
     }
-    closesocket(clientSock);
-    std::cout << "[Server] Client Disconnected. SessionID: " << sessionId << std::endl;
+
+    uint32_t newSessionId = 0;
+    {
+      std::lock_guard<std::mutex> lock(g_sessionMutex);
+      newSessionId = g_idCounter++;
+      session->SessionId = newSessionId;
+      g_sessions[newSessionId] = session;
+    }
+
+    std::cout << "[Server] Client Connected. SessionID: " << newSessionId
+              << std::endl;
+
+    std::thread t(ClientHandler, clientSock, newSessionId);
+    t.detach();
+  }
+
+  closesocket(listenSock);
+  WSACleanup();
+  return 0;
 }
 
-// 나(excludeId)를 제외한 모두에게 전송
-void BroadcastPacket(char* data, int len, uint32_t excludeId)
-{
+void ClientHandler(SOCKET clientSock, uint32_t sessionId) {
+  std::shared_ptr<GsNet::ClientSession> session;
+  {
     std::lock_guard<std::mutex> lock(g_sessionMutex);
-    for (auto& session : g_sessions)
-    {
-        if (session.first == excludeId) continue; // 나에게는 안 보냄 (Client-Side Prediction 때문)
-
-        send(session.second, data, len, 0);
+    auto it = g_sessions.find(sessionId);
+    if (it == g_sessions.end()) {
+      closesocket(clientSock);
+      return;
     }
+    session = it->second;
+  }
+
+  // 1. Handshake
+  if (!session->SendHandshake()) {
+    std::cerr << "[Server] Failed to send handshake. SessionID: " << sessionId
+              << std::endl;
+    goto cleanup;
+  }
+  std::cout << "[Server] Handshake sent. SessionID: " << sessionId << std::endl;
+
+  {
+    int expectedSize = GsNet::ServerCrypto::GetHandshakePacketSize();
+    uint8_t handshakeBuffer[64];
+    int totalRecv = 0;
+
+    while (totalRecv < expectedSize) {
+      int recvLen = recv(clientSock, (char *)(handshakeBuffer + totalRecv),
+                         expectedSize - totalRecv, 0);
+      if (recvLen <= 0) {
+        std::cerr << "[Server] Handshake recv failed. SessionID: " << sessionId
+                  << std::endl;
+        goto cleanup;
+      }
+      totalRecv += recvLen;
+    }
+
+    if (!session->ProcessHandshakeData(handshakeBuffer, expectedSize)) {
+      std::cerr << "[Server] Handshake processing failed. SessionID: "
+                << sessionId << std::endl;
+      goto cleanup;
+    }
+
+    std::cout << "[Server] Handshake complete. SessionID: " << sessionId
+              << " (Encrypted)" << std::endl;
+  }
+
+  // 2. Packet loop
+  while (true) {
+    // Strategy: Receive header first, decrypt it temporarily to get size,
+    // then receive body, and decrypt entire packet together.
+    // BUT this causes nonce mismatch.
+    //
+    // Better strategy: Always receive a fixed amount or use length prefix
+    // before encryption. Since client encrypts entire packet at once, we need
+    // to receive entire packet, but we don't know the size until we decrypt
+    // header.
+    //
+    // SOLUTION: Make client send packet size BEFORE encrypted data (unencrypted
+    // 2-byte prefix) OR: Read all available data, try to decrypt, check
+    // validity
+    //
+    // SIMPLEST FIX: Have both client and server encrypt/decrypt header and body
+    // SEPARATELY. This requires changing client to encrypt header first, then
+    // body.
+    //
+    // FOR NOW: We'll receive the encrypted header (4 bytes), make a COPY and
+    // decrypt ONLY the copy to peek at the size, then receive the rest, and
+    // finally decrypt the ENTIRE original packet.
+
+    uint8_t packetBuffer[4096];
+
+    int headerRecv = 0;
+    const int headerSize = sizeof(PacketHeader); // 4 bytes
+
+    // 1. Receive Header (4 bytes)
+    while (headerRecv < headerSize) {
+      int recvLen = recv(clientSock, (char *)(packetBuffer + headerRecv),
+                         headerSize - headerRecv, 0);
+      if (recvLen <= 0)
+        goto cleanup;
+      headerRecv += recvLen;
+    }
+
+    // 2. Decrypt Header
+    if (!session->Crypto.RecvXor(packetBuffer, headerSize)) {
+      std::cerr << "[Server] Header decryption failed. SessionID: " << sessionId
+                << std::endl;
+      goto cleanup;
+    }
+
+    PacketHeader *header = (PacketHeader *)packetBuffer;
+
+    if (header->size < headerSize || header->size > 4096) {
+      std::cerr << "[Server] Invalid packet size: " << header->size
+                << " SessionID: " << sessionId << std::endl;
+      goto cleanup;
+    }
+
+    // 3. Receive Body
+    int bodySize = header->size - headerSize;
+    int bodyRecv = 0;
+
+    if (bodySize > 0) {
+      while (bodyRecv < bodySize) {
+        int recvLen =
+            recv(clientSock, (char *)(packetBuffer + headerSize + bodyRecv),
+                 bodySize - bodyRecv, 0);
+        if (recvLen <= 0)
+          goto cleanup;
+        bodyRecv += recvLen;
+      }
+
+      // 4. Decrypt Body
+      if (!session->Crypto.RecvXor(packetBuffer + headerSize, bodySize)) {
+        std::cerr << "[Server] Body decryption failed. SessionID: " << sessionId
+                  << std::endl;
+        goto cleanup;
+      }
+    }
+
+    // Handle packet
+    PacketType type = (PacketType)header->type;
+
+    switch (type) {
+    case PacketType::C2S_LOGIN_REQ: {
+      Pkt_LoginReq *reqPkt = (Pkt_LoginReq *)packetBuffer;
+      std::cout << "[Server] Login Request from SessionID: " << sessionId
+                << " Username: " << reqPkt->username << std::endl;
+
+      Pkt_LoginRes res;
+      res.size = sizeof(Pkt_LoginRes);
+      res.type = (uint16_t)PacketType::S2C_LOGIN_RES;
+      res.mySessionId = sessionId;
+      res.success = true;
+
+      if (!session->SendEncrypted((char *)&res, res.size)) {
+        std::cerr << "[Server] Failed to send login response. SessionID: "
+                  << sessionId << std::endl;
+        goto cleanup;
+      }
+
+      std::cout << "[Server] Login Response sent. SessionID: " << sessionId
+                << std::endl;
+
+      // [추가] 유저 입장 동기화
+      {
+        std::lock_guard<std::mutex> lock(g_sessionMutex);
+
+        // 1. 새 유저 정보 패킷 생성
+        Pkt_UserEnter newInfo;
+        newInfo.size = sizeof(Pkt_UserEnter);
+        newInfo.type = (uint16_t)PacketType::S2C_USER_ENTER;
+        newInfo.sessionId = sessionId;
+        newInfo.x = 0;
+        newInfo.y = 0;
+        newInfo.z = 0;
+        newInfo.yaw = 0;
+
+        // 2. 루프: 기존 유저 정보 <-> 새 유저 정보 교환
+        for (auto &pair : g_sessions) {
+          if (pair.first == sessionId)
+            continue; // 나 자신 제외
+          auto &otherSession = pair.second;
+          if (otherSession && otherSession->bHandshakeComplete) {
+            // A. 기존 유저들에게 "새 유저(나) 들어왔어" 알림
+            otherSession->SendEncrypted((char *)&newInfo, newInfo.size);
+
+            // B. 새 유저(나)에게 "기존 유저(너) 정보 줘" 알림
+            Pkt_UserEnter existingInfo;
+            existingInfo.size = sizeof(Pkt_UserEnter);
+            existingInfo.type = (uint16_t)PacketType::S2C_USER_ENTER;
+            existingInfo.sessionId = otherSession->SessionId;
+            existingInfo.x = otherSession->LastX;
+            existingInfo.y = otherSession->LastY;
+            existingInfo.z = otherSession->LastZ;
+            existingInfo.yaw = otherSession->LastYaw;
+
+            session->SendEncrypted((char *)&existingInfo, existingInfo.size);
+          }
+        }
+      }
+    } break;
+
+    case PacketType::C2S_MOVE_UPDATE: {
+      Pkt_MoveUpdate *pkt = (Pkt_MoveUpdate *)packetBuffer;
+      pkt->sessionId = sessionId; // 브로드캐스트를 위해 ID 채움
+      pkt->type = (uint16_t)PacketType::S2C_MOVE_BROADCAST;
+
+      // [추가] 마지막 위치 갱신 (추후 입장하는 유저를 위해)
+      session->LastX = pkt->x;
+      session->LastY = pkt->y;
+      session->LastZ = pkt->z;
+      session->LastYaw = pkt->yaw;
+
+      BroadcastPacket((char *)packetBuffer, pkt->size, sessionId);
+    } break;
+
+    case PacketType::C2S_ATTACK: {
+      Pkt_Attack *pkt = (Pkt_Attack *)packetBuffer;
+      pkt->sessionId = sessionId;
+      pkt->type = (uint16_t)PacketType::S2C_ATTACK_BROADCAST;
+      BroadcastPacket((char *)packetBuffer, pkt->size, sessionId);
+    } break;
+
+    default:
+      std::cerr << "[Server] Unknown packet type: " << (int)header->type
+                << " SessionID: " << sessionId << std::endl;
+      break;
+    }
+  }
+
+  // [추가] 연결 종료 시 퇴장 알림 전송
+  Pkt_UserLeave leavePkt;
+  leavePkt.size = sizeof(Pkt_UserLeave);
+  leavePkt.type = (uint16_t)PacketType::S2C_USER_LEAVE;
+  leavePkt.sessionId = sessionId;
+  BroadcastPacket((char *)&leavePkt, leavePkt.size, sessionId);
+
+cleanup: {
+  std::lock_guard<std::mutex> lock(g_sessionMutex);
+  g_sessions.erase(sessionId);
+}
+  closesocket(clientSock);
+  std::cout << "[Server] Client Disconnected. SessionID: " << sessionId
+            << std::endl;
+}
+
+void BroadcastPacket(char *data, int len, uint32_t excludeId) {
+  std::lock_guard<std::mutex> lock(g_sessionMutex);
+  for (auto &pair : g_sessions) {
+    if (pair.first == excludeId)
+      continue;
+
+    auto &session = pair.second;
+    if (session && session->bHandshakeComplete) {
+      session->SendEncrypted(data, len);
+    }
+  }
 }

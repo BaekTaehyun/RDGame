@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReBirth 시스템 - 신규 프로젝트 적용 가이드</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --accent-cyan: #06b6d4;
+            --border-color: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .overview-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .overview-card h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .overview-card p {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+
+        section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--accent-green);
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            color: var(--accent-purple);
+            font-size: 1.25em;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--accent-orange);
+            font-size: 1.1em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            color: var(--accent-orange);
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: var(--text-secondary);
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .file-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .file-card-header {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-card-header h4 {
+            color: white;
+            margin: 0;
+        }
+
+        .file-card-body {
+            padding: 20px;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .step-list li {
+            counter-increment: step;
+            position: relative;
+            padding: 15px 20px 15px 60px;
+            margin: 10px 0;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .module-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .module-table th,
+        .module-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .module-table th {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .module-table tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .badge-required {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .badge-optional {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .badge-core {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .badge-lyra {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
+            border-left: 4px solid var(--accent-blue);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--accent-red);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .tip-box {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid var(--accent-green);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .folder-structure {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .folder {
+            color: var(--accent-cyan);
+        }
+
+        .file-h {
+            color: var(--accent-purple);
+        }
+
+        .file-cpp {
+            color: var(--accent-blue);
+        }
+
+        .file-cs {
+            color: var(--accent-green);
+        }
+
+        .comment {
+            color: var(--text-secondary);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-purple);
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 10px 0 10px 35px;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 5px;
+            font-size: 1.2em;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .toc a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: var(--accent-blue);
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 ReBirth 시스템 - 신규 프로젝트 적용 가이드</h1>
+        <p class="subtitle">Lyra 스타일 Enhanced Input + GameplayTag 기반 아키텍처 | 작성일: 2025-12-12</p>
+
+        <!-- Overview Cards -->
+        <div class="overview-grid">
+            <div class="overview-card">
+                <h3>🎮 Enhanced Input</h3>
+                <p>UE5 Enhanced Input 시스템 + GameplayTag 기반 입력 매핑</p>
+            </div>
+            <div class="overview-card">
+                <h3>🔄 InitState 시스템</h3>
+                <p>ModularGameplay 기반 컴포넌트 초기화 상태 관리</p>
+            </div>
+            <div class="overview-card">
+                <h3>🏷️ GameplayTags</h3>
+                <p>입력, 스킬, 상태를 태그로 관리하는 유연한 구조</p>
+            </div>
+            <div class="overview-card">
+                <h3>📱 모바일 지원</h3>
+                <p>터치 컨트롤 자동 전환 및 UMG 위젯 시스템</p>
+            </div>
+        </div>
+
+        <!-- TOC -->
+        <nav class="toc">
+            <h2>📋 목차</h2>
+            <ul>
+                <li><a href="#modules">1. 필수 모듈 의존성</a></li>
+                <li><a href="#folder">2. 폴더 구조 및 파일 목록</a></li>
+                <li><a href="#gameplaytags">3. GameplayTags 시스템</a></li>
+                <li><a href="#inputconfig">4. InputConfig 시스템</a></li>
+                <li><a href="#inputcomponent">5. InputComponent 확장</a></li>
+                <li><a href="#herocomponent">6. HeroComponent (InitState)</a></li>
+                <li><a href="#character">7. Character 설정</a></li>
+                <li><a href="#playercontroller">8. PlayerController 설정</a></li>
+                <li><a href="#checklist">9. 적용 체크리스트</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1: Modules -->
+        <section id="modules">
+            <h2>📦 1. 필수 모듈 의존성</h2>
+
+            <h3>Build.cs에 추가해야 할 모듈</h3>
+
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>모듈</th>
+                        <th>용도</th>
+                        <th>필수 여부</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>EnhancedInput</code></td>
+                        <td>UE5 Enhanced Input 시스템</td>
+                        <td><span class="badge badge-required">필수</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>GameplayTags</code></td>
+                        <td>GameplayTag 시스템 (입력 태그, 상태 태그)</td>
+                        <td><span class="badge badge-required">필수</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>ModularGameplay</code></td>
+                        <td>InitState 시스템 (Lyra 스타일 초기화)</td>
+                        <td><span class="badge badge-core">핵심</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>GameplayAbilities</code></td>
+                        <td>GAS 연동 시 필요</td>
+                        <td><span class="badge badge-optional">선택</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>UMG</code></td>
+                        <td>모바일 터치 컨트롤 UI</td>
+                        <td><span class="badge badge-optional">선택</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 [프로젝트명].Build.cs</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C#"><code>public class YourProject : ModuleRules
+{
+    public YourProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
+            "Engine",
+            "InputCore",
+            
+            // ⭐ Enhanced Input 시스템
+            "EnhancedInput",
+            
+            // ⭐ Lyra 스타일 시스템
+            "GameplayTags",
+            "ModularGameplay",
+            
+            // 선택사항
+            "GameplayAbilities",  // GAS 사용 시
+            "UMG",                // 모바일 UI 사용 시
+        });
+
+        // Include 경로 설정
+        PublicIncludePaths.AddRange(new string[] {
+            "YourProject",
+            "YourProject/Input",
+            "YourProject/Character",
+        });
+    }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Folder Structure -->
+        <section id="folder">
+            <h2>📁 2. 폴더 구조 및 파일 목록</h2>
+
+            <h3>권장 폴더 구조</h3>
+
+            <div class="folder-structure">
+                <span class="folder">Source/YourProject/</span>
+                ├── <span class="file-cs">YourProject.Build.cs</span> <span class="comment">// 모듈 설정</span>
+                ├── <span class="file-cpp">YourProject.cpp</span> <span class="comment">// 모듈 구현</span>
+                ├── <span class="file-h">YourProject.h</span> <span class="comment">// 로그 카테고리 정의</span>
+                │
+                ├── <span class="file-h">YourGameplayTags.h</span> <span class="comment">// ⭐ GameplayTag 선언</span>
+                ├── <span class="file-cpp">YourGameplayTags.cpp</span> <span class="comment">// ⭐ GameplayTag 정의</span>
+                │
+                ├── <span class="file-h">YourCharacter.h</span> <span class="comment">// 베이스 캐릭터</span>
+                ├── <span class="file-cpp">YourCharacter.cpp</span>
+                │
+                ├── <span class="file-h">YourPlayerController.h</span> <span class="comment">// IMC 관리, 모바일 지원</span>
+                ├── <span class="file-cpp">YourPlayerController.cpp</span>
+                │
+                ├── <span class="folder">Input/</span> <span class="comment">// ⭐ 입력 시스템</span>
+                │ ├── <span class="file-h">YourInputConfig.h</span> <span class="comment">// DataAsset (Tag↔Action
+                    매핑)</span>
+                │ ├── <span class="file-cpp">YourInputConfig.cpp</span>
+                │ ├── <span class="file-h">YourInputComponent.h</span> <span class="comment">// Enhanced Input 확장</span>
+                │ └── <span class="file-cpp">YourInputComponent.cpp</span>
+                │
+                └── <span class="folder">Character/</span> <span class="comment">// ⭐ 캐릭터 컴포넌트</span>
+                ├── <span class="file-h">YourHeroComponent.h</span> <span class="comment">// InitState 기반 입력 바인딩</span>
+                └── <span class="file-cpp">YourHeroComponent.cpp</span>
+            </div>
+
+            <div class="tip-box">
+                <strong>💡 Tip:</strong> 위 구조에서 "Your"를 프로젝트명으로 교체하세요. 예: <code>YourInputConfig</code> →
+                <code>MyGameInputConfig</code>
+            </div>
+        </section>
+
+        <!-- Section 3: GameplayTags -->
+        <section id="gameplaytags">
+            <h2>🏷️ 3. GameplayTags 시스템</h2>
+
+            <p>GameplayTag는 입력, 상태, 능력 등을 태그로 관리하여 Blueprint와 C++ 간 유연한 연동을 가능하게 합니다.</p>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourGameplayTags.h</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "NativeGameplayTags.h"
+
+namespace YourGameplayTags {
+
+// 태그 문자열로 검색하는 유틸리티 함수
+YOURPROJECT_API FGameplayTag FindTagByString(
+    const FString& TagString, bool bMatchPartialString = false);
+
+// ═══════════════════════════════════════════════════
+// Input Tags - Native (이동, 카메라 등 기본 동작)
+// ═══════════════════════════════════════════════════
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Move);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Look_Mouse);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Look_Stick);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Jump);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Crouch);
+
+// ═══════════════════════════════════════════════════
+// Input Tags - Ability (공격, 스킬 등)
+// ═══════════════════════════════════════════════════
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Attack);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Skill);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Interact);
+
+// ═══════════════════════════════════════════════════
+// Init State Tags (Lyra 스타일 초기화 상태)
+// ═══════════════════════════════════════════════════
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_Spawned);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_DataAvailable);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_DataInitialized);
+YOURPROJECT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_GameplayReady);
+
+}; // namespace YourGameplayTags</code></pre>
+                </div>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourGameplayTags.cpp</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#include "YourGameplayTags.h"
+#include "GameplayTagsManager.h"
+
+namespace YourGameplayTags {
+
+// ═══════════════════════════════════════════════════
+// Input Tags - Native
+// ═══════════════════════════════════════════════════
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Move, 
+    "InputTag.Move", "이동 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Look_Mouse, 
+    "InputTag.Look.Mouse", "마우스 시점 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Look_Stick, 
+    "InputTag.Look.Stick", "스틱 시점 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Jump, 
+    "InputTag.Jump", "점프 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Crouch, 
+    "InputTag.Crouch", "앉기 입력");
+
+// ═══════════════════════════════════════════════════
+// Input Tags - Ability  
+// ═══════════════════════════════════════════════════
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Attack, 
+    "InputTag.Attack", "공격 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Skill, 
+    "InputTag.Skill", "스킬 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Interact, 
+    "InputTag.Interact", "상호작용 입력");
+
+// ═══════════════════════════════════════════════════
+// Init State Tags
+// ═══════════════════════════════════════════════════
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_Spawned, 
+    "InitState.Spawned", "액터 스폰 완료");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_DataAvailable, 
+    "InitState.DataAvailable", "필요 데이터 사용 가능");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_DataInitialized, 
+    "InitState.DataInitialized", "데이터 초기화 완료");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_GameplayReady, 
+    "InitState.GameplayReady", "게임플레이 준비 완료");
+
+// ═══════════════════════════════════════════════════
+// Utility Function
+// ═══════════════════════════════════════════════════
+FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString) {
+    const UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
+    FGameplayTag Tag = Manager.RequestGameplayTag(FName(*TagString), false);
+
+    if (!Tag.IsValid() && bMatchPartialString) {
+        FGameplayTagContainer AllTags;
+        Manager.RequestAllGameplayTags(AllTags, true);
+        for (const FGameplayTag& TestTag : AllTags) {
+            if (TestTag.ToString().Contains(TagString)) {
+                Tag = TestTag;
+                break;
+            }
+        }
+    }
+    return Tag;
+}
+
+} // namespace YourGameplayTags</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: InputConfig -->
+        <section id="inputconfig">
+            <h2>⚙️ 4. InputConfig 시스템</h2>
+
+            <p>DataAsset으로 GameplayTag와 InputAction을 매핑합니다. 에디터에서 쉽게 수정 가능합니다.</p>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 Input/YourInputConfig.h</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "Engine/DataAsset.h"
+#include "GameplayTagContainer.h"
+#include "YourInputConfig.generated.h"
+
+class UInputAction;
+
+/**
+ * GameplayTag ↔ InputAction 매핑 구조체
+ */
+USTRUCT(BlueprintType)
+struct FYourInputAction {
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TObjectPtr<const UInputAction> InputAction = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
+    FGameplayTag InputTag;
+};
+
+/**
+ * 입력 설정 DataAsset
+ * 에디터에서 Tag↔Action 매핑을 정의합니다.
+ */
+UCLASS(BlueprintType, Const)
+class YOURPROJECT_API UYourInputConfig : public UDataAsset {
+    GENERATED_BODY()
+
+public:
+    UYourInputConfig(const FObjectInitializer& ObjectInitializer);
+
+    /** Native 입력 (이동, 카메라) 액션 검색 */
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    const UInputAction* FindNativeInputActionForTag(
+        const FGameplayTag& InputTag, bool bLogNotFound = true) const;
+
+    /** Ability 입력 (공격, 스킬) 액션 검색 */
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    const UInputAction* FindAbilityInputActionForTag(
+        const FGameplayTag& InputTag, bool bLogNotFound = true) const;
+
+public:
+    /** 기본 동작용 입력 액션 (이동, 카메라 등) */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
+    TArray<FYourInputAction> NativeInputActions;
+
+    /** 능력용 입력 액션 (공격, 스킬 등) */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
+    TArray<FYourInputAction> AbilityInputActions;
+};</code></pre>
+                </div>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 Input/YourInputConfig.cpp</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#include "Input/YourInputConfig.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(YourInputConfig)
+
+UYourInputConfig::UYourInputConfig(const FObjectInitializer& ObjectInitializer) {}
+
+const UInputAction* UYourInputConfig::FindNativeInputActionForTag(
+    const FGameplayTag& InputTag, bool bLogNotFound) const 
+{
+    for (const FYourInputAction& Action : NativeInputActions) {
+        if (Action.InputAction && (Action.InputTag == InputTag)) {
+            return Action.InputAction;
+        }
+    }
+
+    if (bLogNotFound) {
+        UE_LOG(LogTemp, Error,
+            TEXT("Can't find NativeInputAction for InputTag [%s] on InputConfig [%s]."),
+            *InputTag.ToString(), *GetNameSafe(this));
+    }
+    return nullptr;
+}
+
+const UInputAction* UYourInputConfig::FindAbilityInputActionForTag(
+    const FGameplayTag& InputTag, bool bLogNotFound) const 
+{
+    for (const FYourInputAction& Action : AbilityInputActions) {
+        if (Action.InputAction && (Action.InputTag == InputTag)) {
+            return Action.InputAction;
+        }
+    }
+
+    if (bLogNotFound) {
+        UE_LOG(LogTemp, Error,
+            TEXT("Can't find AbilityInputAction for InputTag [%s] on InputConfig [%s]."),
+            *InputTag.ToString(), *GetNameSafe(this));
+    }
+    return nullptr;
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: InputComponent -->
+        <section id="inputcomponent">
+            <h2>🎯 5. InputComponent 확장</h2>
+
+            <p>UEnhancedInputComponent를 확장하여 GameplayTag 기반 바인딩을 지원합니다.</p>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 Input/YourInputComponent.h</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "EnhancedInputComponent.h"
+#include "Input/YourInputConfig.h"
+#include "YourInputComponent.generated.h"
+
+class UEnhancedInputLocalPlayerSubsystem;
+
+/**
+ * GameplayTag 기반 입력 바인딩을 지원하는 Enhanced Input Component
+ */
+UCLASS(Config = Input)
+class YOURPROJECT_API UYourInputComponent : public UEnhancedInputComponent {
+    GENERATED_BODY()
+
+public:
+    UYourInputComponent(const FObjectInitializer& ObjectInitializer);
+
+    void AddInputMappings(const UYourInputConfig* InputConfig,
+        UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
+    void RemoveInputMappings(const UYourInputConfig* InputConfig,
+        UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
+
+    /**
+     * Native 입력 바인딩 (이동, 카메라 등)
+     * @param InputConfig - 입력 설정 DataAsset
+     * @param InputTag - 입력 태그
+     * @param TriggerEvent - 트리거 이벤트 (Started, Triggered, Completed 등)
+     * @param Object - 바인딩할 객체
+     * @param Func - 호출될 함수
+     */
+    template <class UserClass, typename FuncType>
+    void BindNativeAction(const UYourInputConfig* InputConfig,
+        const FGameplayTag& InputTag, ETriggerEvent TriggerEvent,
+        UserClass* Object, FuncType Func, bool bLogIfNotFound);
+
+    /**
+     * Ability 입력 일괄 바인딩 (공격, 스킬 등)
+     * 모든 AbilityInputActions를 자동으로 Pressed/Released 핸들러에 연결
+     */
+    template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+    void BindAbilityActions(const UYourInputConfig* InputConfig,
+        UserClass* Object, PressedFuncType PressedFunc,
+        ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
+
+    /** 바인딩 핸들로 제거 */
+    void RemoveBinds(TArray<uint32>& BindHandles);
+};
+
+// ═══════════════════════════════════════════════════
+// Template Implementations
+// ═══════════════════════════════════════════════════
+
+template <class UserClass, typename FuncType>
+void UYourInputComponent::BindNativeAction(
+    const UYourInputConfig* InputConfig, const FGameplayTag& InputTag,
+    ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func,
+    bool bLogIfNotFound) 
+{
+    check(InputConfig);
+    if (const UInputAction* IA = 
+        InputConfig->FindNativeInputActionForTag(InputTag, bLogIfNotFound)) {
+        BindAction(IA, TriggerEvent, Object, Func);
+    }
+}
+
+template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+void UYourInputComponent::BindAbilityActions(
+    const UYourInputConfig* InputConfig, UserClass* Object,
+    PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc,
+    TArray<uint32>& BindHandles) 
+{
+    check(InputConfig);
+
+    for (const FYourInputAction& Action : InputConfig->AbilityInputActions) {
+        if (Action.InputAction && Action.InputTag.IsValid()) {
+            if (PressedFunc) {
+                BindHandles.Add(
+                    BindAction(Action.InputAction, ETriggerEvent::Triggered,
+                        Object, PressedFunc, Action.InputTag).GetHandle());
+            }
+            if (ReleasedFunc) {
+                BindHandles.Add(
+                    BindAction(Action.InputAction, ETriggerEvent::Completed,
+                        Object, ReleasedFunc, Action.InputTag).GetHandle());
+            }
+        }
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 Input/YourInputComponent.cpp</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#include "Input/YourInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(YourInputComponent)
+
+UYourInputComponent::UYourInputComponent(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer) {}
+
+void UYourInputComponent::AddInputMappings(
+    const UYourInputConfig* InputConfig,
+    UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const 
+{
+    check(InputConfig);
+    check(InputSubsystem);
+    // 커스텀 매핑 로직이 필요하면 여기에 추가
+}
+
+void UYourInputComponent::RemoveInputMappings(
+    const UYourInputConfig* InputConfig,
+    UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const 
+{
+    check(InputConfig);
+    check(InputSubsystem);
+    // 커스텀 제거 로직이 필요하면 여기에 추가
+}
+
+void UYourInputComponent::RemoveBinds(TArray<uint32>& BindHandles) {
+    for (uint32 Handle : BindHandles) {
+        RemoveBindingByHandle(Handle);
+    }
+    BindHandles.Reset();
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: HeroComponent -->
+        <section id="herocomponent">
+            <h2>🦸 6. HeroComponent (InitState 시스템)</h2>
+
+            <p>Lyra 스타일의 InitState 시스템을 사용하여 입력 바인딩 시점을 안전하게 관리합니다.</p>
+
+            <div class="highlight-box">
+                <strong>🎯 핵심 개념:</strong> InitState 시스템은 컴포넌트 초기화를 단계별로 관리합니다.
+                <br><code>Spawned → DataAvailable → DataInitialized → GameplayReady</code>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 Character/YourHeroComponent.h</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "Components/GameFrameworkInitStateInterface.h"
+#include "Components/PawnComponent.h"
+#include "InputMappingContext.h"
+#include "YourHeroComponent.generated.h"
+
+class UGameFrameworkComponentManager;
+class UInputComponent;
+class UYourInputConfig;
+struct FActorInitStateChangedParams;
+struct FGameplayTag;
+struct FInputActionValue;
+
+/**
+ * IMC + Priority 구조체
+ */
+USTRUCT(BlueprintType)
+struct FYourInputMappingContextAndPriority {
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TSoftObjectPtr<UInputMappingContext> InputMapping;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    int32 Priority = 0;
+};
+
+/**
+ * Lyra 스타일 Hero Component
+ * InitState 시스템으로 입력 바인딩 시점을 관리합니다.
+ */
+UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent))
+class YOURPROJECT_API UYourHeroComponent
+    : public UPawnComponent,
+      public IGameFrameworkInitStateInterface 
+{
+    GENERATED_BODY()
+
+public:
+    UYourHeroComponent(const FObjectInitializer& ObjectInitializer);
+
+    static UYourHeroComponent* FindHeroComponent(const AActor* Actor) {
+        return Actor ? Actor->FindComponentByClass<UYourHeroComponent>() : nullptr;
+    }
+
+    bool IsReadyToBindInputs() const;
+
+    static const FName NAME_BindInputsNow;
+    static const FName NAME_ActorFeatureName;
+
+    //~ IGameFrameworkInitStateInterface
+    virtual FName GetFeatureName() const override { return NAME_ActorFeatureName; }
+    virtual bool CanChangeInitState(UGameFrameworkComponentManager* Manager,
+        FGameplayTag CurrentState, FGameplayTag DesiredState) const override;
+    virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager,
+        FGameplayTag CurrentState, FGameplayTag DesiredState) override;
+    virtual void OnActorInitStateChanged(
+        const FActorInitStateChangedParams& Params) override;
+    virtual void CheckDefaultInitialization() override;
+    //~ End
+
+protected:
+    virtual void OnRegister() override;
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+    virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
+
+    // 입력 핸들러
+    void Input_AbilityInputTagPressed(FGameplayTag InputTag);
+    void Input_AbilityInputTagReleased(FGameplayTag InputTag);
+    void Input_Move(const FInputActionValue& InputActionValue);
+    void Input_LookMouse(const FInputActionValue& InputActionValue);
+    void Input_LookStick(const FInputActionValue& InputActionValue);
+    void Input_Jump(const FInputActionValue& InputActionValue);
+    void Input_Crouch(const FInputActionValue& InputActionValue);
+
+protected:
+    /** 기본 IMC 매핑 */
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TArray<FYourInputMappingContextAndPriority> DefaultInputMappings;
+
+    /** 입력 설정 DataAsset */
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UYourInputConfig> InputConfig;
+
+    bool bReadyToBindInputs;
+};</code></pre>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <strong>💡 구현 참고:</strong> HeroComponent.cpp는 300줄 이상의 구현이 필요합니다.
+                ReBirth 프로젝트의 <code>Character/ReBirthHeroComponent.cpp</code>를 참조하세요.
+                핵심은 <code>InitializePlayerInput()</code>에서 InputConfig를 사용해 바인딩하는 것입니다.
+            </div>
+        </section>
+
+        <!-- Section 7: Character -->
+        <section id="character">
+            <h2>🧍 7. Character 설정</h2>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourCharacter.h (핵심 부분)</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "YourCharacter.generated.h"
+
+class USpringArmComponent;
+class UCameraComponent;
+class UYourHeroComponent;
+
+UCLASS(abstract)
+class AYourCharacter : public ACharacter {
+    GENERATED_BODY()
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    USpringArmComponent* CameraBoom;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    UCameraComponent* FollowCamera;
+
+    /** ⭐ Hero Component - 입력 바인딩 관리 */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
+        meta = (AllowPrivateAccess = "true"))
+    UYourHeroComponent* HeroComponent;
+
+public:
+    AYourCharacter();
+
+    // 입력 핸들러 (HeroComponent에서 호출됨)
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    virtual void DoMove(float Right, float Forward);
+
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    virtual void DoLook(float Yaw, float Pitch);
+
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    virtual void DoJumpStart();
+
+    UFUNCTION(BlueprintCallable, Category = "Input")
+    virtual void DoJumpEnd();
+
+    FORCEINLINE UYourHeroComponent* GetHeroComponent() const { return HeroComponent; }
+};</code></pre>
+                </div>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourCharacter.cpp (생성자 핵심)</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>AYourCharacter::AYourCharacter() {
+    // Capsule 설정
+    GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+
+    // Controller Rotation 비활성화
+    bUseControllerRotationPitch = false;
+    bUseControllerRotationYaw = false;
+    bUseControllerRotationRoll = false;
+
+    // Movement 설정
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+    GetCharacterMovement()->JumpZVelocity = 500.f;
+    GetCharacterMovement()->MaxWalkSpeed = 500.f;
+
+    // Camera Boom 생성
+    CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+    CameraBoom->SetupAttachment(RootComponent);
+    CameraBoom->TargetArmLength = 400.0f;
+    CameraBoom->bUsePawnControlRotation = true;
+
+    // Follow Camera 생성
+    FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+    FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+    FollowCamera->bUsePawnControlRotation = false;
+
+    // ⭐ Hero Component 생성 - 핵심!
+    HeroComponent = CreateDefaultSubobject<UYourHeroComponent>(TEXT("HeroComponent"));
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: PlayerController -->
+        <section id="playercontroller">
+            <h2>🎮 8. PlayerController 설정</h2>
+
+            <p>IMC(Input Mapping Context) 관리와 모바일 터치 컨트롤을 담당합니다.</p>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourPlayerController.h</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
+#include "YourPlayerController.generated.h"
+
+class UInputMappingContext;
+class UUserWidget;
+
+UCLASS(abstract)
+class AYourPlayerController : public APlayerController {
+    GENERATED_BODY()
+
+protected:
+    /** 기본 IMC 목록 */
+    UPROPERTY(EditAnywhere, Category = "Input|Input Mappings")
+    TArray<UInputMappingContext*> DefaultMappingContexts;
+
+    /** 모바일에서 제외할 IMC (마우스 룩 등) */
+    UPROPERTY(EditAnywhere, Category = "Input|Input Mappings")
+    TArray<UInputMappingContext*> MobileExcludedMappingContexts;
+
+    /** 모바일 컨트롤 위젯 클래스 */
+    UPROPERTY(EditAnywhere, Category = "Input|Touch Controls")
+    TSubclassOf<UUserWidget> MobileControlsWidgetClass;
+
+    UPROPERTY()
+    TObjectPtr<UUserWidget> MobileControlsWidget;
+
+    /** 강제 터치 컨트롤 사용 (디버깅용) */
+    UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")
+    bool bForceTouchControls = false;
+
+    virtual void BeginPlay() override;
+    virtual void SetupInputComponent() override;
+    bool ShouldUseTouchControls() const;
+};</code></pre>
+                </div>
+            </div>
+
+            <div class="file-card">
+                <div class="file-card-header">
+                    <h4>📄 YourPlayerController.cpp</h4>
+                </div>
+                <div class="file-card-body">
+                    <pre data-lang="C++"><code>#include "YourPlayerController.h"
+#include "EnhancedInputSubsystems.h"
+#include "Engine/LocalPlayer.h"
+#include "InputMappingContext.h"
+#include "Blueprint/UserWidget.h"
+#include "Widgets/Input/SVirtualJoystick.h"
+
+void AYourPlayerController::BeginPlay() {
+    Super::BeginPlay();
+
+    // 모바일 터치 컨트롤 스폰
+    if (ShouldUseTouchControls() && IsLocalPlayerController()) {
+        MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
+        if (MobileControlsWidget) {
+            MobileControlsWidget->AddToPlayerScreen(0);
+        }
+    }
+}
+
+void AYourPlayerController::SetupInputComponent() {
+    Super::SetupInputComponent();
+
+    if (IsLocalPlayerController()) {
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = 
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) 
+        {
+            // 기본 IMC 추가
+            for (UInputMappingContext* CurrentContext : DefaultMappingContexts) {
+                Subsystem->AddMappingContext(CurrentContext, 0);
+            }
+
+            // PC 전용 IMC 추가 (모바일 제외)
+            if (!ShouldUseTouchControls()) {
+                for (UInputMappingContext* CurrentContext : MobileExcludedMappingContexts) {
+                    Subsystem->AddMappingContext(CurrentContext, 0);
+                }
+            }
+        }
+    }
+}
+
+bool AYourPlayerController::ShouldUseTouchControls() const {
+    return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Checklist -->
+        <section id="checklist">
+            <h2>✅ 9. 적용 체크리스트</h2>
+
+            <h3>코드 파일 생성</h3>
+            <ul class="checklist">
+                <li><code>[프로젝트명].Build.cs</code> - 모듈 의존성 추가</li>
+                <li><code>[프로젝트명]GameplayTags.h/cpp</code> - GameplayTag 정의</li>
+                <li><code>Input/[프로젝트명]InputConfig.h/cpp</code> - DataAsset 클래스</li>
+                <li><code>Input/[프로젝트명]InputComponent.h/cpp</code> - Enhanced Input 확장</li>
+                <li><code>Character/[프로젝트명]HeroComponent.h/cpp</code> - InitState 입력 바인딩</li>
+                <li><code>[프로젝트명]Character.h/cpp</code> - HeroComponent 포함</li>
+                <li><code>[프로젝트명]PlayerController.h/cpp</code> - IMC 관리</li>
+            </ul>
+
+            <h3>에디터 에셋 생성</h3>
+            <ul class="checklist">
+                <li><strong>Input Actions 생성</strong> - IA_Move, IA_Look, IA_Jump, IA_Attack 등</li>
+                <li><strong>Input Mapping Context 생성</strong> - IMC_Default, IMC_MouseLook 등</li>
+                <li><strong>InputConfig DataAsset 생성</strong> - DA_InputConfig (NativeInputActions, AbilityInputActions
+                    매핑)</li>
+                <li><strong>Blueprint Character 생성</strong> - BP_Character (C++ 클래스 상속)</li>
+                <li><strong>Blueprint PlayerController 생성</strong> - BP_PlayerController (IMC 할당)</li>
+            </ul>
+
+            <h3>프로젝트 설정</h3>
+            <ul class="checklist">
+                <li><strong>Default Pawn Class</strong> - BP_Character 설정</li>
+                <li><strong>Player Controller Class</strong> - BP_PlayerController 설정</li>
+                <li><strong>Default Input Component Class</strong> - 프로젝트 설정에서 <code>UYourInputComponent</code> 지정 (선택)
+                </li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>⚠️ 주의사항:</strong>
+                <ul>
+                    <li>모든 <code>YOURPROJECT_API</code>를 실제 프로젝트 API 매크로로 교체하세요</li>
+                    <li>Include 경로가 Build.cs의 PublicIncludePaths와 일치하는지 확인하세요</li>
+                    <li>Blueprint에서 InputConfig DataAsset을 HeroComponent에 할당해야 합니다</li>
+                </ul>
+            </div>
+        </section>
+
+        <section style="text-align: center; padding: 40px;">
+            <h2 style="border: none; color: var(--accent-cyan);">🎉 완료!</h2>
+            <p style="color: var(--text-secondary); font-size: 1.1em;">
+                이 가이드를 따라 신규 프로젝트에 Lyra 스타일 Enhanced Input 시스템을 적용할 수 있습니다.
+            </p>
+            <div class="highlight-box" style="text-align: left;">
+                <strong>📚 추가 리소스:</strong>
+                <ul>
+                    <li><a href="ReBirth_코드구조_분석.html" style="color: var(--accent-blue);">ReBirth 코드구조 상세 분석</a></li>
+                    <li>Lyra 프로젝트: <code>f:\UnrealEngine\Samples\Games\Lyra</code></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

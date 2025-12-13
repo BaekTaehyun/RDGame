@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReBirth 프로젝트 - 공격/스킬/애니메이션 시스템 분석</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px 35px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toc li:last-child {
+            border-bottom: none;
+        }
+
+        .toc a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent-blue);
+        }
+
+        section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--accent-green);
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-green);
+        }
+
+        h3 {
+            color: var(--accent-purple);
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--accent-orange);
+            font-size: 1.1em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--accent-orange);
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .class-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .class-card h4 {
+            color: var(--accent-blue);
+            margin-top: 0;
+        }
+
+        .class-card .path {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .diagram {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            line-height: 1.4;
+        }
+
+        .flow-arrow {
+            color: var(--accent-green);
+            font-size: 1.2em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border-left: 4px solid var(--accent-blue);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: rgba(248, 81, 73, 0.1);
+            border-left: 4px solid var(--accent-red);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .tip-box {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 4px solid var(--accent-green);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
+
+        tr:hover {
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        ul,
+        ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .badge-interface {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .badge-class {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .badge-component {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .badge-notify {
+            background: var(--accent-orange);
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 ReBirth 프로젝트 코드 구조 분석</h1>
+        <p class="subtitle">공격 모션, 스킬 시스템, 애니메이션 BP 연동 분석 | 생성일: 2025-12-10</p>
+
+        <nav class="toc">
+            <h2>📋 목차</h2>
+            <ul>
+                <li><a href="#section1">1. 프로젝트 구조 개요</a></li>
+                <li><a href="#section2">2. 공격/전투 시스템 클래스 구조</a></li>
+                <li><a href="#section3">3. 애니메이션 시스템 상세 분석</a></li>
+                <li><a href="#section4">4. Animation Blueprint 자동 연동 원리</a></li>
+                <li><a href="#section5">5. 스킬/어빌리티 데이터 관리 구조</a></li>
+                <li><a href="#section6">6. Enhanced Input 시스템과의 연동</a></li>
+                <li><a href="#section7">7. 새로운 스킬 추가 가이드</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1 -->
+        <section id="section1">
+            <h2>1. 프로젝트 구조 개요</h2>
+
+            <h3>1.1 소스 디렉토리 구조</h3>
+            <pre><code>Source/ReBirth/
+├── Character/                    # 캐릭터 컴포넌트
+│   ├── ReBirthHeroComponent.h/cpp   # Input 바인딩 관리 (InitState 시스템)
+│
+├── Input/                        # 입력 시스템
+│   ├── ReBirthInputComponent.h/cpp  # GameplayTag 기반 입력
+│   ├── ReBirthInputConfig.h/cpp     # 입력 설정 DataAsset
+│
+├── Variant_Combat/               # 전투 시스템 ⭐ 핵심
+│   ├── Animation/                # 애니메이션 노티파이
+│   │   ├── AnimNotify_DoAttackTrace.h/cpp
+│   │   ├── AnimNotify_CheckCombo.h/cpp
+│   │   └── AnimNotify_CheckChargedAttack.h/cpp
+│   ├── Interfaces/               # 전투 인터페이스
+│   │   ├── CombatAttacker.h/cpp
+│   │   ├── CombatDamageable.h/cpp
+│   │   └── CombatActivatable.h/cpp
+│   ├── Gameplay/                 # 게임플레이 오브젝트
+│   ├── AI/                       # AI 시스템
+│   ├── CombatCharacter.h/cpp     # 전투 캐릭터 ⭐
+│   └── CombatPlayerController.h/cpp
+│
+├── ReBirthCharacter.h/cpp        # 베이스 캐릭터
+├── ReBirthGameplayTags.h/cpp     # GameplayTag 정의
+└── ReBirthPlayerController.h/cpp</code></pre>
+
+            <h3>1.2 핵심 클래스 관계도</h3>
+            <div class="diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CHARACTER HIERARCHY                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│     ACharacter (UE 기본)                                                     │
+│          │                                                                   │
+│          ▼                                                                   │
+│  ┌──────────────────┐                                                        │
+│  │ AReBirthCharacter │ ◄─── 베이스 캐릭터 (이동, 카메라, 기본 입력)           │
+│  │                  │                                                        │
+│  │ • CameraBoom     │                                                        │
+│  │ • FollowCamera   │                                                        │
+│  │ • HeroComponent  │ ──────► UReBirthHeroComponent (입력 바인딩)            │
+│  └──────────────────┘                                                        │
+│          │                                                                   │
+│          ▼                                                                   │
+│  ┌──────────────────┐     Implements    ┌─────────────────┐                 │
+│  │ ACombatCharacter │ ◄────────────────►│ ICombatAttacker  │                │
+│  │                  │                   │ ICombatDamageable│                │
+│  │ ⭐ 전투 로직     │                   └─────────────────┘                 │
+│  │ • ComboAttack    │                                                        │
+│  │ • ChargedAttack  │                                                        │
+│  │ • DoAttackTrace  │                                                        │
+│  │ • ApplyDamage    │                                                        │
+│  └──────────────────┘                                                        │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="section2">
+            <h2>2. 공격/전투 시스템 클래스 구조</h2>
+
+            <h3>2.1 핵심 인터페이스</h3>
+
+            <div class="class-card">
+                <h4><span class="badge badge-interface">Interface</span> ICombatAttacker</h4>
+                <p class="path">📁 Variant_Combat/Interfaces/CombatAttacker.h</p>
+                <p>공격자가 구현해야 하는 인터페이스. AnimNotify에서 호출됩니다.</p>
+                <pre><code>class ICombatAttacker {
+    // 공격 충돌 체크 - AnimNotify_DoAttackTrace에서 호출
+    virtual void DoAttackTrace(FName DamageSourceBone) = 0;
+    
+    // 콤보 연속 체크 - AnimNotify_CheckCombo에서 호출
+    virtual void CheckCombo() = 0;
+    
+    // 차지 공격 루프 체크 - AnimNotify_CheckChargedAttack에서 호출
+    virtual void CheckChargedAttack() = 0;
+};</code></pre>
+            </div>
+
+            <div class="class-card">
+                <h4><span class="badge badge-interface">Interface</span> ICombatDamageable</h4>
+                <p class="path">📁 Variant_Combat/Interfaces/CombatDamageable.h</p>
+                <p>피해를 받을 수 있는 액터가 구현하는 인터페이스.</p>
+                <pre><code>class ICombatDamageable {
+    // 데미지 적용 (데미지, 공격자, 위치, 넉백 임펄스)
+    virtual void ApplyDamage(float Damage, AActor* DamageCauser, 
+        const FVector& DamageLocation, const FVector& DamageImpulse) = 0;
+    
+    // 사망 처리
+    virtual void HandleDeath() = 0;
+    
+    // 힐링 처리
+    virtual void ApplyHealing(float Healing, AActor* Healer) = 0;
+    
+    // 위험 알림 (적 AI가 반응할 수 있도록)
+    virtual void NotifyDanger(const FVector& DangerLocation, AActor* DangerSource) = 0;
+};</code></pre>
+            </div>
+
+            <h3>2.2 CombatCharacter 상세 분석</h3>
+
+            <div class="class-card">
+                <h4><span class="badge badge-class">Class</span> ACombatCharacter</h4>
+                <p class="path">📁 Variant_Combat/CombatCharacter.h/cpp</p>
+
+                <h4>📌 공격 관련 주요 속성</h4>
+                <table>
+                    <tr>
+                        <th>속성</th>
+                        <th>타입</th>
+                        <th>설명</th>
+                    </tr>
+                    <tr>
+                        <td><code>ComboAttackMontage</code></td>
+                        <td>UAnimMontage*</td>
+                        <td>콤보 공격 애니메이션 몽타주</td>
+                    </tr>
+                    <tr>
+                        <td><code>ChargedAttackMontage</code></td>
+                        <td>UAnimMontage*</td>
+                        <td>차지 공격 애니메이션 몽타주</td>
+                    </tr>
+                    <tr>
+                        <td><code>ComboSectionNames</code></td>
+                        <td>TArray&lt;FName&gt;</td>
+                        <td>콤보 단계별 섹션 이름</td>
+                    </tr>
+                    <tr>
+                        <td><code>MeleeDamage</code></td>
+                        <td>float</td>
+                        <td>근접 공격 데미지</td>
+                    </tr>
+                    <tr>
+                        <td><code>MeleeTraceDistance</code></td>
+                        <td>float</td>
+                        <td>공격 히트 감지 거리</td>
+                    </tr>
+                    <tr>
+                        <td><code>MeleeTraceRadius</code></td>
+                        <td>float</td>
+                        <td>공격 히트 구체 반경</td>
+                    </tr>
+                </table>
+
+                <h4>📌 공격 함수 호출 흐름</h4>
+                <div class="diagram">
+                    <pre>
+[입력] ComboAttackAction 
+         │
+         ▼
+ComboAttackPressed() ─► DoComboAttackStart() ─► ComboAttack()
+                                                     │
+                                                     ▼
+                                    ┌────────────────────────────────┐
+                                    │ AnimInstance->Montage_Play()   │
+                                    │ (ComboAttackMontage 재생)       │
+                                    └────────────────────────────────┘
+                                                     │
+                    ┌────────────────────────────────┴────────────────────┐
+                    │           AnimMontage에서 AnimNotify 발생            │
+                    ├─────────────────────────────────────────────────────┤
+                    │ • AnimNotify_DoAttackTrace → DoAttackTrace()        │
+                    │ • AnimNotify_CheckCombo → CheckCombo()              │
+                    └─────────────────────────────────────────────────────┘
+                                                     │
+                                                     ▼
+                                    ┌────────────────────────────────┐
+                                    │ DoAttackTrace() - 히트 판정    │
+                                    │ → SweepMultiByObjectType()     │
+                                    │ → ICombatDamageable->ApplyDamage│
+                                    └────────────────────────────────┘
+</pre>
+                </div>
+            </div>
+
+            <h3>2.3 공격 구현 코드 상세</h3>
+
+            <h4>콤보 공격 구현</h4>
+            <pre><code>void ACombatCharacter::ComboAttack() {
+    bIsAttacking = true;
+    ComboCount = 0;
+
+    // 적에게 공격이 오고 있음을 알림 (AI 반응용)
+    NotifyEnemiesOfIncomingAttack();
+
+    // 애니메이션 몽타주 재생
+    if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance()) {
+        const float MontageLength = AnimInstance->Montage_Play(
+            ComboAttackMontage, 1.0f, 
+            EMontagePlayReturnType::MontageLength, 0.0f, true);
+
+        if (MontageLength > 0.0f) {
+            // 몽타주 종료 델리게이트 설정
+            AnimInstance->Montage_SetEndDelegate(
+                OnAttackMontageEnded, ComboAttackMontage);
+        }
+    }
+}</code></pre>
+
+            <h4>히트 판정 구현 (DoAttackTrace)</h4>
+            <pre><code>void ACombatCharacter::DoAttackTrace(FName DamageSourceBone) {
+    TArray&lt;FHitResult&gt; OutHits;
+    
+    // 무기/손 본 위치에서 전방으로 스윕
+    const FVector TraceStart = GetMesh()->GetSocketLocation(DamageSourceBone);
+    const FVector TraceEnd = TraceStart + (GetActorForwardVector() * MeleeTraceDistance);
+    
+    // 충돌 설정
+    FCollisionObjectQueryParams ObjectParams;
+    ObjectParams.AddObjectTypesToQuery(ECC_Pawn);
+    ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+    
+    FCollisionShape CollisionShape;
+    CollisionShape.SetSphere(MeleeTraceRadius);
+    
+    // 스윕 멀티 실행
+    if (GetWorld()->SweepMultiByObjectType(OutHits, TraceStart, TraceEnd, 
+        FQuat::Identity, ObjectParams, CollisionShape, QueryParams)) {
+        
+        for (const FHitResult& CurrentHit : OutHits) {
+            ICombatDamageable* Damageable = Cast&lt;ICombatDamageable&gt;(CurrentHit.GetActor());
+            if (Damageable) {
+                // 넉백 계산
+                const FVector Impulse = (CurrentHit.ImpactNormal * -MeleeKnockbackImpulse) 
+                                       + (FVector::UpVector * MeleeLaunchImpulse);
+                
+                // 데미지 적용
+                Damageable->ApplyDamage(MeleeDamage, this, CurrentHit.ImpactPoint, Impulse);
+            }
+        }
+    }
+}</code></pre>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="section3">
+            <h2>3. 애니메이션 시스템 상세 분석</h2>
+
+            <h3>3.1 AnimNotify 클래스들</h3>
+
+            <div class="class-card">
+                <h4><span class="badge badge-notify">AnimNotify</span> UAnimNotify_DoAttackTrace</h4>
+                <p class="path">📁 Variant_Combat/Animation/AnimNotify_DoAttackTrace.h/cpp</p>
+                <p>몽타주의 특정 프레임에서 공격 판정을 수행합니다.</p>
+                <pre><code>UCLASS()
+class UAnimNotify_DoAttackTrace : public UAnimNotify {
+    UPROPERTY(EditAnywhere, Category="Attack")
+    FName AttackBoneName;  // 공격 시작점 본 이름
+    
+    virtual void Notify(USkeletalMeshComponent* MeshComp, 
+        UAnimSequenceBase* Animation, 
+        const FAnimNotifyEventReference& EventReference) override {
+        
+        // 소유자를 ICombatAttacker로 캐스트하여 DoAttackTrace 호출
+        if (ICombatAttacker* AttackerInterface = 
+            Cast&lt;ICombatAttacker&gt;(MeshComp->GetOwner())) {
+            AttackerInterface->DoAttackTrace(AttackBoneName);
+        }
+    }
+};</code></pre>
+            </div>
+
+            <div class="class-card">
+                <h4><span class="badge badge-notify">AnimNotify</span> UAnimNotify_CheckCombo</h4>
+                <p class="path">📁 Variant_Combat/Animation/AnimNotify_CheckCombo.h/cpp</p>
+                <p>콤보 연결 체크 타이밍에 호출됩니다.</p>
+                <pre><code>// 콤보 체크 로직 (CombatCharacter에서)
+void ACombatCharacter::CheckCombo() {
+    if (bIsAttacking && !bIsChargingAttack) {
+        // 입력이 캐시되어 있는지 확인
+        if (GetWorld()->GetTimeSeconds() - CachedAttackInputTime 
+            <= ComboInputCacheTimeTolerance) {
+            
+            CachedAttackInputTime = 0.0f;  // 입력 소비
+            ++ComboCount;
+            
+            if (ComboCount < ComboSectionNames.Num()) {
+                NotifyEnemiesOfIncomingAttack();
+                
+                // 다음 콤보 섹션으로 점프
+                if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance()) {
+                    AnimInstance->Montage_JumpToSection(
+                        ComboSectionNames[ComboCount], ComboAttackMontage);
+                }
+            }
+        }
+    }
+}</code></pre>
+            </div>
+
+            <h3>3.2 AnimMontage 구조와 섹션</h3>
+
+            <div class="highlight-box">
+                <strong>📝 개념 설명:</strong> AnimMontage는 여러 애니메이션 섹션으로 구성될 수 있으며,
+                코드에서 <code>Montage_JumpToSection()</code>을 통해 특정 섹션으로 점프할 수 있습니다.
+                콤보 공격은 이 섹션 점프 기능을 활용합니다.
+            </div>
+
+            <div class="diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ComboAttackMontage 구조                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐         │
+│  │ Attack1 │───►│ Attack2 │───►│ Attack3 │───►│ Attack4 │         │
+│  │ (기본)  │    │ (콤보1) │    │ (콤보2) │    │ (콤보3) │         │
+│  └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘         │
+│       │              │              │              │               │
+│    Notify:        Notify:        Notify:        Notify:            │
+│  DoAttackTrace DoAttackTrace DoAttackTrace  DoAttackTrace          │
+│  CheckCombo    CheckCombo    CheckCombo     (끝)                   │
+│                                                                     │
+│  ComboSectionNames = ["Attack1", "Attack2", "Attack3", "Attack4"]  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="section4">
+            <h2>4. Animation Blueprint 자동 연동 원리</h2>
+
+            <div class="highlight-box">
+                <strong>🎯 핵심 질문:</strong> "이동 작업을 하면서 의문인 것은 애니메이션 BP쪽을 별도로 작업하지 않았는데 동작하는 것"
+            </div>
+
+            <h3>4.1 자동 연동의 비밀</h3>
+
+            <p>Animation Blueprint가 별도 C++ 코드 없이 동작하는 이유는 다음과 같습니다:</p>
+
+            <h4>1️⃣ Blueprint에서 설정된 Animation Blueprint</h4>
+            <pre><code>// ReBirthCharacter.cpp 생성자 주석
+// Note: The skeletal mesh and anim blueprint references on the Mesh component
+// (inherited from Character) are set in the derived blueprint asset named
+// ThirdPersonCharacter (to avoid direct content references in C++)</code></pre>
+
+            <p>Blueprint 캐릭터(예: BP_ThirdPersonCharacter)에서 <code>Mesh</code> 컴포넌트의
+                <code>Anim Class</code> 속성에 Animation Blueprint가 설정되어 있습니다.
+            </p>
+
+            <h4>2️⃣ CharacterMovementComponent의 자동 연동</h4>
+            <div class="diagram">
+                <pre>
+┌────────────────────────────────────────────────────────────────────────────┐
+│                  AnimGraph 자동 연동 흐름                                   │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│    ┌─────────────────────────┐                                             │
+│    │  CharacterMovementComp   │◄──── AddMovementInput() 호출                │
+│    │  • Velocity             │                                             │
+│    │  • IsFalling            │                                             │
+│    │  • IsOnGround           │                                             │
+│    └────────────┬────────────┘                                             │
+│                 │                                                          │
+│                 │ UAnimInstance가 자동으로 참조                             │
+│                 ▼                                                          │
+│    ┌─────────────────────────┐                                             │
+│    │    UAnimInstance        │                                             │
+│    │ (Animation Blueprint)   │                                             │
+│    │                         │                                             │
+│    │ NativeUpdateAnimation() │◄──── 매 프레임 호출                         │
+│    │  • GetVelocity()        │                                             │
+│    │  • GetMovementComponent │                                             │
+│    └────────────┬────────────┘                                             │
+│                 │                                                          │
+│                 ▼                                                          │
+│    ┌─────────────────────────┐                                             │
+│    │    Event Graph에서      │                                             │
+│    │  Speed, Direction 등    │                                             │
+│    │    변수 업데이트        │                                             │
+│    └────────────┬────────────┘                                             │
+│                 │                                                          │
+│                 ▼                                                          │
+│    ┌─────────────────────────┐                                             │
+│    │   State Machine에서     │                                             │
+│    │  조건에 따라 상태 전이  │                                             │
+│    │  Idle ↔ Walk ↔ Run     │                                             │
+│    └─────────────────────────┘                                             │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+
+            <h4>3️⃣ Animation Blueprint의 Event Graph에서 흔히 사용되는 코드</h4>
+            <pre><code>// Animation Blueprint Event Graph (Pseudo Blueprint 코드)
+Event Blueprint Update Animation:
+    // 1. Character Reference 획득
+    Try Get Pawn Owner → Cast to Character → "CharacterRef"
+    
+    // 2. Movement Component에서 속도 정보 획득
+    CharacterRef → Get Character Movement → Get Velocity → Vector Length → "Speed"
+    
+    // 3. 지면 상태 확인
+    CharacterRef → Get Character Movement → Is Falling → "bIsFalling"
+    
+    // 4. 이동 방향 계산
+    Calculate Direction(Velocity, Rotation) → "Direction"</code></pre>
+
+            <h3>4.2 Lyra 프로젝트의 심화된 AnimInstance</h3>
+
+            <p>Lyra는 더 복잡한 AnimInstance 시스템을 사용합니다:</p>
+
+            <div class="class-card">
+                <h4><span class="badge badge-class">Class</span> ULyraAnimInstance</h4>
+                <p class="path">📁 f:\UnrealEngine\Samples\Games\Lyra\Source\LyraGame\Animation\LyraAnimInstance.h</p>
+                <pre><code>UCLASS(Config = Game)
+class ULyraAnimInstance : public UAnimInstance {
+protected:
+    // GameplayTag를 Blueprint 변수에 자동 매핑
+    UPROPERTY(EditDefaultsOnly, Category = "GameplayTags")
+    FGameplayTagBlueprintPropertyMap GameplayTagPropertyMap;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Character State Data")
+    float GroundDistance = -1.0f;
+
+    virtual void NativeInitializeAnimation() override {
+        // AbilitySystem과 연동
+        if (UAbilitySystemComponent* ASC = 
+            UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwningActor())) {
+            GameplayTagPropertyMap.Initialize(this, ASC);
+        }
+    }
+    
+    virtual void NativeUpdateAnimation(float DeltaSeconds) override {
+        // 매 프레임 상태 업데이트
+        if (const ALyraCharacter* Character = Cast&lt;ALyraCharacter&gt;(GetOwningActor())) {
+            ULyraCharacterMovementComponent* CharMoveComp = 
+                CastChecked&lt;ULyraCharacterMovementComponent&gt;(Character->GetCharacterMovement());
+            GroundDistance = CharMoveComp->GetGroundInfo().GroundDistance;
+        }
+    }
+};</code></pre>
+            </div>
+
+            <div class="tip-box">
+                <strong>💡 핵심 포인트:</strong>
+                <ul>
+                    <li>Animation Blueprint는 <code>NativeUpdateAnimation()</code>에서 매 프레임 상태를 갱신</li>
+                    <li>Character의 <code>GetVelocity()</code>, <code>GetCharacterMovement()</code> 등으로 상태 확인</li>
+                    <li>C++ 코드 없이도 Blueprint의 Event Graph에서 동일한 로직 구현 가능</li>
+                    <li>MontagePlaying 상태도 AnimInstance에서 자동 추적됨</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="section5">
+            <h2>5. 스킬/어빌리티 데이터 관리 구조</h2>
+
+            <h3>5.1 현재 Input 시스템 구조</h3>
+
+            <div class="class-card">
+                <h4><span class="badge badge-class">DataAsset</span> UReBirthInputConfig</h4>
+                <p class="path">📁 Input/ReBirthInputConfig.h</p>
+                <p>GameplayTag와 InputAction을 매핑하는 데이터 에셋입니다.</p>
+                <pre><code>USTRUCT(BlueprintType)
+struct FReBirthInputAction {
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TObjectPtr&lt;const UInputAction&gt; InputAction = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
+    FGameplayTag InputTag;  // 예: InputTag.Attack
+};
+
+UCLASS(BlueprintType, Const)
+class UReBirthInputConfig : public UDataAsset {
+    // 이동, 카메라 등 기본 액션
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TArray&lt;FReBirthInputAction&gt; NativeInputActions;
+
+    // 어빌리티용 액션 (공격, 스킬 등)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TArray&lt;FReBirthInputAction&gt; AbilityInputActions;
+};</code></pre>
+            </div>
+
+            <h3>5.2 GameplayTags 정의</h3>
+
+            <pre><code>// ReBirthGameplayTags.h/cpp
+
+namespace ReBirthGameplayTags {
+    // Native Input Tags (기본 동작)
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Move, "InputTag.Move", "이동");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Look_Mouse, "InputTag.Look.Mouse", "마우스 시점");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Look_Stick, "InputTag.Look.Stick", "스틱 시점");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Jump, "InputTag.Jump", "점프");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Crouch, "InputTag.Crouch", "앉기");
+
+    // Ability Input Tags (스킬/공격)
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Attack, "InputTag.Attack", "공격");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Skill, "InputTag.Skill", "스킬");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Interact, "InputTag.Interact", "상호작용");
+}</code></pre>
+
+            <h3>5.3 권장 스킬 데이터 관리 구조</h3>
+
+            <p>스킬을 확장성 있게 관리하려면 다음과 같은 구조를 권장합니다:</p>
+
+            <div class="diagram">
+                <pre>
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    권장 스킬 데이터 아키텍처                               │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│    ┌─────────────────────┐                                                 │
+│    │   USkillDataAsset   │  ◄─── DataAsset으로 스킬 정의                  │
+│    │  (UReBirthSkillData) │                                                │
+│    ├─────────────────────┤                                                 │
+│    │ • SkillName         │                                                 │
+│    │ • SkillTag          │ ───► FGameplayTag (Skill.Fire.Fireball)        │
+│    │ • InputTag          │ ───► FGameplayTag (InputTag.Skill.Q)           │
+│    │ • SkillMontage      │ ───► UAnimMontage*                             │
+│    │ • CooldownTime      │                                                 │
+│    │ • ManaCost          │                                                 │
+│    │ • DamageAmount      │                                                 │
+│    │ • SkillIcon         │ ───► UTexture2D*                               │
+│    └─────────────────────┘                                                 │
+│              │                                                             │
+│              ▼                                                             │
+│    ┌─────────────────────┐                                                 │
+│    │  USkillSetDataAsset │  ◄─── 캐릭터별 스킬 세트                       │
+│    │ (UReBirthSkillSet)   │                                                │
+│    ├─────────────────────┤                                                 │
+│    │ • ActiveSkills[]    │ ───► TArray&lt;UReBirthSkillData*&gt;               │
+│    │ • PassiveSkills[]   │                                                 │
+│    │ • UltimateSkill     │                                                 │
+│    └─────────────────────┘                                                 │
+│              │                                                             │
+│              ▼                                                             │
+│    ┌─────────────────────┐                                                 │
+│    │  USkillComponent    │  ◄─── 캐릭터에 부착되는 컴포넌트               │
+│    ├─────────────────────┤                                                 │
+│    │ • CurrentSkillSet   │                                                 │
+│    │ • ExecuteSkill()    │                                                 │
+│    │ • CheckCooldown()   │                                                 │
+│    └─────────────────────┘                                                 │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+
+            <h4>스킬 DataAsset 예시 코드</h4>
+            <pre><code>// ReBirthSkillData.h
+UCLASS(BlueprintType)
+class UReBirthSkillData : public UPrimaryDataAsset {
+    GENERATED_BODY()
+    
+public:
+    // 기본 정보
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill")
+    FText SkillName;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill")
+    FText SkillDescription;
+    
+    // 식별자
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Tags")
+    FGameplayTag SkillTag;  // Skill.Fire.Fireball
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Tags")
+    FGameplayTag InputTag;  // InputTag.Skill.Q
+    
+    // 애니메이션
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Animation")
+    TObjectPtr&lt;UAnimMontage&gt; SkillMontage;
+    
+    // 스탯
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Stats")
+    float Cooldown = 5.0f;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Stats")
+    float ManaCost = 10.0f;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|Stats")
+    float BaseDamage = 50.0f;
+    
+    // UI
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill|UI")
+    TObjectPtr&lt;UTexture2D&gt; SkillIcon;
+};</code></pre>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="section6">
+            <h2>6. Enhanced Input 시스템과의 연동</h2>
+
+            <h3>6.1 Input 바인딩 흐름</h3>
+
+            <div class="diagram">
+                <pre>
+┌────────────────────────────────────────────────────────────────────────────┐
+│                   Enhanced Input 초기화 흐름                               │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│    [게임 시작]                                                             │
+│         │                                                                  │
+│         ▼                                                                  │
+│    UReBirthHeroComponent::BeginPlay()                                      │
+│         │                                                                  │
+│         ├── TryToChangeInitState(InitState_Spawned)                        │
+│         │                                                                  │
+│         └── CheckDefaultInitialization()                                   │
+│                  │                                                         │
+│    [InitState 체인 진행]                                                   │
+│         │                                                                  │
+│         Spawned → DataAvailable → DataInitialized → GameplayReady         │
+│                         │                                                  │
+│                         ▼                                                  │
+│    HandleChangeInitState(DataAvailable → DataInitialized)                  │
+│         │                                                                  │
+│         └── InitializePlayerInput(InputComponent)                          │
+│                  │                                                         │
+│                  ├── Subsystem->ClearAllMappings()                         │
+│                  │                                                         │
+│                  ├── AddMappingContext(IMC, Priority)  ◄─ DefaultInputMappings│
+│                  │                                                         │
+│                  ├── ReBirthIC->AddInputMappings(InputConfig)              │
+│                  │                                                         │
+│                  ├── ReBirthIC->BindAbilityActions(...)  ◄─ 어빌리티 입력  │
+│                  │                                                         │
+│                  └── ReBirthIC->BindNativeAction(...)    ◄─ 기본 입력      │
+│                           │                                                │
+│                           ├── InputTag_Move → Input_Move()                 │
+│                           ├── InputTag_Look_Mouse → Input_LookMouse()      │
+│                           ├── InputTag_Jump → Input_Jump()                 │
+│                           └── InputTag_Attack → Input_AbilityInputTagPressed│
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+</pre>
+            </div>
+
+            <h3>6.2 어빌리티 입력 처리</h3>
+
+            <pre><code>// UReBirthHeroComponent의 어빌리티 입력 처리
+void UReBirthHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag) {
+    // TODO: Gameplay Ability System과 연동 예정
+    UE_LOG(LogTemp, Verbose, 
+        TEXT("[ReBirthHeroComponent] Ability Input Pressed: %s"),
+        *InputTag.ToString());
+    
+    // 여기에 스킬 실행 로직 추가
+    // 예: SkillComponent->ExecuteSkillByInputTag(InputTag);
+}
+
+void UReBirthHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag) {
+    // 버튼 릴리즈 처리 (차지 공격 등)
+}</code></pre>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="section7">
+            <h2>7. 새로운 스킬 추가 가이드</h2>
+
+            <h3>7.1 단계별 스킬 추가 절차</h3>
+
+            <h4>Step 1: GameplayTag 추가</h4>
+            <pre><code>// ReBirthGameplayTags.h - 헤더에 선언 추가
+REBIRTH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Skill_Fireball);
+REBIRTH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Skill_Fire_Fireball);
+
+// ReBirthGameplayTags.cpp - 정의 추가
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(InputTag_Skill_Fireball, 
+    "InputTag.Skill.Fireball", "파이어볼 스킬 입력");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_Fire_Fireball, 
+    "Skill.Fire.Fireball", "파이어볼 스킬");</code></pre>
+
+            <h4>Step 2: Input Action 생성 (에디터)</h4>
+            <ol>
+                <li>Content Browser에서 Input Action 에셋 생성</li>
+                <li>Value Type: <code>Digital (Bool)</code> 또는 <code>Axis1D</code></li>
+                <li>이름: <code>IA_Skill_Fireball</code></li>
+            </ol>
+
+            <h4>Step 3: InputConfig DataAsset 업데이트</h4>
+            <pre><code>// DA_InputConfig 에디터에서:
+AbilityInputActions:
+  - InputAction: IA_Skill_Fireball
+    InputTag: InputTag.Skill.Fireball</code></pre>
+
+            <h4>Step 4: AnimMontage 생성 (에디터)</h4>
+            <ol>
+                <li>스킬 애니메이션 시퀀스 임포트</li>
+                <li>AnimMontage 생성</li>
+                <li>적절한 위치에 AnimNotify 추가:
+                    <ul>
+                        <li><code>AnimNotify_DoAttackTrace</code> - 데미지 판정 시점</li>
+                        <li>커스텀 Notify - 이펙트/사운드</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Step 5: 스킬 로직 구현</h4>
+            <pre><code>// 스킬 컴포넌트 또는 캐릭터에 추가
+void ACombatCharacter::ExecuteFireball() {
+    if (bIsAttacking) return;
+    
+    bIsAttacking = true;
+    
+    // 마나 체크
+    if (CurrentMana < FireballManaCost) {
+        UE_LOG(LogCombat, Warning, TEXT("마나 부족!"));
+        return;
+    }
+    
+    CurrentMana -= FireballManaCost;
+    
+    // 몽타주 재생
+    if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance()) {
+        AnimInstance->Montage_Play(FireballMontage);
+        AnimInstance->Montage_SetEndDelegate(OnSkillMontageEnded, FireballMontage);
+    }
+}</code></pre>
+
+            <h4>Step 6: HeroComponent에서 입력 처리 연결</h4>
+            <pre><code>void UReBirthHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag) {
+    APawn* Pawn = GetPawn&lt;APawn&gt;();
+    
+    if (InputTag == ReBirthGameplayTags::InputTag_Skill_Fireball) {
+        if (ACombatCharacter* CombatChar = Cast&lt;ACombatCharacter&gt;(Pawn)) {
+            CombatChar->ExecuteFireball();
+        }
+    }
+    // 추가 스킬들...
+}</code></pre>
+
+            <h3>7.2 확장성을 위한 권장 패턴</h3>
+
+            <div class="tip-box">
+                <strong>💡 확장성 있는 스킬 시스템 설계:</strong>
+                <ol>
+                    <li><strong>DataAsset 기반:</strong> 각 스킬을 독립적인 DataAsset으로 정의</li>
+                    <li><strong>SkillComponent:</strong> 캐릭터에 스킬 관리 컴포넌트 추가</li>
+                    <li><strong>Tag 기반 매핑:</strong> GameplayTag로 입력 → 스킬 → 이펙트 매핑</li>
+                    <li><strong>인터페이스 활용:</strong> <code>ISkillExecutor</code> 등 인터페이스로 다형성 확보</li>
+                </ol>
+            </div>
+
+            <pre><code>// 권장 스킬 컴포넌트 구조
+UCLASS(BlueprintType, Blueprintable)
+class UReBirthSkillComponent : public UActorComponent {
+    GENERATED_BODY()
+    
+public:
+    // 현재 장착된 스킬셋
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills")
+    TObjectPtr&lt;UReBirthSkillSet&gt; CurrentSkillSet;
+    
+    // InputTag로 스킬 실행
+    UFUNCTION(BlueprintCallable, Category = "Skills")
+    bool ExecuteSkillByInputTag(FGameplayTag InputTag);
+    
+    // SkillTag로 스킬 실행
+    UFUNCTION(BlueprintCallable, Category = "Skills")
+    bool ExecuteSkillBySkillTag(FGameplayTag SkillTag);
+    
+    // 쿨다운 관리
+    UFUNCTION(BlueprintPure, Category = "Skills")
+    bool IsSkillOnCooldown(FGameplayTag SkillTag) const;
+    
+private:
+    // 스킬별 쿨다운 타이머
+    UPROPERTY()
+    TMap&lt;FGameplayTag, float&gt; SkillCooldowns;
+};</code></pre>
+        </section>
+
+        <section style="text-align: center; padding: 40px;">
+            <h2 style="border: none;">📚 요약</h2>
+            <table style="margin: 0 auto; width: 80%;">
+                <tr>
+                    <th>시스템</th>
+                    <th>핵심 클래스</th>
+                    <th>역할</th>
+                </tr>
+                <tr>
+                    <td>전투 시스템</td>
+                    <td><code>ACombatCharacter</code></td>
+                    <td>콤보/차지 공격, 데미지 처리</td>
+                </tr>
+                <tr>
+                    <td>인터페이스</td>
+                    <td><code>ICombatAttacker</code>, <code>ICombatDamageable</code></td>
+                    <td>공격자/피해자 공통 함수 정의</td>
+                </tr>
+                <tr>
+                    <td>애니메이션 알림</td>
+                    <td><code>UAnimNotify_*</code></td>
+                    <td>몽타주 특정 프레임에서 로직 실행</td>
+                </tr>
+                <tr>
+                    <td>입력 설정</td>
+                    <td><code>UReBirthInputConfig</code></td>
+                    <td>GameplayTag ↔ InputAction 매핑</td>
+                </tr>
+                <tr>
+                    <td>입력 바인딩</td>
+                    <td><code>UReBirthHeroComponent</code></td>
+                    <td>InitState 시스템으로 입력 초기화</td>
+                </tr>
+            </table>
+
+            <div class="tip-box" style="text-align: left; margin-top: 30px;">
+                <strong>🎮 Animation Blueprint 자동 동작 원리:</strong>
+                <p style="margin-bottom: 0;">
+                    Blueprint 에디터에서 캐릭터의 Mesh 컴포넌트에 Animation Blueprint가 설정되어 있고,
+                    해당 ABP의 Event Graph에서 <code>CharacterMovementComponent</code>의
+                    <code>Velocity</code>, <code>IsFalling</code> 등의 정보를 읽어
+                    State Machine의 상태 전이 조건으로 사용합니다.
+                    C++ 코드에서 <code>AddMovementInput()</code>을 호출하면 자동으로
+                    <code>CharacterMovementComponent</code>의 상태가 업데이트되고,
+                    ABP가 이를 감지하여 적절한 애니메이션을 재생합니다.
+                </p>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

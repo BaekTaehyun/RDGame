@@ -24,15 +24,17 @@ void FReceiverStrategy::Tick(float DeltaTime) {
 
   // 1. 위치 보간 (VInterpTo)
   FVector CurrentLoc = Char->GetActorLocation();
+  FVector NewLoc = CurrentLoc;
 
   // 타겟과의 거리가 너무 멀면(텔레포트 등) 즉시 이동
   float DistSq = FVector::DistSquared(CurrentLoc, TargetLocation);
   if (DistSq > 500.0f * 500.0f) // 5미터 이상 차이나면
   {
+    NewLoc = TargetLocation;
     Char->SetActorLocation(TargetLocation);
     Char->SetActorRotation(TargetRotation);
   } else {
-    FVector NewLoc =
+    NewLoc =
         FMath::VInterpTo(CurrentLoc, TargetLocation, DeltaTime, InterpSpeed);
     Char->SetActorLocation(NewLoc);
   }
@@ -43,10 +45,20 @@ void FReceiverStrategy::Tick(float DeltaTime) {
                                      RotateInterpSpeed);
   Char->SetActorRotation(NewRot);
 
-  // 3. 애니메이션을 위한 Velocity 설정 (선택)
-  // 실제 이동에 따른 속도를 계산하거나, 서버에서 받은 속도를 세팅해줌
-  // (보통 CharacterMovementComponent가 위치 변화에 따라 Velocity를 자동
-  // 갱신하기도 함)
+  // 3. 애니메이션을 위한 Velocity 설정
+  if (auto *MoveComp = Char->GetCharacterMovement()) {
+    // A. 실제 이동 속도 기반 (Moonwalk 방지)
+    FVector RealVelocity = (NewLoc - CurrentLoc) / DeltaTime;
+
+    // B. 서버 속도와 혼합하거나(Blending), 특정 상태에서는 강제 설정
+    // 여기서는 실제 이동 속도 반영이 애니메이션에 가장 자연스러움
+    // Z축은 점프 등을 위해 서버 속도 참고 가능하나, 단순화를 위해 RealVelocity
+    // 사용
+    MoveComp->Velocity = RealVelocity;
+
+    // UpdateComponent를 호출하여 파생 데이터 갱신
+    MoveComp->UpdateComponentVelocity();
+  }
 }
 
 void FReceiverStrategy::OnNetworkDataReceived(const FVector &NewLoc,

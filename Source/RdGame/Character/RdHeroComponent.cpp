@@ -222,20 +222,18 @@ void URdHeroComponent::InitializePlayerInput(
       const_cast<APawn *>(Pawn), NAME_BindInputsNow);
 }
 
-bool URdHeroComponent::IsReadyToBindInputs() const {
-  return bReadyToBindInputs;
-}
-
 void URdHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag) {
-  // TODO: Integrate with Gameplay Ability System when ready
-  UE_LOG(LogTemp, Verbose, TEXT("[RdHeroComponent] Ability Input Pressed: %s"),
-         *InputTag.ToString());
+  // if (URdAbilitySystemComponent* RdASC = GetRdAbilitySystemComponent())
+  // {
+  // 	RdASC->AbilityInputTagPressed(InputTag);
+  // }
 }
 
 void URdHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag) {
-  // TODO: Integrate with Gameplay Ability System when ready
-  UE_LOG(LogTemp, Verbose, TEXT("[RdHeroComponent] Ability Input Released: %s"),
-         *InputTag.ToString());
+  // if (URdAbilitySystemComponent* RdASC = GetRdAbilitySystemComponent())
+  // {
+  // 	RdASC->AbilityInputTagReleased(InputTag);
+  // }
 }
 
 void URdHeroComponent::Input_Move(const FInputActionValue &InputActionValue) {

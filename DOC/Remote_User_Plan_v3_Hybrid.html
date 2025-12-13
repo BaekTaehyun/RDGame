@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하이브리드 네트워크 동기화 시스템 계획</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-orange);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            margin-top: 2rem;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--accent-green);
+            margin-top: 1.5rem;
+        }
+
+        .box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .mode-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .mode-card {
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .mode-card h4 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+
+        code {
+            background: rgba(110, 118, 129, 0.4);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d2a8ff;
+        }
+
+        pre {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌐 하이브리드 네트워크 동기화 시스템 계획</h1>
+    <p><strong>Goal:</strong> 필드(TCP/자체서버)와 던전(UDP/데디케이티드 서버)을 자유롭게 오가는 유연한 캐릭터 시스템 구축</p>
+
+    <div class="box">
+        <h3>💡 핵심 전략: "Driver Switching"</h3>
+        <p>
+            캐릭터(Actor)의 움직임을 제어하는 주체(Driver)를 런타임에 교체하는 방식입니다.
+            상황에 따라 <strong>언리얼 엔진의 내장 Replication</strong>과 <strong>커스텀 보간 컴포넌트</strong> 중 하나를 선택하여 활성화합니다.
+        </p>
+    </div>
+
+    <div class="mode-switch">
+        <div class="mode-card" style="border-top: 3px solid var(--accent-blue);">
+            <h4>🏗️ Mode A: TCP Field (Custom)</h4>
+            <ul>
+                <li><strong>서버:</strong> 자체 C++ 서버 / 웹 서버</li>
+                <li><strong>통신:</strong> TCP 패킷 (GsNetworkManager)</li>
+                <li><strong>제어:</strong> <code>GsNetworkMovementComponent</code> 활성화</li>
+                <li><strong>Movement:</strong> <code>ReplicateMovement = false</code></li>
+                <li><strong>특징:</strong> 대규모 인원, 채팅, 비전투 구역 효율적</li>
+            </ul>
+        </div>
+        <div class="mode-card" style="border-top: 3px solid var(--accent-red);">
+            <h4>⚔️ Mode B: UDP Dungeon (UE5)</h4>
+            <ul>
+                <li><strong>서버:</strong> UE5 Dedicated Server</li>
+                <li><strong>통신:</strong> UE5 Replication (Property)</li>
+                <li><strong>제어:</strong> Engine Built-in SimulatedProxy</li>
+                <li><strong>Movement:</strong> <code>ReplicateMovement = true</code></li>
+                <li><strong>특징:</strong> 정교한 물리, 빠른 전투 반응, 보안</li>
+            </ul>
+        </div>
+    </div>
+
+    <h2>1. 클래스 설계 변경 (<code>ARdRemoteCharacter</code>)</h2>
+
+    <p>하나의 캐릭터 클래스가 두 모드를 모두 지원해야 합니다.</p>
+
+    <pre><code class="cpp">UCLASS()
+class ARdRemoteCharacter : public ARdGameCharacter 
+{
+    GENERATED_BODY()
+
+public:
+    // 네트워크 모드 열거형
+    enum class ENetworkDriverMode {
+        None,
+        CustomTCP,  // 필드 (자체 동기화)
+        UnrealUDP   // 던전 (언리얼 리플리케이션)
+    };
+
+    // 모드 전환 함수
+    void SetNetworkDriverMode(ENetworkDriverMode NewMode);
+
+protected:
+    // 커스텀 동기화 컴포넌트 (TCP용)
+    UPROPERTY(VisibleAnywhere)
+    class UGsNetworkMovementComponent* CustomMoveComp;
+
+    virtual void BeginPlay() override;
+};</code></pre>
+
+    <h2>2. 모드 전환 로직 구현</h2>
+
+    <pre><code class="cpp">void ARdRemoteCharacter::SetNetworkDriverMode(ENetworkDriverMode NewMode)
+{
+    switch (NewMode)
+    {
+    case ENetworkDriverMode::CustomTCP:
+        // 1. 언리얼 리플리케이션 끄기
+        SetReplicates(false); 
+        SetReplicateMovement(false);
+        
+        // 2. 커스텀 컴포넌트 켜기
+        CustomMoveComp->SetComponentTickEnabled(true);
+        CustomMoveComp->Activate(true);
+        break;
+
+    case ENetworkDriverMode::UnrealUDP:
+        // 1. 커스텀 컴포넌트 끄기
+        CustomMoveComp->SetComponentTickEnabled(false);
+        CustomMoveComp->Deactivate();
+
+        // 2. 언리얼 리플리케이션 켜기
+        SetReplicates(true);
+        SetReplicateMovement(true);
+        break;
+    }
+}</code></pre>
+
+    <h2>3. GsNetworkMovementComponent 역할 (TCP 모드용)</h2>
+    <p>이 컴포넌트는 <strong>TCP 모드일 때만 동작</strong>하며, 언리얼 리플리케이션이 꺼진 상태에서 수동으로 <code>SimulatedProxy</code> 역할을 대신합니다.</p>
+    <ul>
+        <li><code>StartLocation</code>, <code>TargetLocation</code> 보간</li>
+        <li><code>Velocity</code> 주입 (애니메이션 용)</li>
+        <li><code>CharacterMovementComponent</code> 설정을 <code>MOVE_Custom</code>이나 <code>MOVE_Flying</code> 등으로 강제 조정 가능
+        </li>
+    </ul>
+
+    <h2>4. 구현 단계 (Roadmap)</h2>
+
+    <h3>Phase 1: 기반 마련</h3>
+    <ul>
+        <li><code>ARdRemoteCharacter</code> 클래스 생성.</li>
+        <li><code>GsNetworkMovementComponent</code>가 <code>ARdRemoteCharacter</code>에 부착되도록 설정.</li>
+        <li><code>SetNetworkDriverMode</code> 함수 구현.</li>
+    </ul>
+
+    <h3>Phase 2: TCP 모드 구현 (우선순위)</h3>
+    <ul>
+        <li>현재 개발 중인 필드 상황에 맞춰, <code>CustomTCP</code> 모드를 기본값으로 설정.</li>
+        <li><code>GsNetworkMovementComponent</code>의 보간 로직 완성.</li>
+    </ul>
+
+    <h3>Phase 3: UDP 모드 테스트 (추후)</h3>
+    <ul>
+        <li>데디케이티드 서버 연결 시 자동으로 <code>UnrealUDP</code> 모드로 전환되도록 <code>GameInstance</code>나 <code>Level</code> 블루프린트에서
+            처리.</li>
+    </ul>
+
+</body>
+
+</html>

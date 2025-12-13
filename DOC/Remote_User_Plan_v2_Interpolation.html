@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타 유저 캐릭터 구현 계획 (수정안)</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: var(--accent-purple);
+            margin-top: 2rem;
+        }
+
+        h3 {
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+        }
+
+        .box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .warning {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        code {
+            background: rgba(110, 118, 129, 0.4);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d2a8ff;
+        }
+
+        pre {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 타 유저 구현 계획 (v2: 보간 방식)</h1>
+    <p><strong>주제:</strong> AI 제거 및 직접 트랜스폼 보간(Interpolation)을 통한 동기화</p>
+
+    <div class="box">
+        <h3>💡 핵심 변경 사항</h3>
+        <ul>
+            <li><span class="warning">삭제:</span> <code>ARdRemoteController</code> (AI Controller)</li>
+            <li><span class="warning">삭제:</span> NavMesh 의존성 (길찾기 로직 제거)</li>
+            <li><span class="highlight">추가:</span> 위치/회전 보간 (Interpolation) 로직</li>
+            <li><span class="highlight">추가:</span> 애니메이션 속도(Velocity) 주입</li>
+        </ul>
+        <p>
+            <strong>이유:</strong> 비행, 수영, 클라이밍 등 NavMesh가 없는 공간에서의 자유로운 이동을 지원하기 위해,
+            지능형 이동(AI) 대신 <strong>서버 상태 복제(Replication)</strong> 방식으로 전환합니다.
+        </p>
+    </div>
+
+    <h2>1. 시스템 구조</h2>
+
+    <h3>1.1 클래스 역할</h3>
+    <ul>
+        <li>
+            <strong><code>ARdRemoteCharacter</code></strong> (Character 상속)
+            <ul>
+                <li>로컬 플레이어와 외형은 같지만 입력(Input) 및 카메라 로직이 제거된 껍데기 Actor입니다.</li>
+                <li>물리 충돌(Collision)은 <code>Pawn</code>이나 <code>CharacterMesh</code>만 남기고 나머지는 <code>NoCollision</code>
+                    처리하여 로컬 플레이어의 길막을 최소화합니다.</li>
+            </ul>
+        </li>
+        <li>
+            <strong><code>UGsNetworkMovementComponent</code></strong> (ActorComponent)
+            <ul>
+                <li>실질적인 <strong>동기화 엔진</strong>입니다.</li>
+                <li>목표 지점(Target Location)과 현재 지점(Current Location) 사이를 매 프레임(Tick) 부드럽게 이동시킵니다.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>2. 이동 동기화 알고리즘 (핵심)</h2>
+
+    <p>네트워크로 받은 데이터는 과거의 위치입니다. 이를 부드럽게 보여주기 위해 <strong>선형 보간(Lerp)</strong>을 사용합니다.</p>
+
+    <h3>2.1 Tick 로직 (의사 코드)</h3>
+    <pre><code class="cpp">void UGsNetworkMovementComponent::TickComponent(...)
+{
+    // 1. 데이터가 없으면 패스
+    if (!bHasTargetData) return;
+
+    // 2. 현재 위치 가져오기
+    FVector CurrentLoc = Owner->GetActorLocation();
+
+    // 3. 목표 위치로 부드럽게 이동 (VInterpTo 사용)
+    // InterpSpeed는 네트워크 지연 시간에 따라 조절하면 더 좋음
+    FVector NewLoc = FMath::VInterpTo(CurrentLoc, TargetLocation, DeltaTime, InterpSpeed);
+
+    // 4. 위치 적용
+    Owner->SetActorLocation(NewLoc);
+
+    // 5. 회전 동기화 (RInterpTo 사용)
+    FRotator NewRot = FMath::RInterpTo(Owner->GetActorRotation(), TargetRotation, DeltaTime, RotInterpSpeed);
+    Owner->SetActorRotation(NewRot);
+
+    // 6. 애니메이션을 위한 속도 주입 (중요!)
+    // 실제 이동 거리 기반으로 속도 계산하여 CharacterMovement에 주입해야 
+    // AnimBP가 '뛰는 모션'을 재생함.
+    FVector RealVelocity = (NewLoc - CurrentLoc) / DeltaTime;
+    MovementComponent->Velocity = RealVelocity;
+}</code></pre>
+
+    <h3>2.2 텔레포트 처리</h3>
+    <p>네트워크 렉으로 인해 현재 위치와 목표 위치가 너무 멀어지면(예: 5미터 이상), 보간하지 않고 <strong>즉시 이동(Teleport)</strong>시켜야 맵 뚫음 현상을 방지할 수 있습니다.
+    </p>
+
+    <h2>3. 특수 상태 동기화 (확장 고려)</h2>
+    <p>비행, 클라이밍 등을 위해 <code>Packet</code> 구조체에 <code>MovementMode</code> 필드 추가를 권장합니다.</p>
+
+    <pre><code class="cpp">// 서버에서 올 때
+struct FPacketMove {
+    FVector Location;
+    FRotator Rotation;
+    FVector Velocity;
+    uint8 MovementMode; // 0:Walk, 1:Fall, 2:Swim, 3:Fly, 4:Climb
+};
+
+// 클라이언트 적용 시
+if (ReceivedMode == MOVE_Flying) {
+    CharacterMovement->SetMovementMode(MOVE_Flying);
+}</code></pre>
+
+    <h2>4. 작업 순서</h2>
+    <ol>
+        <li><strong><code>ARdRemoteCharacter</code> 클래스 생성</strong>
+            <ul>
+                <li><code>ARdGameCharacter</code> 복사 혹은 상속.</li>
+                <li>Camera, Input 관련 컴포넌트 제거.</li>
+            </ul>
+        </li>
+        <li><strong><code>GsNetworkMovementComponent</code> 보간 로직 구현</strong>
+            <ul>
+                <li><code>TickComponent</code> 활성화.</li>
+                <li><code>VInterpTo</code> 로직 작성.</li>
+            </ul>
+        </li>
+        <li><strong><code>GsNetworkManager</code> 스폰 로직 연결</strong>
+            <ul>
+                <li>유저 입장 패킷 수신 시 <code>ARdRemoteCharacter</code> 스폰.</li>
+                <li>이동 패킷 수신 시 해당 캐릭터의 컴포넌트에 데이터 전달.</li>
+            </ul>
+        </li>
+    </ol>
+
+</body>
+
+</html>

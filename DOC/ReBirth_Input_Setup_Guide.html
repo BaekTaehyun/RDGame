@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReBirth Enhanced Input 설정 가이드</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent-blue);
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            color: var(--accent-blue);
+        }
+
+        h2::before {
+            content: '§ ';
+            color: var(--accent-purple);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: var(--accent-green);
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 30px 0;
+        }
+
+        code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            color: var(--accent-orange);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        ul,
+        ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .step-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .step-card.completed {
+            border-left-color: var(--accent-green);
+        }
+
+        .step-card.pending {
+            border-left-color: var(--accent-orange);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            background: var(--accent-blue);
+            color: #fff;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-card.completed .step-number {
+            background: var(--accent-green);
+        }
+
+        .step-card.pending .step-number {
+            background: var(--accent-orange);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+
+        .badge-completed {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge-pending {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--accent-orange);
+            border: 1px solid var(--accent-orange);
+        }
+
+        .badge-editor {
+            background: rgba(163, 113, 247, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .warning-box {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .tip-box {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            padding: 5px 0;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .toc a::before {
+            content: '→';
+            color: var(--accent-purple);
+        }
+
+        .file-tree {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+        }
+
+        .file-tree .folder {
+            color: var(--accent-blue);
+        }
+
+        .file-tree .file {
+            color: var(--text-primary);
+        }
+
+        .file-tree .new {
+            color: var(--accent-green);
+        }
+
+        .screenshot-placeholder {
+            background: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            margin: 15px 0;
+        }
+
+        .kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 ReBirth Enhanced Input 설정 가이드</h1>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 60%;">C++ 완료 60% | 에디터 설정 40%</div>
+        </div>
+
+        <div class="toc">
+            <h3>📋 목차</h3>
+            <ul>
+                <li><a href="#overview">현재 진행 상황</a></li>
+                <li><a href="#step1">Step 1: InputAction 에셋 생성</a></li>
+                <li><a href="#step2">Step 2: InputMappingContext 생성</a></li>
+                <li><a href="#step3">Step 3: ReBirthInputConfig DataAsset 생성</a></li>
+                <li><a href="#step4">Step 4: 캐릭터 블루프린트 설정</a></li>
+                <li><a href="#step5">Step 5: PlayerController 설정</a></li>
+                <li><a href="#verification">검증 및 테스트</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">현재 진행 상황</h2>
+
+        <div class="highlight-box">
+            <h3>✅ C++ 구현 완료</h3>
+            <table>
+                <tr>
+                    <th>파일</th>
+                    <th>설명</th>
+                    <th>상태</th>
+                </tr>
+                <tr>
+                    <td><code>ReBirthGameplayTags.h/cpp</code></td>
+                    <td>InputTag, InitState 태그 정의</td>
+                    <td><span class="badge badge-completed">✅ 완료</span></td>
+                </tr>
+                <tr>
+                    <td><code>Input/ReBirthInputConfig.h/cpp</code></td>
+                    <td>GameplayTag ↔ InputAction 매핑</td>
+                    <td><span class="badge badge-completed">✅ 완료</span></td>
+                </tr>
+                <tr>
+                    <td><code>Input/ReBirthInputComponent.h/cpp</code></td>
+                    <td>Enhanced Input 래퍼</td>
+                    <td><span class="badge badge-completed">✅ 완료</span></td>
+                </tr>
+                <tr>
+                    <td><code>Character/ReBirthHeroComponent.h/cpp</code></td>
+                    <td>입력 초기화 관리 (InitState)</td>
+                    <td><span class="badge badge-completed">✅ 완료</span></td>
+                </tr>
+                <tr>
+                    <td><code>ReBirthCharacter.h/cpp</code></td>
+                    <td>HeroComponent 추가됨</td>
+                    <td><span class="badge badge-completed">✅ 완료</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <hr>
+
+        <h2 id="step1">Step 1: InputAction 에셋 생성</h2>
+
+        <div class="step-card pending">
+            <span class="step-number">1</span>
+            <strong>Content Browser에서 InputAction 에셋 생성</strong>
+            <span class="badge badge-editor">🎮 에디터</span>
+        </div>
+
+        <h3>생성 위치</h3>
+        <div class="file-tree">
+            <span class="folder">📁 Content/</span><br>
+            &nbsp;&nbsp;<span class="folder">📁 Input/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="folder new">📁 Actions/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Move.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Look_Mouse.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Look_Stick.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Jump.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Crouch.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Attack.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Skill.uasset</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IA_Interact.uasset</span>
+        </div>
+
+        <h3>생성 방법</h3>
+        <ol>
+            <li>Content Browser에서 <kbd>우클릭</kbd> → <code>Input</code> → <code>Input Action</code></li>
+            <li>아래 표에 따라 각 InputAction 생성 및 설정</li>
+        </ol>
+
+        <table>
+            <tr>
+                <th>에셋 이름</th>
+                <th>Value Type</th>
+                <th>용도</th>
+            </tr>
+            <tr>
+                <td><code>IA_Move</code></td>
+                <td><strong>Axis2D (Vector2D)</strong></td>
+                <td>WASD 이동</td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Mouse</code></td>
+                <td><strong>Axis2D (Vector2D)</strong></td>
+                <td>마우스 시점 조작</td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Stick</code></td>
+                <td><strong>Axis2D (Vector2D)</strong></td>
+                <td>게임패드 스틱 시점</td>
+            </tr>
+            <tr>
+                <td><code>IA_Jump</code></td>
+                <td><strong>Digital (Bool)</strong></td>
+                <td>점프</td>
+            </tr>
+            <tr>
+                <td><code>IA_Crouch</code></td>
+                <td><strong>Digital (Bool)</strong></td>
+                <td>웅크리기 토글</td>
+            </tr>
+            <tr>
+                <td><code>IA_Attack</code></td>
+                <td><strong>Digital (Bool)</strong></td>
+                <td>공격 (Ability)</td>
+            </tr>
+            <tr>
+                <td><code>IA_Skill</code></td>
+                <td><strong>Digital (Bool)</strong></td>
+                <td>스킬 (Ability)</td>
+            </tr>
+            <tr>
+                <td><code>IA_Interact</code></td>
+                <td><strong>Digital (Bool)</strong></td>
+                <td>상호작용 (Ability)</td>
+            </tr>
+        </table>
+
+        <div class="tip-box">
+            <strong>💡 팁:</strong> IA_Move와 IA_Look_* 의 경우 <code>Value Type</code>을 반드시 <code>Axis2D (Vector2D)</code>로
+            설정해야 합니다!
+        </div>
+
+        <hr>
+
+        <h2 id="step2">Step 2: InputMappingContext 생성</h2>
+
+        <div class="step-card pending">
+            <span class="step-number">2</span>
+            <strong>InputMappingContext 에셋 생성 및 키 바인딩</strong>
+            <span class="badge badge-editor">🎮 에디터</span>
+        </div>
+
+        <h3>생성 위치</h3>
+        <div class="file-tree">
+            <span class="folder">📁 Content/</span><br>
+            &nbsp;&nbsp;<span class="folder">📁 Input/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 IMC_Default.uasset</span>
+        </div>
+
+        <h3>생성 방법</h3>
+        <ol>
+            <li>Content Browser에서 <kbd>우클릭</kbd> → <code>Input</code> → <code>Input Mapping Context</code></li>
+            <li>이름을 <code>IMC_Default</code>로 설정</li>
+            <li>더블클릭하여 에디터 열기</li>
+        </ol>
+
+        <h3>키 바인딩 설정</h3>
+        <table>
+            <tr>
+                <th>Input Action</th>
+                <th>키 바인딩</th>
+                <th>Modifiers</th>
+            </tr>
+            <tr>
+                <td><code>IA_Move</code></td>
+                <td>W, A, S, D</td>
+                <td>Swizzle Input Axis Values (WASD → Vector2D)</td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Mouse</code></td>
+                <td>Mouse XY 2D-Axis</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Stick</code></td>
+                <td>Gamepad Right Stick</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Jump</code></td>
+                <td>Spacebar, Gamepad Face Button Bottom</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Crouch</code></td>
+                <td>Left Ctrl, Gamepad Face Button Right</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Attack</code></td>
+                <td>Left Mouse Button</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Skill</code></td>
+                <td>Right Mouse Button, Q</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><code>IA_Interact</code></td>
+                <td>E, Gamepad Face Button Left</td>
+                <td>-</td>
+            </tr>
+        </table>
+
+        <div class="tip-box">
+            <strong>💡 WASD 이동 설정 팁:</strong>
+            <ol>
+                <li>IA_Move에 <code>W</code> 키 추가</li>
+                <li>Modifiers에 <code>Swizzle Input Axis Values</code> 추가 (YXZ 순서)</li>
+                <li><code>S</code> 키 추가 후 <code>Negate</code> Modifier 추가</li>
+                <li><code>D</code> 키 추가</li>
+                <li><code>A</code> 키 추가 후 <code>Negate</code> Modifier 추가</li>
+            </ol>
+        </div>
+
+        <hr>
+
+        <h2 id="step3">Step 3: ReBirthInputConfig DataAsset 생성</h2>
+
+        <div class="step-card pending">
+            <span class="step-number">3</span>
+            <strong>InputConfig DataAsset 생성 및 태그 매핑</strong>
+            <span class="badge badge-editor">🎮 에디터</span>
+        </div>
+
+        <h3>생성 위치</h3>
+        <div class="file-tree">
+            <span class="folder">📁 Content/</span><br>
+            &nbsp;&nbsp;<span class="folder">📁 Input/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file new">📄 DA_InputConfig_Default.uasset</span>
+        </div>
+
+        <h3>생성 방법</h3>
+        <ol>
+            <li>Content Browser에서 <kbd>우클릭</kbd> → <code>Miscellaneous</code> → <code>Data Asset</code></li>
+            <li>클래스 선택 창에서 <code>ReBirthInputConfig</code> 선택</li>
+            <li>이름을 <code>DA_InputConfig_Default</code>로 설정</li>
+        </ol>
+
+        <h3>Native Input Actions 설정</h3>
+        <p><code>Native Input Actions</code> 배열에 다음 항목 추가:</p>
+
+        <table>
+            <tr>
+                <th>Input Action</th>
+                <th>Input Tag</th>
+            </tr>
+            <tr>
+                <td><code>IA_Move</code></td>
+                <td><code>InputTag.Move</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Mouse</code></td>
+                <td><code>InputTag.Look.Mouse</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Look_Stick</code></td>
+                <td><code>InputTag.Look.Stick</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Jump</code></td>
+                <td><code>InputTag.Jump</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Crouch</code></td>
+                <td><code>InputTag.Crouch</code></td>
+            </tr>
+        </table>
+
+        <h3>Ability Input Actions 설정</h3>
+        <p><code>Ability Input Actions</code> 배열에 다음 항목 추가:</p>
+
+        <table>
+            <tr>
+                <th>Input Action</th>
+                <th>Input Tag</th>
+            </tr>
+            <tr>
+                <td><code>IA_Attack</code></td>
+                <td><code>InputTag.Attack</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Skill</code></td>
+                <td><code>InputTag.Skill</code></td>
+            </tr>
+            <tr>
+                <td><code>IA_Interact</code></td>
+                <td><code>InputTag.Interact</code></td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2 id="step4">Step 4: 캐릭터 블루프린트 설정</h2>
+
+        <div class="step-card pending">
+            <span class="step-number">4</span>
+            <strong>캐릭터 BP에서 HeroComponent 설정</strong>
+            <span class="badge badge-editor">🎮 에디터</span>
+        </div>
+
+        <h3>설정 방법</h3>
+        <ol>
+            <li>캐릭터 블루프린트 (예: <code>BP_ThirdPersonCharacter</code>) 열기</li>
+            <li>Components 패널에서 <code>HeroComponent</code> 선택</li>
+            <li>Details 패널에서 다음 설정:</li>
+        </ol>
+
+        <table>
+            <tr>
+                <th>속성</th>
+                <th>값</th>
+            </tr>
+            <tr>
+                <td><code>Default Input Mappings</code></td>
+                <td>
+                    배열에 추가:<br>
+                    • Input Mapping: <code>IMC_Default</code><br>
+                    • Priority: <code>0</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>Input Config</code></td>
+                <td><code>DA_InputConfig_Default</code></td>
+            </tr>
+        </table>
+
+        <div class="warning-box">
+            <strong>⚠️ 중요:</strong> HeroComponent가 C++에서 추가되었으므로, 블루프린트를 열면 자동으로 Components 목록에 표시됩니다.
+            만약 보이지 않는다면 프로젝트를 다시 컴파일하세요.
+        </div>
+
+        <hr>
+
+        <h2 id="step5">Step 5: PlayerController 설정</h2>
+
+        <div class="step-card pending">
+            <span class="step-number">5</span>
+            <strong>PlayerController의 InputComponent 클래스 변경</strong>
+            <span class="badge badge-editor">🎮 에디터</span>
+        </div>
+
+        <h3>설정 방법 (C++)</h3>
+        <p><code>ReBirthPlayerController.cpp</code> 생성자에 다음 추가:</p>
+
+        <pre><code>AReBirthPlayerController::AReBirthPlayerController()
+{
+    // ReBirthInputComponent 사용하도록 설정
+    // 이 설정은 블루프린트에서도 가능
+}</code></pre>
+
+        <h3>설정 방법 (블루프린트)</h3>
+        <ol>
+            <li>PlayerController 블루프린트 열기</li>
+            <li>Class Defaults에서 <code>Input Component Class</code>를 <code>ReBirthInputComponent</code>로 변경</li>
+        </ol>
+
+        <div class="tip-box">
+            <strong>💡 대안:</strong> PlayerController에서 직접 설정하는 대신,
+            <code>Project Settings</code> → <code>Engine</code> → <code>Input</code>에서
+            <code>Default Input Component Class</code>를 변경할 수도 있습니다.
+        </div>
+
+        <hr>
+
+        <h2 id="verification">검증 및 테스트</h2>
+
+        <div class="step-card">
+            <span class="step-number">✓</span>
+            <strong>설정 완료 후 확인 사항</strong>
+        </div>
+
+        <h3>체크리스트</h3>
+        <table>
+            <tr>
+                <th>항목</th>
+                <th>확인</th>
+            </tr>
+            <tr>
+                <td>PIE 실행 시 캐릭터가 WASD로 이동하는가?</td>
+                <td>☐</td>
+            </tr>
+            <tr>
+                <td>마우스로 카메라 시점이 조작되는가?</td>
+                <td>☐</td>
+            </tr>
+            <tr>
+                <td>Spacebar로 점프가 되는가?</td>
+                <td>☐</td>
+            </tr>
+            <tr>
+                <td>Output Log에 "BindInputsNow" 관련 로그가 보이는가?</td>
+                <td>☐</td>
+            </tr>
+            <tr>
+                <td>Ability Input (Attack, Skill)이 로그에 출력되는가?</td>
+                <td>☐</td>
+            </tr>
+        </table>
+
+        <h3>디버깅 팁</h3>
+        <div class="tip-box">
+            <strong>🔍 입력이 작동하지 않을 때:</strong>
+            <ol>
+                <li><code>showdebug enhancedinput</code> 콘솔 명령어로 현재 바인딩 상태 확인</li>
+                <li>Output Log에서 <code>LogTemp</code> 카테고리 확인</li>
+                <li>HeroComponent의 <code>bReadyToBindInputs</code> 상태 확인</li>
+                <li>InputConfig DataAsset이 제대로 설정되었는지 확인</li>
+            </ol>
+        </div>
+
+        <hr>
+
+        <div class="highlight-box">
+            <h3>🎯 완료 후 구조</h3>
+            <div class="file-tree">
+                <span class="folder">📁 Content/</span><br>
+                &nbsp;&nbsp;<span class="folder">📁 Input/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="folder">📁 Actions/</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Move.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Look_Mouse.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Look_Stick.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Jump.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Crouch.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Attack.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Skill.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IA_Interact.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 IMC_Default.uasset</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">📄 DA_InputConfig_Default.uasset</span>
+            </div>
+        </div>
+
+        <p style="text-align:center;color:var(--text-secondary);margin-top:40px;">
+            📅 2025-12-07 | ReBirth Enhanced Input Setup Guide
+        </p>
+    </div>
+</body>
+
+</html>

@@ -1,26 +1,30 @@
-#include "Network/GsNetworkManager.h"
+#include "GsNetworkManager.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
+#include "GsNetworkMovementComponent.h"
 #include "GsNetworkSubsystem.h"
 #include "Kismet/GameplayStatics.h"
-#include "Network/GsNetworkMovementComponent.h"
+#include "RdNetworkSettings.h"
+#include "RdRemoteCharacter.h"
+
 
 void UGsNetworkManager::Initialize(FSubsystemCollectionBase &Collection) {
   Super::Initialize(Collection);
   UE_LOG(LogTemp, Log, TEXT("[GsNetworkManager] Initialize Called"));
 
-  // BP 클래스 동적 로드
-  // 경로: Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.uasset
-  FString ClassPath = TEXT("/Game/ThirdPerson/Blueprints/"
-                           "BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C");
-  RemoteActorClass = LoadClass<AActor>(nullptr, *ClassPath);
+  // 설정에서 RemoteCharacterClass 로드
+  const URdNetworkSettings *Settings = GetDefault<URdNetworkSettings>();
+  if (Settings && !Settings->RemoteCharacterClass.IsNull()) {
+    RemoteActorClass = Settings->RemoteCharacterClass.LoadSynchronous();
+  }
 
+  // 로드 실패 시 기본 C++ 클래스 사용
   if (!RemoteActorClass) {
     UE_LOG(LogTemp, Warning,
-           TEXT("[GsNetworkManager] Failed to load BP_ThirdPersonCharacter. "
-                "Using ACharacter instead."));
-    RemoteActorClass = ACharacter::StaticClass();
+           TEXT("[GsNetworkManager] Failed to load RemoteCharacterClass from "
+                "Settings. Using default ARdRemoteCharacter."));
+    RemoteActorClass = ARdRemoteCharacter::StaticClass();
   }
 
   // 핸들러 등록
@@ -103,13 +107,22 @@ void UGsNetworkManager::HandleUserEnter(const TArray<uint8> &Data) {
     AActor *NewActor = World->SpawnActor<AActor>(RemoteActorClass, SpawnLoc,
                                                  SpawnRot, SpawnParams);
     if (NewActor) {
+      if (ARdRemoteCharacter *RemoteChar = Cast<ARdRemoteCharacter>(NewActor)) {
+        RemoteChar->SetSessionId(Pkt->sessionId);
+        // 필드 스폰이므로 CustomTCP 모드 강제 설정
+        RemoteChar->SetNetworkDriverMode(ENetworkDriverMode::CustomTCP);
+
+        UE_LOG(LogTemp, Log,
+               TEXT("[GsNetworkManager] Initialized RemoteCharacter %d "
+                    "(CustomTCP Mode)"),
+               Pkt->sessionId);
+      }
+
       RemoteActors.Add(Pkt->sessionId, NewActor);
       UE_LOG(LogTemp, Log, TEXT("[GsNetworkManager] Spawned User %d at %s"),
              Pkt->sessionId, *SpawnLoc.ToString());
 
-      if (APawn *NewPawn = Cast<APawn>(NewActor)) {
-        NewPawn->SpawnDefaultController();
-      }
+      // RemoteChar는 AI 컨트롤러가 필요 없음 (직접 보간)
     }
   }
 }
