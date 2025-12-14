@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Preset Assembly Algorithm Specification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e74c3c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .update-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            vertical-align: middle;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Advanced Preset Assembly Algorithm <span class="update-badge">V2</span><br><small>(True Diablo 2 Modular
+            System)</small></h1>
+
+    <div class="section">
+        <h2>1. 개요 (Overview)</h2>
+        <p>
+            본 문서는 <strong>디아블로 2</strong>와 같이 다채롭고 유기적인 던전을 생성하기 위해,
+            단순 방향 연결이 아닌 <strong>정밀 소켓 매칭(Socket Matching)</strong> 시스템을 도입한 알고리즘 명세서입니다.
+        </p>
+        <p>
+            이제 '방(Room)'은 단순한 네모 공간이 아니라, 복잡한 모양을 가진 <strong>'모듈(Module)'</strong>로 정의됩니다.
+            작은 복도 조각, T자형 갈림길, 거대한 홀 등 모든 것이 모듈이며,
+            각 모듈은 정확한 위치에 정의된 <strong>소켓(문)</strong>을 통해 서로 결합됩니다.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>2. 고도화된 데이터 구조 (Advanced Data Structure)</h2>
+        <p>기존의 단순 비트마스크(N/S/E/W)로는 문이 한쪽 벽에 치우쳐 있거나, 한 벽에 문이 두 개 있는 경우를 표현할 수 없습니다. 이를 <strong>소켓 리스트</strong>로 대체합니다.
+        </p>
+
+        <h3>2.1. 소켓 데이터 (Socket Definition)</h3>
+        <table>
+            <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>LocalPosition</code></td>
+                <td><code>FIntPoint</code></td>
+                <td>모듈 내에서의 그리드 좌표 (예: X=2, Y=0). (0,0)은 모듈의 원점.</td>
+            </tr>
+            <tr>
+                <td><code>Direction</code></td>
+                <td><code>Enum</code></td>
+                <td>연결 방향 (North, East, South, West). 이 방향으로 다른 모듈이 붙음.</td>
+            </tr>
+            <tr>
+                <td><code>SocketTag</code></td>
+                <td><code>FName</code></td>
+                <td>(선택) 소켓의 종류. 예: "BigDoor"는 "BigDoor"끼리만 연결, "Secret"은 "Secret"끼리만 연결.</td>
+            </tr>
+        </table>
+
+        <h3>2.2. 모듈 데이터 (Module Definition)</h3>
+        <pre><code class="language-cpp">
+// Struct: 개별 소켓 정보
+USTRUCT(BlueprintType)
+struct FModuleSocket {
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    FIntPoint LocalPosition; // 예: (2, 0)
+
+    UPROPERTY(EditAnywhere)
+    EDirection Direction;    // 예: North
+
+    UPROPERTY(EditAnywhere)
+    FName SocketTag;         // 예: "Standard"
+};
+
+// Struct: 모듈(방/복도) 데이터
+USTRUCT(BlueprintType)
+struct FModuleData {
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    FName ModuleID;
+
+    // 모듈 크기 (타일 단위)
+    UPROPERTY(EditAnywhere)
+    FIntPoint Size; 
+
+    // ★ 핵심: 소켓 리스트 (마스크 대신 사용)
+    UPROPERTY(EditAnywhere)
+    TArray<FModuleSocket> Sockets;
+
+    // 실제 에셋 (Level Instance 권장)
+    UPROPERTY(EditAnywhere)
+    TSoftClassPtr<AActor> ModuleActorClass;
+    
+    // 이 모듈 내부 타일 정보 (선택 사항: 미니맵용)
+    // UPROPERTY(EditAnywhere)
+    // UTexture2D* LayoutRef; 
+};
+        </code></pre>
+    </div>
+
+    <div class="section">
+        <h2>3. 소켓 매칭 알고리즘 (Socket Matching Logic)</h2>
+        <p>이제 알고리즘은 단순히 "북쪽이 뚫린 방"을 찾는 게 아니라, <strong>"좌표가 딱 맞는 짝"</strong>을 찾아야 합니다.</p>
+
+        <h3>3.1. 매칭 원리 (The Math)</h3>
+        <p>
+            현재 배치된 모듈 A의 소켓 <code>S1</code>(위치 <code>P1</code>, 방향 <code>Dir1</code>)에,
+            새로운 모듈 B의 소켓 <code>S2</code>(위치 <code>P2</code>, 방향 <code>Dir2</code>)를 붙이려면 다음 조건이 성립해야 합니다.
+        </p>
+        <ol>
+            <li><strong>방향 역수</strong>: <code>Dir1</code>과 <code>Dir2</code>는 서로 반대여야 함 (북 ↔ 남).</li>
+            <li><strong>태그 일치</strong>: <code>S1.Tag</code> == <code>S2.Tag</code> (큰 문은 큰 문끼리).</li>
+            <li><strong>위치 계산</strong>:
+                <br>
+                모듈 B의 배치 위치(<code>Origin_B</code>)는 다음과 같이 계산됩니다:
+                <br>
+                <code>Origin_B = (Origin_A + P1) + Offset(Dir1) - P2</code>
+                <br>
+                <em>(설명: A의 소켓 위치로 가서, 한 칸 전진한 뒤, B의 소켓 위치만큼 빼주면 B의 원점이 나온다.)</em>
+            </li>
+        </ol>
+
+        <div class="diagram">
+            <svg width="600" height="200" viewBox="0 0 600 200" style="background:#fff; border:1px solid #ccc;">
+                <g transform="translate(50, 50)">
+                    <rect x="0" y="0" width="80" height="80" fill="#aaddff" stroke="#333" stroke-width="2" />
+                    <text x="40" y="45" text-anchor="middle">Module A</text>
+                    <circle cx="40" cy="0" r="5" fill="green" />
+                    <!-- North Socket at (1,0) local if 2x2. let's say (2,0) if 4x4 -->
+                    <text x="40" y="-10" text-anchor="middle" font-size="12">Socket A (2, 0)</text>
+                </g>
+
+                <g transform="translate(130, 10)"> <!-- Connect North -->
+                    <rect x="0" y="0" width="40" height="40" fill="#ffddaa" stroke="#333" stroke-width="2" />
+                    <text x="20" y="25" text-anchor="middle" font-size="12">Mod B</text>
+                    <circle cx="20" cy="40" r="5" fill="green" /> <!-- South Socket at (1,1) local if 2x2 -->
+                    <!-- Position Matching visual -->
+                </g>
+
+                <text x="350" y="100" font-size="14">
+                    "모듈 B의 (1,1) 소켓을<br>모듈 A의 (2,0) 소켓에 결합"
+                </text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. 복도와 유기적 구조 (Corridors & Organics)</h2>
+        <p>사용자가 언급한 <strong>"유기적 모양"</strong>은 다양한 작은 모듈들을 조합할 때 나옵니다.</p>
+
+        <h3>4.1. 모듈의 다양화</h3>
+        <p>단순한 방 외에 다음 모듈들이 데이터베이스에 있어야 합니다:</p>
+        <ul>
+            <li><strong>Straight Corridor</strong>: 1x2, 2x1 크기의 직선 통로.</li>
+            <li><strong>Corner (L-Shape)</strong>: 2x2 크기, 꺾이는 통로.</li>
+            <li><strong>T-Junction / Cross</strong>: 3방향, 4방향 갈림길.</li>
+            <li><strong>Stub / Dead End</strong>: 막다른 길 (생성 실패 시 마감용).</li>
+            <li><strong>Small Room Feature</strong>: 3x3 크기의 작은 방 (중간 거점).</li>
+        </ul>
+
+        <h3>4.2. 생성 전략 (Generation Strategy)</h3>
+        <p>
+            알고리즘은 <strong>"방 → 복도 → 방"</strong> 패턴을 강제할 수 있습니다.
+        </p>
+        <ul>
+            <li>현재 확장 중인 모듈이 <strong>'방'</strong>이면, 다음 모듈은 <strong>'복도'</strong> 태그가 붙은 것들 중에서만 찾습니다.</li>
+            <li>현재 모듈이 <strong>'복도'</strong>라면, <strong>'복도'</strong>(길 연장) 또는 <strong>'방'</strong>(새 방 발견) 중 랜덤 선택합니다.
+            </li>
+            <li>이 규칙을 통해 방과 방이 바로 붙지 않고 복도로 연결되는 구조를 보장합니다.</li>
+        </ul>
+    </div>
+
+</body>
+
+</html>

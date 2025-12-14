@@ -8,7 +8,6 @@
 #include "RdNetworkSettings.h"
 #include "RdRemoteCharacter.h"
 
-
 void UGsNetworkManager::Initialize(FSubsystemCollectionBase &Collection) {
   Super::Initialize(Collection);
   UE_LOG(LogTemp, Log, TEXT("[GsNetworkManager] Initialize Called"));
@@ -170,4 +169,11 @@ void UGsNetworkManager::HandleMoveBroadcast(const TArray<uint8> &Data) {
       }
     }
   }
+}
+
+void UGsNetworkManager::ClearRemoteActors() {
+  // When changing levels, all actors are destroyed by the Engine.
+  // We just need to empty our list so we don't hold dangling pointers.
+  RemoteActors.Empty();
+  UE_LOG(LogTemp, Log, TEXT("[GsNetworkManager] RemoteActors map cleared."));
 }

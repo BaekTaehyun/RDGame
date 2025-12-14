@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가이드: Experience 시스템 데이터 설정 방법</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-warning: #d29922;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h1 {
+            color: var(--accent-blue);
+        }
+
+        h2 {
+            margin-top: 2rem;
+            color: var(--accent-green);
+        }
+
+        .step {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+
+        code {
+            background: #2b303b;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #ff7b72;
+        }
+
+        .note {
+            background: rgba(210, 153, 34, 0.15);
+            border-left: 4px solid var(--accent-warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #e3b341;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📘 가이드: Experience 시스템 데이터 설정</h1>
+    <p>새로 구현된 <strong>Experience System</strong>을 사용하여 던전 입장을 설정하는 절차입니다. 코드를 수정하지 않고 에디터에서 데이터 애셋(Data Asset)만으로 설정을
+        관리합니다.</p>
+
+    <div class="step">
+        <div class="step-title">Step 1. 컴파일 및 에디터 실행</div>
+        <p>코드가 추가되었으므로 언리얼 에디터를 닫고 IDE(Visual Studio/Rider)에서 <strong>컴파일(Build)</strong> 후 에디터를 다시 실행해주세요.</p>
+    </div>
+
+    <div class="step">
+        <div class="step-title">Step 2. Data Asset 생성</div>
+        <p>각 던전(또는 지역)마다 하나의 정의 파일이 필요합니다.</p>
+        <ol>
+            <li>콘텐츠 브라우저 우클릭 &rarr; <strong>Miscellaneous (기타)</strong> &rarr; <strong>Data Asset</strong> 선택</li>
+            <li>부모 클래스로 <code>RdExperienceDefinition</code> 검색 및 선택</li>
+            <li>파일 이름 지정 (예: <code>DA_Dungeon_Fire</code>)</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <div class="step-title">Step 3. Data Asset 속성 설정</div>
+        <p>생성한 <code>DA_Dungeon_Fire</code> 파일을 더블 클릭하여 엽니다.</p>
+        <ul>
+            <li><strong>Experience Id:</strong> 태그 선택 (예: <code>Experience.Type.Dungeon</code>)<br>
+                <small>* 원하는 태그가 없다면 프로젝트 세팅 &rarr; GameplayTags에서 추가 가능</small>
+            </li>
+            <li><strong>Target IP:</strong> 이동할 데디케이티드 서버 IP (로컬 테스트 시 <code>127.0.0.1</code>)</li>
+            <li><strong>Target Port:</strong> 서버 포트 (기본 <code>7777</code>)</li>
+            <li><strong>Target Map:</strong> (참조용) 해당 던전의 맵 파일 지정</li>
+            <li><strong>Loading Screen Widget:</strong> 로딩 중에 띄울 UI 위젯 클래스 선택</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <div class="step-title">Step 4. 볼륨(Trigger) 배치</div>
+        <p>플레이어가 밟으면 이동할 위치에 트리거를 배치합니다.</p>
+        <ol>
+            <li><strong>Place Actors</strong> 패널에서 <code>RdLevelTransferVolume</code> 검색</li>
+            <li>레벨(뷰포트)에 드래그하여 배치</li>
+            <li>디테일 패널 &rarr; <strong>Experience</strong> 섹션 확인</li>
+            <li><strong>Destination Tag</strong>: (선택사항) 태그로 찾을 경우 설정</li>
+            <li><strong>Destination Asset</strong>: <strong>(권장)</strong> Step 2에서 만든 <code>DA_Dungeon_Fire</code>를 직접
+                할당</li>
+        </ol>
+        <div class="note">
+            ⚠️ <strong>중요 확인:</strong> <strong>Destination Asset</strong>에 파일을 직접 넣어주는 것이 가장 안전합니다. 태그만 넣을 경우, 에셋이 메모리에
+            로드되지 않아 찾지 못할 수 있습니다.
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-title">Step 5. 테스트</div>
+        <ol>
+            <li>데디케이티드 서버(또는 수신할 리스 서버)를 실행해둡니다.</li>
+            <li>에디터에서 플레이(PIE) 후, 캐릭터로 볼륨에 진입합니다.</li>
+            <li>로그(Output Log)에 <code>[RdSession] Requesting Experience...</code>가 뜨는지 확인합니다.</li>
+            <li>로딩 화면이 뜨고 해당 서버로 이동되는지 확인합니다.</li>
+        </ol>
+    </div>
+
+</body>
+
+</html>

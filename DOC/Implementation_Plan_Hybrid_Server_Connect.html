@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구현 계획: 영역 기반 하이브리드 서버 연결 시스템 (Experience 적용)</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+            --accent-orange: #d29922;
+            --border-color: #30363d;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-purple);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            margin-top: 2rem;
+            border-left: 5px solid var(--accent-blue);
+            padding-left: 10px;
+        }
+
+        h3 {
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+        }
+
+        .box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag-badge {
+            background-color: var(--accent-orange);
+            color: #0d1117;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        pre {
+            background: #1f2428;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: Consolas, monospace;
+            color: #ff7b72;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 구현 계획: Experience 기반 하이브리드 서버 연결 시스템</h1>
+    <p><strong>문서 개요:</strong> Lyra의 "Experience" 아키텍처를 경량화(Lite)하여 RdGame에 적용, 던전별 컨셉과 UI를 데이터 기반으로 관리하는 시스템 설계안입니다.
+    </p>
+
+    <div class="box">
+        <h3>🎯 핵심 목표</h3>
+        <ul>
+            <li><strong>Lyra-Lite Framework:</strong> 무거운 플러그인 없이 Lyra의 Experience(데이터 기반 경험 관리) 철학 구현</li>
+            <li><strong>Data-Driven Design:</strong> 코드 수정 없이 데이터 에셋(DataAsset)만으로 던전별 설정(IP, UI, Map) 관리</li>
+            <li><strong>Seamless Transition:</strong> 세션 서브시스템을 통한 매끄러운 네트워크 전환</li>
+        </ul>
+    </div>
+
+    <h2>1. 시스템 아키텍처 (System Architecture)</h2>
+    <p>하드코딩된 IP 접속 방식에서 벗어나, <strong>"경험(Experience)을 요청하면 시스템이 적절한 서버로 안내하는"</strong> 구조입니다.</p>
+
+    <h3>1.1 구성 요소</h3>
+    <ul>
+        <li><strong>URdExperienceDefinition (Primary DataAsset):</strong>
+            <ul>
+                <li>던전의 "컨셉"을 정의하는 데이터 에셋입니다.</li>
+                <li>속성: <span class="tag-badge">Experience ID (Tag)</span>, <code>Target IP</code>,
+                    <code>Target Map</code>, <code>Loading Screen Widget</code></li>
+            </ul>
+        </li>
+        <li><strong>URdSessionSubsystem:</strong>
+            <ul>
+                <li><code>UGameInstanceSubsystem</code> 상속</li>
+                <li>Tag를 받아 해당 Experience 에셋을 찾고, 정의된 UI를 띄운 후 이동(Travel)을 수행합니다.</li>
+            </ul>
+        </li>
+        <li><strong>ARdLevelTransferVolume:</strong>
+            <ul>
+                <li>트리거 역할. <strong>오직 'Tag' 정보만 가집니다.</strong> (예: <code>Exp.Dungeon.Fire</code>)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>2. 상세 구현 워크플로우 (Detailed Workflow)</h2>
+
+    <h3>Step 1: 데이터 준비 (Editor)</h3>
+    <p>기획자가 에디터에서 <code>URdExperienceDefinition</code> 에셋을 생성합니다.</p>
+    <div class="box">
+        <h4>Asset: DA_Exp_FireDungeon</h4>
+        <ul>
+            <li><strong>Experience ID:</strong> <code>Exp.Dungeon.Fire</code></li>
+            <li><strong>Target IP:</strong> "127.0.0.1:7777"</li>
+            <li><strong>Loading Screen:</strong> <code>WBP_Loading_Fire</code> (불타는 테마)</li>
+        </ul>
+    </div>
+
+    <h3>Step 2: 트리거 진입</h3>
+    <p>플레이어가 볼륨에 진입하면 태그 기반으로 요청을 보냅니다.</p>
+    <pre><code>// ARdLevelTransferVolume::OnOverlap
+const FGameplayTag TargetTag = GameplayTags::Exp_Dungeon_Fire;
+// IP주소나 맵이름을 몰라도 됨
+GetGameInstance()->GetSubsystem<URdSessionSubsystem>()->RequestExperience(TargetTag);</code></pre>
+
+    <h3>Step 3: 세션 서브시스템의 Experience 처리</h3>
+    <p>서브시스템이 "경험 전환" 프로세스를 시작합니다.</p>
+    <ol>
+        <li><strong>Asset Lookup:</strong> <code>AssetManager</code>를 통해 <code>Exp.Dungeon.Fire</code> 태그를 가진 에셋 검색</li>
+        <li><strong>UI Transition:</strong> 에셋에 정의된 <code>WBP_Loading_Fire</code> 위젯 생성 및 Viewport 추가</li>
+        <li><strong>Data Persist:</strong> <code>GsNetworkManager</code>(TCP) 연결 상태 보존 처리</li>
+        <li><strong>ClientTravel:</strong> 에셋의 <code>TargetIP</code>로 <code>ClientTravel</code> 실행</li>
+    </ol>
+
+    <h3>Step 4: 목적지 도착</h3>
+    <ul>
+        <li>서버 접속 성공 시 캐릭터 스폰 (UnrealUDP 모드)</li>
+        <li>로딩 완료 신호 시 서브시스템이 로딩 화면 제거</li>
+    </ul>
+
+    <h2>3. 클래스 설계 (Class Design)</h2>
+
+    <div class="box">
+        <h3>UCLASS URdExperienceDefinition : public UPrimaryDataAsset</h3>
+        <p><strong>Properties:</strong></p>
+        <ul>
+            <li><code>FGameplayTag ExperienceId</code> (Key)</li>
+            <li><code>FString TargetIP</code></li>
+            <li><code>TSubclassOf&lt;UUserWidget&gt; LoadingScreenWidget</code></li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h3>UCLASS URdSessionSubsystem : public UGameInstanceSubsystem</h3>
+        <p><strong>Functions:</strong></p>
+        <ul>
+            <li><code>RequestExperience(FGameplayTag ExperienceTag)</code></li>
+        </ul>
+    </div>
+
+    <h2>4. 검증 계획 (Verification)</h2>
+    <ol>
+        <li><strong>데이터 에셋 생성:</strong> 테스트용 Experience 에셋(DA_Test) 생성</li>
+        <li><strong>볼륨 설정:</strong> 레벨에 볼륨 배치 후 DA_Test의 태그 할당</li>
+        <li><strong>진입 테스트:</strong> 입장 시 지정된 '테스트용 로딩 화면'이 뜨는지 확인</li>
+        <li><strong>이동 확인:</strong> 지정된 IP로 정상 이동 되는지 확인</li>
+    </ol>
+
+</body>
+
+</html>

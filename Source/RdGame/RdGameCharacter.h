@@ -35,25 +35,10 @@ class ARdGameCharacter : public ACharacter,
                          public ICombatDamageable {
   GENERATED_BODY()
 
-  /** Camera boom positioning the camera behind the character */
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
-            meta = (AllowPrivateAccess = "true"))
-  USpringArmComponent *CameraBoom;
-
-  /** Follow camera */
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
-            meta = (AllowPrivateAccess = "true"))
-  UCameraComponent *FollowCamera;
-
   /** Network Movement Component */
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
             meta = (AllowPrivateAccess = "true"))
   UGsNetworkMovementComponent *NetworkMovementComponent;
-
-  /** Hero Component (Input Binding Manager) */
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
-            meta = (AllowPrivateAccess = "true"))
-  URdHeroComponent *HeroComponent;
 
   /** Life bar widget component */
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components",
@@ -168,16 +153,7 @@ protected:
   /** If true, the charged attack hold check has been tested at least once */
   bool bHasLoopedChargedAttack = false;
 
-  /** Camera boom length while the character is dead */
-  UPROPERTY(EditAnywhere, Category = "Camera",
-            meta = (ClampMin = 0, ClampMax = 1000, Units = "cm"))
-  float DeathCameraDistance = 400.0f;
-
-  /** Camera boom length when the character respawns */
-  UPROPERTY(EditAnywhere, Category = "Camera",
-            meta = (ClampMin = 0, ClampMax = 1000, Units = "cm"))
-  float DefaultCameraDistance = 100.0f;
-
+protected:
   /** Time to wait before respawning the character */
   UPROPERTY(EditAnywhere, Category = "Respawn",
             meta = (ClampMin = 0, ClampMax = 10, Units = "s"))
@@ -240,10 +216,6 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Input")
   virtual void DoChargedAttackEnd();
 
-  /** Handles camera toggle input */
-  UFUNCTION(BlueprintCallable, Category = "Input")
-  virtual void DoCameraToggle();
-
 protected:
   /** Resets the character's current HP to maximum */
   void ResetHP();
@@ -256,10 +228,6 @@ protected:
 
   /** Called from a delegate when the attack montage ends */
   void AttackMontageEnded(UAnimMontage *Montage, bool bInterrupted);
-
-  /** BP hook to animate the camera side switch */
-  UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-  void BP_ToggleCamera();
 
 public:
   // ~begin CombatAttacker interface
@@ -321,19 +289,12 @@ protected:
                       const FVector &DamageDirection);
 
 public:
-  /** Returns CameraBoom subobject **/
-  FORCEINLINE class USpringArmComponent *GetCameraBoom() const {
-    return CameraBoom;
-  }
-
-  /** Returns FollowCamera subobject **/
-  FORCEINLINE class UCameraComponent *GetFollowCamera() const {
-    return FollowCamera;
-  }
-
   /** Returns NetworkMovementComponent subobject **/
   FORCEINLINE class UGsNetworkMovementComponent *
   GetNetworkMovementComponent() const {
     return NetworkMovementComponent;
   }
+
+  /** Returns RdCharacterMovementComponent subobject **/
+  class URdCharacterMovementComponent *GetRdCharacterMovement() const;
 };

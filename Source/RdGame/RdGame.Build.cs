@@ -24,7 +24,12 @@ public class RdGame : ModuleRules
             "GsNetworking",
             "GameplayTags",
             "ModularGameplay",
-            "DeveloperSettings"
+            "DeveloperSettings",
+            "CommonUI",
+            "CommonGame",
+            "CommonUser",
+            "UIExtension",
+            "GameFeatures"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

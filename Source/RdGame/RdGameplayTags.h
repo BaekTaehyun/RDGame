@@ -35,4 +35,10 @@ RDGAME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_DataAvailable);
 RDGAME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_DataInitialized);
 RDGAME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InitState_GameplayReady);
 
+// ---------------------------------------------------------
+// Experience Tags (세션 이동/던전 컨셉)
+// ---------------------------------------------------------
+RDGAME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Experience_Type_Field);
+RDGAME_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Experience_Type_Dungeon);
+
 }; // namespace RdGameplayTags

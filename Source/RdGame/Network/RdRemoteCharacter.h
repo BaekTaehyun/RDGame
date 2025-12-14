@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "../Character/RdCharacterMovementComponent.h"
 #include "CoreMinimal.h"
 #include "RdGameCharacter.h"
 #include "RdRemoteCharacter.generated.h"
@@ -14,12 +15,6 @@ class UGsNetworkMovementComponent;
  * 1. CustomTCP 모드 (필드): GsNetworkMovementComponent를 통해 위치 동기화
  * 2. UnrealUDP 모드 (던전): 언리얼 엔진의 기본 Replication 사용
  */
-UENUM(BlueprintType)
-enum class ENetworkDriverMode : uint8 {
-  None,
-  CustomTCP, // 자체 TCP 통신으로 동기화 (Field)
-  UnrealUDP  // 언리얼 Replication으로 동기화 (Dungeon)
-};
 
 UCLASS()
 class RDGAME_API ARdRemoteCharacter : public ARdGameCharacter {

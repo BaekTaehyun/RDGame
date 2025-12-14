@@ -5,9 +5,7 @@
 
 ARdRemoteCharacter::ARdRemoteCharacter(
     const FObjectInitializer &ObjectInitializer)
-    : Super(ObjectInitializer.DoNotCreateDefaultSubobject(TEXT("CameraBoom"))
-                .DoNotCreateDefaultSubobject(TEXT("FollowCamera"))
-                .DoNotCreateDefaultSubobject(TEXT("HeroComponent"))) {
+    : Super(ObjectInitializer) {
   // 기본적으로 AI 컨트롤러를 사용하지 않음 (직접 보간 or Replication)
   AutoPossessAI = EAutoPossessAI::Disabled;
   AIControllerClass = nullptr;
@@ -34,54 +32,35 @@ void ARdRemoteCharacter::BeginPlay() {
   SetNetworkDriverMode(CurrentDriverMode);
 }
 
+#include "../Character/RdCharacterMovementComponent.h"
+
 void ARdRemoteCharacter::SetNetworkDriverMode(ENetworkDriverMode NewMode) {
   CurrentDriverMode = NewMode;
 
-  UGsNetworkMovementComponent *MoveComp = GetNetworkMovementComponent();
-
-  switch (CurrentDriverMode) {
-  case ENetworkDriverMode::CustomTCP:
-    // 1. 언리얼 리플리케이션 비활성화
+  // 1. Handle Actor-level replication logic
+  if (CurrentDriverMode == ENetworkDriverMode::CustomTCP) {
     SetReplicates(false);
     SetReplicateMovement(false);
+  } else {
+    SetReplicates(true);
+    SetReplicateMovement(true);
+  }
 
-    // 2. 물리/이동 모드 설정
-    // CustomTCP 모드에서는 직접 Transform을 보간하므로 물리 시뮬레이션 간섭을
-    // 최소화 하지만 애니메이션을 위해 Walking 모드는 유지
-    if (auto *CMC = GetCharacterMovement()) {
-      // 마찰력과 제동력을 0으로 설정하여 Velocity가 물리 엔진에 의해 초기화되는
-      // 것을 방지
-      CMC->GroundFriction = 0.0f;
-      CMC->BrakingDecelerationWalking = 0.0f;
-    }
+  // 2. Delegate movement mode logic to the custom component
+  if (auto *RdCMC = GetRdCharacterMovement()) {
+    RdCMC->SetNetworkDriverMode(CurrentDriverMode);
+  }
 
-    // 3. 커스텀 컴포넌트 활성화
-    if (MoveComp) {
+  // 3. Toggle Network Movement Component (The listener for TCP data)
+  UGsNetworkMovementComponent *MoveComp = GetNetworkMovementComponent();
+  if (MoveComp) {
+    if (CurrentDriverMode == ENetworkDriverMode::CustomTCP) {
       MoveComp->SetComponentTickEnabled(true);
       MoveComp->Activate(true);
-    }
-    break;
-
-  case ENetworkDriverMode::UnrealUDP:
-    // 0. 물리 설정 복구 (기본값)
-    if (auto *CMC = GetCharacterMovement()) {
-      CMC->GroundFriction = 8.0f;                // 기본값 복구
-      CMC->BrakingDecelerationWalking = 2048.0f; // 기본값 복구
-    }
-
-    // 1. 커스텀 컴포넌트 비활성화
-    if (MoveComp) {
+    } else {
       MoveComp->SetComponentTickEnabled(false);
       MoveComp->Deactivate();
     }
-
-    // 2. 언리얼 리플리케이션 활성화
-    SetReplicates(true);
-    SetReplicateMovement(true);
-    break;
-
-  default:
-    break;
   }
 
   UE_LOG(LogTemp, Log, TEXT("RemoteCharacter[%s] Network Mode Changed to: %d"),

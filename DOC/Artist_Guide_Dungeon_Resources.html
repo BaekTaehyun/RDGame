@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Artist Guide: Modular Room Assembly (V2)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #ccc;
+            background-color: #1e1e1e;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #f0ad4e;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section {
+            background: #2d2d2d;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .highlight {
+            color: #5bc0de;
+            font-weight: bold;
+        }
+
+        .danger {
+            color: #d9534f;
+            font-weight: bold;
+        }
+
+        .spec-box {
+            background: #333;
+            border: 1px solid #555;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        ul {
+            list-style-type: square;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 20px auto;
+            border: 2px solid #555;
+            border-radius: 4px;
+        }
+
+        code {
+            background-color: #444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            color: #fff;
+        }
+
+        /* Checkbox styling */
+        .checklist label {
+            display: block;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+        }
+
+        .checklist input {
+            margin-right: 15px;
+            transform: scale(1.5);
+        }
+
+        .checklist label:hover {
+            background-color: #383838;
+        }
+
+        .module-card {
+            display: inline-block;
+            width: 45%;
+            background: #222;
+            margin: 10px;
+            padding: 15px;
+            vertical-align: top;
+            border-left: 4px solid #f0ad4e;
+        }
+
+        .module-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Dungeon Modular Asset Guide <span
+            style="font-size:0.5em; background:#444; padding:2px 8px; border-radius:4px;">Advanced</span><br><small
+            style="font-size: 0.5em; color: #888;">Variable Tiles & Precise Sockets</small></h1>
+
+    <div class="section">
+        <h2>1. 개요 (Overview)</h2>
+        <p>
+            우리의 던전 시스템은 <strong>"레고 블록 조립"</strong>과 같습니다. 아티스트 여러분은 완성된 던전을 만드는 것이 아니라,
+            던전을 구성하는 <strong><span class="highlight">다양한 모양의 부품(Module)</span></strong>을 만들어야 합니다.
+        </p>
+        <p>
+            단순히 4x4 크기의 네모 방만 만드는 것이 아닙니다.
+            ㄱ자로 꺾인 복도, T자 갈림길, 아주 작은 1x1 통로 등 다양한 부품이 필요합니다.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>2. 제작 규격 (Technical Specifications)</h2>
+
+        <div class="spec-box">
+            <h3>📏 단위 및 크기 (Units & Dimensions)</h3>
+            <ul>
+                <li><strong>기본 타일 크기 (Tile Size)</strong>: <code>400 x 400 uu</code> (Unreal Units)</li>
+                <li><strong>모듈(방) 크기</strong>: 타일 단위로 자유롭게 결정 (예: 2x1, 3x3, 4x6 등)</li>
+                <li><strong>벽 높이</strong>: <code>500 uu</code> (권장)</li>
+                <li><strong>Pivot Point</strong>: <span class="highlight">무조건 모듈의 (0,0) 코너 바닥</span>에 위치해야 합니다. 중앙이
+                    아닙니다. (아래 그림 참조)</li>
+            </ul>
+
+            <img src="file:///C:/Users/bak12/.gemini/antigravity/brain/f5e2eef7-0a00-4270-97cf-d72f606f3c0e/dungeon_modular_guide_blueprint_1765642173360.png"
+                alt="Modular Room Schematic">
+            <p style="text-align:center; font-size:0.9em; color:#888;">(참고: 위 그림은 예시이며, 실제로는 다양한 크기의 모듈을 만들 수 있습니다.)</p>
+        </div>
+
+        <div class="spec-box">
+            <h3>🔌 소켓 위치 규칙 (Socket Locations)</h3>
+            <p>문(Socket)은 <strong>"그리드 좌표"</strong> 단위로 뚫어야 합니다.</p>
+            <ul>
+                <li>소켓은 반드시 타일의 <strong>중앙</strong>에 맞춰야 합니다.</li>
+                <li>예를 들어 너비가 4칸인 방이라면, 문은 1번째 칸이나 2번째 칸 등 정확한 타일 위치에 있어야 합니다.</li>
+                <li><strong>애매한 위치(예: 1.5칸)에 문을 뚫으면 안 됩니다.</strong> 조립이 불가능합니다.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. 모듈 예시 (Module Types)</h2>
+        <p>던전의 다양성을 위해 다음과 같은 부품들을 제작해주세요.</p>
+
+        <div class="module-card">
+            <span class="module-title">🏠 기본 방 (Standard Room)</span>
+            크기: 4x4, 6x6, 8x8 등<br>
+            용도: 몬스터 전투 공간. 4면에 모두 소켓이 있을 수도 있고, 한쪽만 있을 수도 있습니다.
+        </div>
+
+        <div class="module-card">
+            <span class="module-title">🛣️ 직선 복도 (Straight Corridor)</span>
+            크기: 1x2, 1x4 (좁은 길) 또는 2x4 (넓은 길)<br>
+            용도: 방과 방을 연결하는 통로.
+        </div>
+
+        <div class="module-card">
+            <span class="module-title">↩️ 코너 (Corner / L-Shape)</span>
+            크기: 2x2, 3x3<br>
+            용도: 복도가 90도로 꺾이는 구간.
+        </div>
+
+        <div class="module-card">
+            <span class="module-title">╋ 교차로 (Intersection)</span>
+            크기: 3x3 (중앙 비움)<br>
+            용도: 3방향(T자) 또는 4방향(십자) 갈림길.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. 스타일 및 디테일 (Style Guide)</h2>
+        <p><strong>Diablo 2 고딕 판타지</strong></p>
+        <ul>
+            <li><strong>지저분함 (Grungy)</strong>: 너무 깔끔한 새 건물 같으면 안 됩니다. 이끼, 균열, 물웅덩이를 추가해주세요.</li>
+            <li><strong>어둠 (Darkness)</strong>: 기본적으로 어두운 톤을 유지하고, 횃불이나 마법 소스로 <strong>"포인트 조명"</strong>을 주세요.</li>
+            <li><strong>높낮이 (Verticality)</strong>: (가능하다면) 바닥에 약간의 단차(계단)를 주어도 좋습니다. 단 캐릭터 이동(NavMesh)에 지장이 없어야 합니다.
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. 납품 전 체크리스트 (Submission Checklist)</h2>
+        <div class="checklist">
+            <label><input type="checkbox"> Pivot은 (0,0) 코너 바닥에 있는가?</label>
+            <label><input type="checkbox"> 모든 벽/바닥이 400uu 그리드에 딱 맞게 정렬되었는가?</label>
+            <label><input type="checkbox"> 문(Socket) 위치가 타일 중앙에 정확히 위치하는가?</label>
+            <label><input type="checkbox"> 소켓이 없는 면은 꽉 막힌 벽으로 처리되었는가?</label>
+            <label><input type="checkbox"> 콜리전(Collision) 테스트 완료 (캐릭터 끼임 없음)</label>
+        </div>
+    </div>
+
+</body>
+
+</html>

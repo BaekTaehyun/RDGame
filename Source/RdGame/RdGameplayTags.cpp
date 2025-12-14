@@ -43,6 +43,14 @@ UE_DEFINE_GAMEPLAY_TAG_COMMENT(InitState_GameplayReady,
                                "게임플레이 준비 완료");
 
 // ---------------------------------------------------------
+// Experience Tags
+// ---------------------------------------------------------
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(Experience_Type_Field, "Experience.Type.Field",
+                               "필드 경험 (TCP)");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(Experience_Type_Dungeon,
+                               "Experience.Type.Dungeon", "던전 경험 (UDP)");
+
+// ---------------------------------------------------------
 // Utility Function
 // ---------------------------------------------------------
 FGameplayTag FindTagByString(const FString &TagString,

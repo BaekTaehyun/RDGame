@@ -5,13 +5,16 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GsNetworkManager.generated.h"
 
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLoginResult, bool, bSuccess);
 
 /**
  * 게임 내 네트워크 로직 처리 (패킷 핸들링, 액터 스폰/동기화)
  */
 UCLASS()
-class RDGAME_API UGsNetworkManager : public UGameInstanceSubsystem {
+class RDGAME_API UGsNetworkManager : public UGameInstanceSubsystem
+{
   GENERATED_BODY()
 
 public:
@@ -43,4 +46,8 @@ private:
 
   // 스폰할 액터 클래스 (BP 클래스 경로 로드 예정)
   TSubclassOf<AActor> RemoteActorClass;
+
+public:
+  // 레벨 이동 시 dangling pointer 방지를 위해 호출
+  void ClearRemoteActors();
 };

@@ -1,8 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "RdGameCharacter.h"
-#include "Camera/CameraComponent.h"
-#include "Character/RdHeroComponent.h"
+#include "Character/RdCharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
@@ -12,9 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Input/RdInputComponent.h"
-#include "Input/RdInputConfig.h"
 #include "InputActionValue.h"
 #include "Network/GsNetworkMovementComponent.h"
 #include "RdGame.h"
@@ -25,8 +21,15 @@
 ARdGameCharacter::ARdGameCharacter()
     : ARdGameCharacter(FObjectInitializer::Get()) {}
 
+URdCharacterMovementComponent *
+ARdGameCharacter::GetRdCharacterMovement() const {
+  return Cast<URdCharacterMovementComponent>(GetCharacterMovement());
+}
+
 ARdGameCharacter::ARdGameCharacter(const FObjectInitializer &ObjectInitializer)
-    : Super(ObjectInitializer) {
+    : Super(ObjectInitializer
+                .SetDefaultSubobjectClass<URdCharacterMovementComponent>(
+                    ACharacter::CharacterMovementComponentName)) {
   // Set size for collision capsule
   GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -50,49 +53,23 @@ ARdGameCharacter::ARdGameCharacter(const FObjectInitializer &ObjectInitializer)
   GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
   GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
-  // Create a camera boom (pulls in towards the player if there is a collision)
-  CameraBoom = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(
-      this, TEXT("CameraBoom"));
-  CameraBoom->SetupAttachment(RootComponent);
-  CameraBoom->TargetArmLength =
-      400.0f; // The camera follows at this distance behind the character
-  CameraBoom->bUsePawnControlRotation =
-      true; // Rotate the arm based on the controller
-
-  // Create a follow camera
-  FollowCamera = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(
-      this, TEXT("FollowCamera"));
-  FollowCamera->SetupAttachment(
-      CameraBoom,
-      USpringArmComponent::SocketName); // Attach the camera to the end of the
-                                        // boom and let the boom adjust to match
-                                        // the controller orientation
-  FollowCamera->bUsePawnControlRotation =
-      false; // Camera does not rotate relative to arm
-
   // Create Network Movement Component
   NetworkMovementComponent =
       ObjectInitializer.CreateDefaultSubobject<UGsNetworkMovementComponent>(
           this, TEXT("NetworkMovementComponent"));
 
-  // Create Hero Component
-  HeroComponent = ObjectInitializer.CreateDefaultSubobject<URdHeroComponent>(
-      this, TEXT("HeroComponent"));
-
   // create the life bar widget component
   LifeBar = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(
       this, TEXT("LifeBar"));
-  LifeBar->SetupAttachment(RootComponent);
+  if (LifeBar) {
+    LifeBar->SetupAttachment(RootComponent);
+  }
 
   // set the player tag
   Tags.Add(FName("Player"));
 
   // bind the attack montage ended delegate
   OnAttackMontageEnded.BindUObject(this, &ARdGameCharacter::AttackMontageEnded);
-
-  // Configure camera lag
-  CameraBoom->bEnableCameraLag = true;
-  CameraBoom->bEnableCameraRotationLag = true;
 
   // Note: The skeletal mesh and anim blueprint references on the Mesh component
   // (inherited from Character) are set in the derived blueprint asset named
@@ -101,69 +78,15 @@ ARdGameCharacter::ARdGameCharacter(const FObjectInitializer &ObjectInitializer)
 
 void ARdGameCharacter::SetupPlayerInputComponent(
     UInputComponent *PlayerInputComponent) {
-  // NOTE: 기본 입력 바인딩(Move, Look, Jump, Crouch)은 HeroComponent의
-  // InitState 시스템이 HandleChangeInitState에서 자동으로 처리합니다.
-  // SetupPlayerInputComponent는 ACharacter::SetupPlayerInputComponent 이후에
-  // 호출되므로, 추가 Combat 관련 바인딩만 여기서 처리합니다.
-
-  // Bind Native Combat Actions (공격, 카메라 토글 등 캐릭터 고유 액션)
-  if (URdInputComponent *RdIC = Cast<URdInputComponent>(PlayerInputComponent)) {
-    if (HeroComponent) {
-      if (const URdInputConfig *IC = HeroComponent->GetInputConfig()) {
-        // Combo Attack
-        RdIC->BindNativeAction(IC, RdGameplayTags::InputTag_Attack_Combo,
-                               ETriggerEvent::Started, this,
-                               &ThisClass::DoComboAttackStart, false);
-
-        // Charged Attack
-        RdIC->BindNativeAction(IC, RdGameplayTags::InputTag_Attack_Charged,
-                               ETriggerEvent::Started, this,
-                               &ThisClass::DoChargedAttackStart, false);
-        RdIC->BindNativeAction(IC, RdGameplayTags::InputTag_Attack_Charged,
-                               ETriggerEvent::Completed, this,
-                               &ThisClass::DoChargedAttackEnd, false);
-
-        // Camera Toggle
-        RdIC->BindNativeAction(IC, RdGameplayTags::InputTag_Camera_Toggle,
-                               ETriggerEvent::Triggered, this,
-                               &ThisClass::DoCameraToggle, false);
-      }
-    }
-  } else {
-    UE_LOG(LogRdGame, Error,
-           TEXT("'%s' Failed to find RdInputComponent! This character is built "
-                "to use URdInputComponent. Check the Player Controller's "
-                "InputComponentClass setting."),
-           *GetNameSafe(this));
-  }
+  // Base character does not bind inputs. Derived PlayerCharacter does.
 }
 
 void ARdGameCharacter::DoMove(float Right, float Forward) {
-  if (GetController() != nullptr) {
-    // find out which way is forward
-    const FRotator Rotation = GetController()->GetControlRotation();
-    const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-    // get forward vector
-    const FVector ForwardDirection =
-        FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-    // get right vector
-    const FVector RightDirection =
-        FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-    // add movement
-    AddMovementInput(ForwardDirection, Forward);
-    AddMovementInput(RightDirection, Right);
-  }
+  // Stub for Base
 }
 
 void ARdGameCharacter::DoLook(float Yaw, float Pitch) {
-  if (GetController() != nullptr) {
-    // add yaw and pitch input to controller
-    AddControllerYawInput(Yaw);
-    AddControllerPitchInput(Pitch);
-  }
+  // Stub for Base
 }
 
 void ARdGameCharacter::DoJumpStart() {
@@ -185,9 +108,6 @@ void ARdGameCharacter::BeginPlay() {
     // check(LifeBarWidget); // Widget might not be initialized yet in some
     // cases
   }
-
-  // initialize the camera
-  GetCameraBoom()->TargetArmLength = DefaultCameraDistance;
 
   // save the relative transform for the mesh so we can reset the ragdoll later
   MeshStartingTransform = GetMesh()->GetRelativeTransform();
@@ -257,11 +177,6 @@ void ARdGameCharacter::DoChargedAttackEnd() {
   if (bHasLoopedChargedAttack) {
     CheckChargedAttack();
   }
-}
-
-void ARdGameCharacter::DoCameraToggle() {
-  // call the BP hook
-  BP_ToggleCamera();
 }
 
 void ARdGameCharacter::ResetHP() {
@@ -513,9 +428,6 @@ void ARdGameCharacter::HandleDeath() {
   if (LifeBar) {
     LifeBar->SetHiddenInGame(true);
   }
-
-  // pull back the camera
-  GetCameraBoom()->TargetArmLength = DeathCameraDistance;
 
   // schedule respawning
   if (UWorld *World = GetWorld()) {
