@@ -1,6 +1,7 @@
-#include "Input/RdInputConfig.h"
+#include "RdInputConfig.h"
+#include "InputAction.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(RdInputConfig)
+DEFINE_LOG_CATEGORY_STATIC(LogRdInput, Log, All);
 
 URdInputConfig::URdInputConfig(const FObjectInitializer &ObjectInitializer)
     : Super(ObjectInitializer) {}
@@ -15,11 +16,12 @@ URdInputConfig::FindNativeInputActionForTag(const FGameplayTag &InputTag,
   }
 
   if (bLogNotFound) {
-    UE_LOG(LogTemp, Error,
+    UE_LOG(LogRdInput, Warning,
            TEXT("Can't find NativeInputAction for InputTag [%s] on InputConfig "
                 "[%s]."),
            *InputTag.ToString(), *GetNameSafe(this));
   }
+
   return nullptr;
 }
 
@@ -33,10 +35,11 @@ URdInputConfig::FindAbilityInputActionForTag(const FGameplayTag &InputTag,
   }
 
   if (bLogNotFound) {
-    UE_LOG(LogTemp, Error,
+    UE_LOG(LogRdInput, Warning,
            TEXT("Can't find AbilityInputAction for InputTag [%s] on "
                 "InputConfig [%s]."),
            *InputTag.ToString(), *GetNameSafe(this));
   }
+
   return nullptr;
 }

@@ -13,7 +13,7 @@ class UPrimaryGameLayout;
  * Defines the UI policy for the RDGame project, including the primary layout
  * widget class.
  */
-UCLASS(Abstract, Blueprintable, Config = Game)
+UCLASS(Blueprintable, Config = Game)
 class RDGAME_API URdGameUIPolicy : public UGameUIPolicy {
   GENERATED_BODY()
 

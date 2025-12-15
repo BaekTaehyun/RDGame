@@ -8,24 +8,36 @@
 class UInputAction;
 
 /**
- * GameplayTag ↔ InputAction 매핑 구조체
+ * FRdInputAction
+ *
+ * Struct used to map an input action to a gameplay input tag.
  */
 USTRUCT(BlueprintType)
 struct FRdInputAction {
   GENERATED_BODY()
 
 public:
+  /** The input action to bind */
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
   TObjectPtr<const UInputAction> InputAction = nullptr;
 
+  /** The gameplay tag associated with this input action */
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
             Meta = (Categories = "InputTag"))
   FGameplayTag InputTag;
 };
 
 /**
- * 입력 설정 DataAsset
- * 에디터에서 Tag↔Action 매핑을 정의합니다.
+ * URdInputConfig
+ *
+ * Non-mutable data asset that contains input configuration properties.
+ * Maps InputActions to GameplayTags for a unified input system.
+ *
+ * Usage:
+ * 1. Create a DataAsset of this type in the editor (e.g., DA_RdInputConfig)
+ * 2. Add entries to NativeInputActions and/or AbilityInputActions
+ * 3. Use FindNativeInputActionForTag() or FindAbilityInputActionForTag() to
+ * look up InputActions
  */
 UCLASS(BlueprintType, Const)
 class RDGAME_API URdInputConfig : public UDataAsset {
@@ -34,25 +46,34 @@ class RDGAME_API URdInputConfig : public UDataAsset {
 public:
   URdInputConfig(const FObjectInitializer &ObjectInitializer);
 
-  /** Native 입력 (이동, 카메라) 액션 검색 */
-  UFUNCTION(BlueprintCallable, Category = "Input")
+  /** Find a native input action by its associated gameplay tag */
+  UFUNCTION(BlueprintCallable, Category = "RdGame|Input")
   const UInputAction *
   FindNativeInputActionForTag(const FGameplayTag &InputTag,
                               bool bLogNotFound = true) const;
 
-  /** Ability 입력 (공격, 스킬) 액션 검색 */
-  UFUNCTION(BlueprintCallable, Category = "Input")
+  /** Find an ability input action by its associated gameplay tag */
+  UFUNCTION(BlueprintCallable, Category = "RdGame|Input")
   const UInputAction *
   FindAbilityInputActionForTag(const FGameplayTag &InputTag,
                                bool bLogNotFound = true) const;
 
 public:
-  /** 기본 동작용 입력 액션 (이동, 카메라 등) */
+  /**
+   * List of native input actions used by the owner.
+   * These input actions are mapped to a gameplay tag and must be manually
+   * bound. Examples: Move, Look, Jump, Crouch
+   */
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
             Meta = (TitleProperty = "InputAction"))
   TArray<FRdInputAction> NativeInputActions;
 
-  /** 능력용 입력 액션 (공격, 스킬 등) */
+  /**
+   * List of ability input actions used by the owner.
+   * These input actions are mapped to a gameplay tag and are automatically
+   * bound to abilities with matching input tags. Examples: PrimaryAttack,
+   * SecondaryAttack, Ability1, Ability2
+   */
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
             Meta = (TitleProperty = "InputAction"))
   TArray<FRdInputAction> AbilityInputActions;
