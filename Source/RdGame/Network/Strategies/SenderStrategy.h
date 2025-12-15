@@ -19,7 +19,7 @@ public:
 private:
   // 패킷 전송 주기 관리
   float TimeSinceLastUpdate = 0.0f;
-  const float UpdateInterval = 0.1f; // 10Hz
+  const float UpdateInterval = 0.5f; // 10Hz
 
   // 마지막으로 전송한 상태 (중복 전송 방지)
   FVector LastSentLocation;

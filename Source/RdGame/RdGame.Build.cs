@@ -26,10 +26,14 @@ public class RdGame : ModuleRules
             "ModularGameplay",
             "DeveloperSettings",
             "CommonUI",
+            "CommonInput",
             "CommonGame",
             "CommonUser",
             "UIExtension",
-            "GameFeatures"
+            "GameFeatures",
+            "AsyncMixin",
+            "ControlFlows",
+            "CommonLoadingScreen"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -50,7 +54,14 @@ public class RdGame : ModuleRules
             "RdGame/Variant_SideScrolling/Interfaces",
             "RdGame/Variant_SideScrolling/UI",
             "RdGame/Network",
-            "RdGame/UI"
+            "RdGame/UI",
+            "RdGame/UI/Basic",
+            "RdGame/UI/Common",
+            "RdGame/UI/Foundation",
+            "RdGame/UI/Frontend",
+            "RdGame/UI/Subsystem",
+            "RdGame/UI/IndicatorSystem",
+            "RdGame/UI/PerformanceStats"
         });
 
         // Uncomment if you are using Slate UI

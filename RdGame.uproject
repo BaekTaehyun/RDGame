@@ -1,78 +1,90 @@
 {
-  "FileVersion": 3,
-  "EngineAssociation": "{09BC6132-4A37-D599-C506-68B3D3A7D474}",
-  "Category": "",
-  "Description": "",
-  "Modules": [
-    {
-      "Name": "RdGame",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "ModelingToolsEditorMode",
-      "Enabled": true
-    },
-    {
-      "Name": "ModularGameplay",
-      "Enabled": true
-    },
-    {
-      "Name": "StateTree",
-      "Enabled": true
-    },
-    {
-      "Name": "GameplayStateTree",
-      "Enabled": true
-    },
-    {
-      "Name": "DungeonGenerator",
-      "Enabled": true
-    },
-    {
-      "Name": "GsMessaging",
-      "Enabled": true
-    },
-    {
-      "Name": "GsNetworking",
-      "Enabled": true
-    },
-    {
-      "Name": "VisualStudioTools",
-      "Enabled": true,
-      "SupportedTargetPlatforms": [
-        "Win64"
-      ]
-    },
-    {
-      "Name": "CommonUI",
-      "Enabled": true
-    },
-    {
-      "Name": "GameFeatures",
-      "Enabled": true
-    },
-    {
-      "Name": "CommonGame",
-      "Enabled": true
-    },
-    {
-      "Name": "UIExtension",
-      "Enabled": true
-    },
-    {
-      "Name": "CommonUser",
-      "Enabled": true
-    },
-    {
-      "Name": "ModularGameplayActors",
-      "Enabled": true
-    }
-  ],
-  "TargetPlatforms": [],
-  "AdditionalRootDirectories": [],
-  "AdditionalPluginDirectories": [],
-  "EpicSampleNameHash": ""
+	"FileVersion": 3,
+	"EngineAssociation": "{B99C14CD-4E93-A050-35EC-0B8E66574C19}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "RdGame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "StateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "DungeonGenerator",
+			"Enabled": true
+		},
+		{
+			"Name": "GsMessaging",
+			"Enabled": true
+		},
+		{
+			"Name": "GsNetworking",
+			"Enabled": true
+		},
+		{
+			"Name": "VisualStudioTools",
+			"Enabled": false,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "GameFeatures",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonGame",
+			"Enabled": true
+		},
+		{
+			"Name": "UIExtension",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUser",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplayActors",
+			"Enabled": true
+		},
+		{
+			"Name": "AsyncMixin",
+			"Enabled": true
+		},
+		{
+			"Name": "ControlFlows",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonLoadingScreen",
+			"Enabled": true
+		}
+	],
+	"TargetPlatforms": [],
+	"AdditionalRootDirectories": [],
+	"AdditionalPluginDirectories": [],
+	"EpicSampleNameHash": ""
 }
