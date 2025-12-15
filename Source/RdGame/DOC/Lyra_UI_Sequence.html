@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyra UI 초기화 시퀀스</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            color: var(--accent-purple);
+            font-size: 1.2rem;
+            margin: 25px 0 15px;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 800px;
+        }
+
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .flow-step {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            min-width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(88, 166, 255, 0.2);
+        }
+
+        .flow-step.init { border-color: var(--accent-blue); }
+        .flow-step.user { border-color: var(--accent-green); }
+        .flow-step.frontend { border-color: var(--accent-purple); }
+        .flow-step.complete { border-color: var(--accent-orange); }
+
+        .flow-step .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .flow-step .name {
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .flow-arrow {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+        }
+
+        /* Component Table */
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .component-table th,
+        .component-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .component-table th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .component-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .component-table tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        .component-name {
+            color: var(--accent-purple);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+        }
+
+        /* Frontend Steps */
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .step-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: attr(data-step);
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--bg-tertiary);
+        }
+
+        .step-card.step1 { border-top: 3px solid var(--accent-blue); }
+        .step-card.step2 { border-top: 3px solid var(--accent-green); }
+        .step-card.step3 { border-top: 3px solid var(--accent-orange); }
+        .step-card.step4 { border-top: 3px solid var(--accent-purple); }
+
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .step-card.step1 .step-title { color: var(--accent-blue); }
+        .step-card.step2 .step-title { color: var(--accent-green); }
+        .step-card.step3 .step-title { color: var(--accent-orange); }
+        .step-card.step4 .step-title { color: var(--accent-purple); }
+
+        .step-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .step-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-content li {
+            padding: 5px 0 5px 20px;
+            position: relative;
+        }
+
+        .step-content li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Layer Stack */
+        .layer-stack {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .layer {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .layer:hover {
+            transform: translateX(10px);
+            border-color: var(--accent-blue);
+        }
+
+        .layer-name {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .layer-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .layer-examples {
+            color: var(--accent-green);
+            font-size: 0.85rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .code-block .keyword { color: var(--accent-purple); }
+        .code-block .function { color: var(--accent-blue); }
+        .code-block .string { color: var(--accent-green); }
+        .code-block .comment { color: var(--text-secondary); }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin: 25px 0;
+        }
+
+        .info-box h4 {
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+        }
+
+        /* Sequence Diagram */
+        .sequence-diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .sequence-row {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .seq-actor {
+            min-width: 150px;
+            padding: 8px 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-blue);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .seq-arrow {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .seq-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -5px;
+            top: -8px;
+            color: var(--accent-purple);
+        }
+
+        .seq-message {
+            background: var(--bg-primary);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lyra UI 초기화 시퀀스</h1>
+        <p class="subtitle">Lyra Starter Game의 UI 시스템 아키텍처 및 프론트엔드 플로우 분석</p>
+
+        <!-- Overview Flow -->
+        <h2>📊 전체 초기화 플로우</h2>
+        <div class="flow-diagram">
+            <div class="flow-container">
+                <div class="flow-row">
+                    <div class="flow-step init">
+                        <div class="label">Game Start</div>
+                        <div class="name">GameInstance</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step init">
+                        <div class="label">Subsystem</div>
+                        <div class="name">GameUIManagerSubsystem</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step init">
+                        <div class="label">Policy</div>
+                        <div class="name">GameUIPolicy</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <div class="flow-step user">
+                        <div class="label">Player</div>
+                        <div class="name">CommonLocalPlayer</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step user">
+                        <div class="label">Root Widget</div>
+                        <div class="name">PrimaryGameLayout</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step frontend">
+                        <div class="label">Frontend</div>
+                        <div class="name">FrontendStateComponent</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step complete">
+                        <div class="label">Complete</div>
+                        <div class="name">Main Menu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Table -->
+        <h2>🧩 핵심 컴포넌트</h2>
+        <table class="component-table">
+            <thead>
+                <tr>
+                    <th>컴포넌트</th>
+                    <th>역할</th>
+                    <th>생명주기</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="component-name">GameUIManagerSubsystem</span></td>
+                    <td>게임 인스턴스 레벨 UI 관리자, UIPolicy 스위칭 담당</td>
+                    <td>GameInstance</td>
+                </tr>
+                <tr>
+                    <td><span class="component-name">GameUIPolicy</span></td>
+                    <td>플레이어별 RootLayout 생성/관리 정책</td>
+                    <td>SwitchToPolicy 호출 시</td>
+                </tr>
+                <tr>
+                    <td><span class="component-name">PrimaryGameLayout</span></td>
+                    <td>실제 화면에 표시되는 루트 위젯 (모든 UI의 컨테이너)</td>
+                    <td>Player 추가 시</td>
+                </tr>
+                <tr>
+                    <td><span class="component-name">FrontendStateComponent</span></td>
+                    <td>프론트엔드 플로우 (Press Start → Login → Main Menu) 관리</td>
+                    <td>GameState</td>
+                </tr>
+                <tr>
+                    <td><span class="component-name">ControlFlow</span></td>
+                    <td>비동기 단계를 순차적으로 실행하는 플로우 시스템</td>
+                    <td>Flow 실행 중</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Frontend Flow Steps -->
+        <h2>🔄 Frontend Flow 단계</h2>
+        <div class="steps-container">
+            <div class="step-card step1" data-step="01">
+                <div class="step-title">WaitForUserInitialization</div>
+                <div class="step-content">
+                    <ul>
+                        <li>하드 디스커넥트 감지</li>
+                        <li>유저 상태 리셋 (필요시)</li>
+                        <li>모든 세션 정리 (CleanUpSessions)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="step-card step2" data-step="02">
+                <div class="step-title">TryShowPressStartScreen</div>
+                <div class="step-content">
+                    <ul>
+                        <li>이미 로그인됨? → 스킵</li>
+                        <li>ShouldWaitForStartInput()? → Press Start 화면</li>
+                        <li>아니면 → 자동 로그인 시도</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="step-card step3" data-step="03">
+                <div class="step-title">TryJoinRequestedSession</div>
+                <div class="step-content">
+                    <ul>
+                        <li>세션 초대 대기 중인지 확인</li>
+                        <li>성공 시 → CancelFlow() (메인 메뉴 스킵)</li>
+                        <li>실패 시 → ContinueFlow() (메인 메뉴로)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="step-card step4" data-step="04">
+                <div class="step-title">TryShowMainScreen</div>
+                <div class="step-content">
+                    <ul>
+                        <li>MainScreenClass 위젯 Push</li>
+                        <li>UI.Layer.Menu 레이어에 표시</li>
+                        <li>로딩 화면 숨김</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layer Stack -->
+        <h2>📚 위젯 레이어 스택</h2>
+        <div class="layer-stack">
+            <div class="layer">
+                <div>
+                    <span class="layer-name">UI.Layer.Modal</span>
+                    <span class="layer-desc"> — 최상위 모달 다이얼로그</span>
+                </div>
+                <span class="layer-examples">확인창, 경고창</span>
+            </div>
+            <div class="layer">
+                <div>
+                    <span class="layer-name">UI.Layer.Menu</span>
+                    <span class="layer-desc"> — 메뉴 및 프론트엔드 화면</span>
+                </div>
+                <span class="layer-examples">MainScreen, PressStartScreen</span>
+            </div>
+            <div class="layer">
+                <div>
+                    <span class="layer-name">UI.Layer.GameMenu</span>
+                    <span class="layer-desc"> — 인게임 메뉴</span>
+                </div>
+                <span class="layer-examples">일시정지 메뉴, 설정</span>
+            </div>
+            <div class="layer">
+                <div>
+                    <span class="layer-name">UI.Layer.Game</span>
+                    <span class="layer-desc"> — HUD 레이어</span>
+                </div>
+                <span class="layer-examples">체력바, 미니맵, 인디케이터</span>
+            </div>
+        </div>
+
+        <!-- Code Example -->
+        <h2>💻 ControlFlow 사용 예시</h2>
+        <div class="code-block">
+<span class="keyword">void</span> <span class="function">ULyraFrontendStateComponent::OnExperienceLoaded</span>(<span class="keyword">const</span> ULyraExperienceDefinition* Experience)
+{
+    FControlFlow& Flow = <span class="function">FControlFlowStatics::Create</span>(<span class="keyword">this</span>, <span class="string">TEXT("FrontendFlow")</span>)
+        .<span class="function">QueueStep</span>(<span class="string">TEXT("Wait For User Initialization")</span>, <span class="keyword">this</span>, &ThisClass::FlowStep_WaitForUserInitialization)
+        .<span class="function">QueueStep</span>(<span class="string">TEXT("Try Show Press Start Screen")</span>, <span class="keyword">this</span>, &ThisClass::FlowStep_TryShowPressStartScreen)
+        .<span class="function">QueueStep</span>(<span class="string">TEXT("Try Join Requested Session")</span>, <span class="keyword">this</span>, &ThisClass::FlowStep_TryJoinRequestedSession)
+        .<span class="function">QueueStep</span>(<span class="string">TEXT("Try Show Main Screen")</span>, <span class="keyword">this</span>, &ThisClass::FlowStep_TryShowMainScreen);
+
+    Flow.<span class="function">ExecuteFlow</span>();  <span class="comment">// 순차적으로 실행 시작</span>
+    FrontEndFlow = Flow.<span class="function">AsShared</span>();
+}
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4>💡 핵심 포인트</h4>
+            <p>Lyra의 UI 시스템은 <strong>Experience 로드 완료</strong> 이벤트를 기점으로 프론트엔드 플로우를 시작합니다. 
+            ControlFlow를 통해 각 단계가 순차적으로 실행되며, 비동기 작업(위젯 로딩, 세션 참가 등)이 완료될 때까지 
+            다음 단계로 진행하지 않습니다.</p>
+        </div>
+
+        <!-- Sequence Diagram -->
+        <h2>🔗 초기화 시퀀스 다이어그램</h2>
+        <div class="sequence-diagram">
+            <div class="sequence-row">
+                <div class="seq-actor">GameInstance</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">Initialize()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">UIManagerSubsystem</div>
+            </div>
+            <div class="sequence-row">
+                <div class="seq-actor">UIManagerSubsystem</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">SwitchToPolicy()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">GameUIPolicy</div>
+            </div>
+            <div class="sequence-row">
+                <div class="seq-actor">LocalPlayer</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">NotifyPlayerAdded()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">GameUIPolicy</div>
+            </div>
+            <div class="sequence-row">
+                <div class="seq-actor">GameUIPolicy</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">CreateWidget()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">PrimaryGameLayout</div>
+            </div>
+            <div class="sequence-row">
+                <div class="seq-actor">ExperienceManager</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">OnExperienceLoaded()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">FrontendStateComp</div>
+            </div>
+            <div class="sequence-row">
+                <div class="seq-actor">FrontendStateComp</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-message">ExecuteFlow()</div>
+                <div class="seq-arrow"></div>
+                <div class="seq-actor">ControlFlow</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>RdGame Project - Lyra UI System Documentation</p>
+            <p>Generated: 2025-12-15</p>
+        </div>
+    </div>
+</body>
+</html>
