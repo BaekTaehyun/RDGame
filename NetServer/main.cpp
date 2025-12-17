@@ -2,6 +2,7 @@
 #include "Session.h"
 #include <WinSock2.h>
 #include <iostream>
+#include <cstdlib>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -44,7 +45,8 @@ int main() {
 
   if (bind(listenSock, (SOCKADDR *)&serverAddr, sizeof(serverAddr)) ==
       SOCKET_ERROR) {
-    std::cerr << "Bind failed." << std::endl;
+    std::cerr << "Bind failed. Trying to identify the process using port 9000..." << std::endl;
+    std::system("netstat -ano | findstr :9000");
     closesocket(listenSock);
     WSACleanup();
     return 1;
