@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네트워크 이동 동기화 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #0f3460;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --accent: #e94560;
+            --accent-secondary: #0f4c75;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #ff6b6b;
+            margin: 20px 0 15px;
+        }
+
+        .mermaid {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: var(--accent-secondary);
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ul,
+        ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: 2px solid var(--accent);
+        }
+
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .pipeline-step .num {
+            background: var(--accent);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .pipeline-step .content {
+            flex: 1;
+        }
+
+        .pipeline-step .formula {
+            color: #4da6ff;
+            font-family: monospace;
+        }
+
+        .latency-diagram {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre;
+            line-height: 1.8;
+        }
+
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌐 네트워크 이동 동기화 시스템</h1>
+        <p class="subtitle">TCP 기반 Dead Reckoning | BasePredictionTime + Jitter 방식</p>
+
+        <!-- 핵심 공식 -->
+        <div class="section">
+            <h2>🎯 핵심 예측 공식</h2>
+            <div class="formula-box">
+                예측 위치 = 서버 위치 + 속도 × (BasePredictionTime + Jitter)
+            </div>
+            <pre>// ReceiverStrategy.cpp
+float Jitter = LocalDelta - ServerDelta;
+ElapsedSec = BasePredictionTime + Jitter;  // 100ms + Jitter
+FVector PredictedLocation = NewLoc + NewVel * ElapsedSec;</pre>
+        </div>
+
+        <!-- 5단계 파이프라인 -->
+        <div class="section">
+            <h2>⚙️ 5단계 처리 파이프라인</h2>
+
+            <div class="pipeline-step">
+                <div class="num">1</div>
+                <div class="content">
+                    <strong>경과 시간 계산</strong><br>
+                    <span class="formula">ElapsedSec = 100ms + (로컬패킷간격 - 서버패킷간격)</span>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="num">2</div>
+                <div class="content">
+                    <strong>위치 예측</strong><br>
+                    <span class="formula">P = P₀ + V × t</span>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="num">3</div>
+                <div class="content">
+                    <strong>중력 보정 (점프/낙하)</strong><br>
+                    <span class="formula">Z = Z₀ + Vz×t + ½gt²</span>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="num">4</div>
+                <div class="content">
+                    <strong>방향 전환 보정</strong><br>
+                    <span class="formula">>45° 변경 시 목적지 90%로 단축</span>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="num">5</div>
+                <div class="content">
+                    <strong>이상값 검증</strong><br>
+                    <span class="formula">거리 > 최대이동거리 시 원본 사용</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 레이턴시 다이어그램 -->
+        <div class="section">
+            <h2>📡 레이턴시 보상 개념</h2>
+            <div class="latency-diagram">┌─────────────────────────────────────────────────────┐
+                │ 송신자 ──[100ms]──▶ 서버 ──[100ms]──▶ 수신자 │
+                │ │
+                │ 수신 시점에 원격 플레이어는 이미 200ms 뒤 │
+                │ → 속도 기반으로 200ms 앞으로 예측! │
+                └─────────────────────────────────────────────────────┘</div>
+        </div>
+
+        <!-- 시퀀스 다이어그램 -->
+        <div class="section">
+            <h2>📤 시퀀스 다이어그램: 이동 동기화</h2>
+            <div class="mermaid">
+                sequenceDiagram
+                participant Sender as FSenderStrategy
+                participant Server as TCP Server
+                participant Receiver as FReceiverStrategy
+                participant CMC as RdCharacterMovementComponent
+
+                Sender->>Server: Pkt_MoveUpdate (위치, 속도, 타임스탬프)
+                Server->>Receiver: S2C_MOVE_BROADCAST
+                Receiver->>Receiver: Jitter = LocalDelta - ServerDelta
+                Receiver->>Receiver: ElapsedSec = 100ms + Jitter
+                Receiver->>Receiver: 위치 예측 (P + V × t)
+                Receiver->>Receiver: 중력/방향전환 보정
+                Receiver->>CMC: SetNetworkTarget(PredictedLoc)
+                loop Every Frame
+                CMC->>CMC: InterpTo(TargetLocation)
+                end
+            </div>
+        </div>
+
+        <!-- 클래스 다이어그램 -->
+        <div class="section">
+            <h2>📊 클래스 다이어그램</h2>
+            <div class="mermaid">
+                classDiagram
+                class IMovementStrategy {
+                &lt;&lt;interface&gt;&gt;
+                +Initialize()
+                +Tick()
+                +OnNetworkDataReceived()
+                }
+
+                class FSenderStrategy {
+                -LastSentLocation
+                -UpdateInterval
+                +SendMovePacket()
+                }
+
+                class FReceiverStrategy {
+                -BasePredictionTime: 100ms
+                -MaxPredictionTime: 500ms
+                -DirectionChangeThreshold: 0.7
+                -DestinationShortenRatio: 0.9
+                -GravityZ: -980
+                +OnNetworkDataReceived() Dead Reckoning
+                }
+
+                class URdCharacterMovementComponent {
+                +SetNetworkTarget()
+                +TickComponent() 보간
+                }
+
+                IMovementStrategy &lt;|.. FSenderStrategy
+                IMovementStrategy &lt;|.. FReceiverStrategy
+                FReceiverStrategy --> URdCharacterMovementComponent
+            </div>
+        </div>
+
+        <!-- 상수 설정 -->
+        <div class="section">
+            <h2>🔧 상수 설정 (ReceiverStrategy.h)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>상수</th>
+                        <th>값</th>
+                        <th>의미</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>BasePredictionTime</code></td>
+                        <td>0.1f (100ms)</td>
+                        <td>기본 예측 시간 (RTT/2)</td>
+                    </tr>
+                    <tr>
+                        <td><code>MaxPredictionTime</code></td>
+                        <td>0.5f (500ms)</td>
+                        <td>최대 예측 상한</td>
+                    </tr>
+                    <tr>
+                        <td><code>DirectionChangeThreshold</code></td>
+                        <td>0.7f</td>
+                        <td>cos(45°) - 방향 전환 임계값</td>
+                    </tr>
+                    <tr>
+                        <td><code>DestinationShortenRatio</code></td>
+                        <td>0.9f (90%)</td>
+                        <td>방향 전환 시 목적지 축소 비율</td>
+                    </tr>
+                    <tr>
+                        <td><code>GravityZ</code></td>
+                        <td>-980.0f</td>
+                        <td>중력 가속도 (cm/s²)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 패킷 구조 -->
+        <div class="section">
+            <h2>📦 패킷 구조 (Pkt_MoveUpdate)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>필드</th>
+                        <th>타입</th>
+                        <th>설명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>size</td>
+                        <td>uint16</td>
+                        <td>패킷 크기</td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>uint16</td>
+                        <td>PacketType (3=C2S, 4=S2C)</td>
+                    </tr>
+                    <tr>
+                        <td>sessionId</td>
+                        <td>uint32</td>
+                        <td>유저 식별자</td>
+                    </tr>
+                    <tr>
+                        <td>x, y, z</td>
+                        <td>float × 3</td>
+                        <td>위치</td>
+                    </tr>
+                    <tr>
+                        <td>vx, vy, vz</td>
+                        <td>float × 3</td>
+                        <td>속도 (Dead Reckoning용)</td>
+                    </tr>
+                    <tr>
+                        <td>pitch, yaw, roll</td>
+                        <td>float × 3</td>
+                        <td>회전</td>
+                    </tr>
+                    <tr>
+                        <td>timestamp</td>
+                        <td>uint64</td>
+                        <td>밀리초 타임스탬프</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 관련 파일 -->
+        <div class="section">
+            <h2>📁 관련 파일</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>파일</th>
+                        <th>역할</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Protocol.h</code></td>
+                        <td>패킷 구조 정의</td>
+                    </tr>
+                    <tr>
+                        <td><code>GsNetworkManager.cpp</code></td>
+                        <td>패킷 핸들러 등록 및 처리</td>
+                    </tr>
+                    <tr>
+                        <td><code>GsNetworkMovementComponent.cpp</code></td>
+                        <td>Strategy 선택 로직</td>
+                    </tr>
+                    <tr>
+                        <td><code>SenderStrategy.cpp</code></td>
+                        <td>송신 로직 (Rate-Limited)</td>
+                    </tr>
+                    <tr>
+                        <td><code>ReceiverStrategy.cpp</code></td>
+                        <td>수신 로직 (Dead Reckoning)</td>
+                    </tr>
+                    <tr>
+                        <td><code>RdCharacterMovementComponent.cpp</code></td>
+                        <td>보간 처리 (InterpTo)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#e94560',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#e94560',
+                lineColor: '#aaa',
+                secondaryColor: '#0f4c75',
+                tertiaryColor: '#16213e'
+            }
+        });
+    </script>
+</body>
+
+</html>

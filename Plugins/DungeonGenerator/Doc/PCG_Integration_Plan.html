@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>던전 랜드스케이프 & PCG 통합 구현 계획 (v5 - 최종안)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; background-color: #f9f9f9; }
+        .container { background-color: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        h3 { color: #16a085; }
+        code { background: #eef1f5; padding: 2px 5px; border-radius: 3px; font-family: Consolas, monospace; color: #e74c3c; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        ul { margin-bottom: 20px; }
+        li { margin-bottom: 5px; }
+        strong { color: #2c3e50; }
+        .note { background: #e8f6f3; padding: 15px; border-radius: 5px; border-left: 5px solid #1abc9c; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>던전 랜드스케이프 & PCG 통합 구현 계획 (v5 - 최종안)</h1>
+
+        <h2>목표</h2>
+        <p>DungeonGenerator를 기반으로 <strong>'오픈 필드형 던전'</strong>을 제작하는 에디터 워크플로우를 구축합니다.</p>
+        <ol>
+            <li><strong>지형 (Landscape)</strong>: 던전 영역 전체에 "굴곡 있는 자연스러운 지형"을 에디터 타임에 생성합니다. 벽을 융기시키는 것이 아니라, 전반적으로 자연스러운 높낮이(Noise)를 부여합니다.</li>
+            <li><strong>장애물 (PCG Walls)</strong>: 이동 불가능한 영역(Wall)은 PCG 그래프가 나무, 바위 등을 스폰하여 막습니다.</li>
+            <li><strong>바닥 디테일 (PCG Floors)</strong>: 이동 가능한 영역(Floor)은 랜드스케이프가 그대로 보이거나 자잘한 풀/돌을 PCG로 스폰합니다.</li>
+        </ol>
+
+        <h2>아키텍처</h2>
+
+        <h3>1. [Editor Tool] 랜드스케이프 생성기</h3>
+        <ul>
+            <li><strong>역할</strong>: 에디터에서 버튼 클릭 시 <code>ALandscape</code> 액터를 생성합니다.</li>
+            <li><strong>하이트맵 생성 로직</strong>:
+                <ul>
+                    <li>던전 그리드 크기에 맞춰 해상도 결정.</li>
+                    <li><strong>Perlin Noise</strong>를 적용하여 전체적으로 완만한 굴곡(Undulation) 생성.</li>
+                    <li><em>옵션</em>: 던전의 'Wall' 영역이라고 해서 고도를 강제로 높이지 않습니다 (사용자 피드백 반영). 단, 원한다면 약간의 융기(Bump) 정도는 노이즈에 섞을 수 있도록 파라미터화 합니다.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>2. [Plugin] DungeonPCG 브릿지</h3>
+        <ul>
+            <li><strong>역할</strong>: 던전의 논리적 구조(Grid)를 PCG 데이터로 변환하여, 지형 위에 에셋을 배치합니다.</li>
+            <li><strong>데이터 변환 (<code>UDungeonPCGHelper</code>)</strong>:
+                <ul>
+                    <li><code>FDungeonGrid</code> -> <code>UPCGPointData</code> 변환.</li>
+                    <li>각 포인트에 <code>TileType</code> ("Wall", "Floor") 어트리뷰트 부여.</li>
+                    <li>Z축 위치는 랜드스케이프 알맞게 투영(Project)되거나 레이캐스트로 보정.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3. [PCG Graph] 로직 구성</h3>
+        <ul>
+            <li><strong>입력</strong>: <code>DungeonPoints</code> (from Helper).</li>
+            <li><strong>분기 (Filter)</strong>:
+                <ul>
+                    <li><code>Type == Wall</code>: <strong>Blocker Spawner</strong> (큰 바위, 빽빽한 나무, 절벽 메시 등). -> <em>실질적인 벽 역할</em></li>
+                    <li><code>Type == Floor</code>: <strong>Detail Spawner</strong> (자갈, 꽃, 잔디). -> <em>플레이어 이동 가능</em></li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>단계별 구현</h2>
+
+        <h3>1단계: DungeonPCG 플러그인 (데이터 브릿지)</h3>
+        <ul>
+            <li><code>GenerateDungeonPoints(Grid)</code> 함수 구현.</li>
+            <li>PCG 컴포넌트에 데이터 주입 기능.</li>
+        </ul>
+
+        <h3>2단계: 에디터 랜드스케이프 툴</h3>
+        <ul>
+            <li><code>GenerateLandscape(Grid)</code> 구현.</li>
+            <li>C++ <code>ALandscapeProxy::Import</code>를 사용하여 노이즈 하이트맵 적용.</li>
+            <li>생성된 랜드스케이프에 <code>DungeonPoints</code>를 처리할 <code>PCGComponent</code> 자동 부착 및 실행.</li>
+        </ul>
+
+        <h3>3단계: 통합 및 검증</h3>
+        <ul>
+            <li>에디터에서 "Generate Dungeon Landscape" 실행.</li>
+            <li>결과: 굴곡진 땅(Landscape) 위에, 미로 형태의 숲(PCG Wall)이 생성됨.</li>
+            <li>사용자가 지형 스컬핑 모드로 바닥을 더 다듬거나, PCG 파라미터를 조절하여 숲의 밀도 수정 가능.</li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PCG Cleanup 리팩터링 설명</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .problem {
+            background: #ffe6e6;
+            border-left: 4px solid #e74c3c;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .solution {
+            background: #e6ffe6;
+            border-left: 4px solid #27ae60;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PCG Cleanup 리팩터링</h1>
+
+    <h2>문제점</h2>
+    <div class="problem">
+        <ul>
+            <li><strong>레벨 로드 후 Clear 버튼 미동작</strong>: <code>PCGRenderer</code>가 <code>UPROPERTY(Transient)</code>로 선언되어
+                레벨 로드 후 null</li>
+            <li><strong>ISM 컴포넌트 미삭제</strong>: PCG가 Owner Actor 내부에 직접 생성한 ISM 컴포넌트가 삭제되지 않음</li>
+            <li><strong>코드 중복</strong>: Cleanup 로직이 여러 곳에 분산</li>
+        </ul>
+    </div>
+
+    <h2>해결책</h2>
+    <div class="solution">
+        <ul>
+            <li><strong>통일된 Cleanup 방식</strong>: Owner Actor에서 모든 컴포넌트 직접 탐색/삭제</li>
+            <li><strong>PCGRenderer null 대응</strong>: null이면 새로 생성 후 사용</li>
+            <li><strong>단일 책임</strong>: 모든 PCG cleanup 로직을 <code>DungeonPCGRenderer::Cleanup()</code>에 집중</li>
+        </ul>
+    </div>
+
+    <h2>Cleanup 순서</h2>
+    <table>
+        <tr>
+            <th>순서</th>
+            <th>대상</th>
+            <th>설명</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>UPCGComponent</td>
+            <td>CleanupLocalImmediate + DestroyComponent</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>UInstancedStaticMeshComponent</td>
+            <td>PCG가 생성한 ISM 컴포넌트 삭제</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>UStaticMeshComponent</td>
+            <td>PCG가 생성한 SM 컴포넌트 삭제</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>PCGWorldActor</td>
+            <td>PCG 시스템 캐시 초기화 (에디터 전용)</td>
+        </tr>
+    </table>
+
+    <h2>관련 파일</h2>
+    <ul>
+        <li><code>DungeonPCGRenderer.cpp</code>: Cleanup(AActor*) 구현</li>
+        <li><code>DungeonRendererComponent.cpp</code>: ClearDungeon() 호출부</li>
+    </ul>
+
+    <h2>작성일</h2>
+    <p>2024-12-24</p>
+</body>
+
+</html>

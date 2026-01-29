@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP PCG Integration Guide</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #0056b3;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .note {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>MCP PCG Integration Guide</h1>
+    <p>This document explains how to set up the Unreal MCP Server and use it to control Procedural Content Generation
+        (PCG) graphs from an LLM (like Claude Desktop).</p>
+
+    <div class="note">
+        <strong>Note:</strong> This setup requires Python support to be enabled in Unreal Engine.
+    </div>
+
+    <h2>1. Installation & Setup</h2>
+
+    <h3>Step 1: Prerequisites</h3>
+    <ul>
+        <li>Unreal Engine 5.2+ (with PCG Plugin enabled)</li>
+        <li>Python 3.x installed on the system (and Python Editor Script Plugin in UE)</li>
+        <li>Node.js (for the MCP Client, if using Claude Desktop)</li>
+    </ul>
+
+    <h3>Step 2: Script Placement</h3>
+    <p>Ensure the following scripts are in your project's <code>Script</code> directory (e.g.,
+        <code>Documents/Unreal Projects/RdGame/Script/</code>):</p>
+    <ul>
+        <li><code>unreal_socket_server.py</code> (The Server)</li>
+        <li><code>unreal_mcp_bridge.py</code> (The Bridge)</li>
+    </ul>
+
+    <h3>Step 3: Running the Server</h3>
+    <p>The socket server must be running inside Unreal Engine to accept commands.</p>
+    <div class="step">
+        <div class="step-title">Option A: Manual Start</div>
+        <p>Run the following command in the Unreal Output Log (Cmd mode) or Python console:</p>
+        <pre>py "c:\Users\COM2US\Documents\Unreal Projects\RdGame\Script\unreal_socket_server.py"</pre>
+    </div>
+    <div class="step">
+        <div class="step-title">Option B: Startup Script</div>
+        <p>Add the line above to your `init_unreal.py` to start it automatically when the editor opens.</p>
+    </div>
+
+    <h3>Step 4: Configuring MCP Client</h3>
+    <p>Configure your MCP client (e.g., Claude Desktop config) to run the bridge script.</p>
+    <pre>
+{
+  "mcpServers": {
+    "unreal-pcg": {
+      "command": "python",
+      "args": [
+        "c:/Users/COM2US/Documents/Unreal Projects/RdGame/Script/unreal_mcp_bridge.py"
+      ]
+    }
+  }
+}
+    </pre>
+
+    <h2>2. Using PCG Tools</h2>
+
+    <p>Once connected, the LLM will have access to the following tools:</p>
+
+    <h3>Create PCG Graph</h3>
+    <p>Creates a new PCG graph asset.</p>
+    <ul>
+        <li><strong>Tool:</strong> <code>create_pcg_graph</code></li>
+        <li><strong>Args:</strong> <code>package_path</code>, <code>asset_name</code></li>
+    </ul>
+
+    <h3>Add Node</h3>
+    <p>Adds a node (e.g., Spawner) to the graph.</p>
+    <ul>
+        <li><strong>Tool:</strong> <code>add_pcg_node</code></li>
+        <li><strong>Args:</strong> <code>graph_path</code>, <code>node_class</code> (e.g.,
+            'PCGStaticMeshSpawnerSettings'), <code>position_x</code>, <code>position_y</code></li>
+    </ul>
+
+    <h3>Connect Nodes</h3>
+    <p>Connects two nodes.</p>
+    <ul>
+        <li><strong>Tool:</strong> <code>connect_pcg_nodes</code></li>
+        <li><strong>Args:</strong> <code>upstream_node</code> (e.g. 'Input'), <code>downstream_node</code></li>
+    </ul>
+
+    <h3>Assign Mesh (Smart Property)</h3>
+    <p>Assigns a Static Mesh to a Spawner node. You can simply provide a list of asset paths.</p>
+    <ul>
+        <li><strong>Tool:</strong> <code>set_pcg_node_properties</code></li>
+        <li><strong>Example:</strong>
+            <pre>
+{
+  "properties": {
+    "MeshEntries": ["/Engine/BasicShapes/Cube.Cube"],
+    "Debug": true
+  }
+}
+            </pre>
+        </li>
+    </ul>
+
+</body>
+
+</html>

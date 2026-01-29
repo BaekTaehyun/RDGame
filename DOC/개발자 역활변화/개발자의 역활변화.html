@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 시대의 게임 개발: 변화와 생존 전략</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        /* Interactive Elements */
+        .role-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .role-card.active {
+            border-color: #3b82f6; /* Blue-500 */
+            background-color: #eff6ff; /* Blue-50 */
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .step-item:hover .step-marker {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Slate/Gray) with Blue Tech Accents -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Title and core thesis (Shift to "Game Developer" identity).
+         2. Role Transformation (Interactive Grid): Users click traditional roles (Programmer, Artist, etc.) to reveal how AI changes them into a unified "Game Developer".
+         3. Efficiency Dashboard (Charts): Visualizing the quantitative shifts (Speed, Scale, Quality). Uses Radar and Bar charts to contrast Traditional vs. AI methods.
+         4. Survival Strategy (Process Flow): A step-by-step guide based on the report's logic (Tool Usage -> Survival -> Efficiency).
+         5. Summary/Footer.
+         Reasoning: The report splits clearly into "Roles" and "Performance/Survival". Separating these allows for focused exploration.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Role Transformation: HTML/CSS Grid with JS interaction. Goal: Inform/Organize. Justification: Text-heavy qualitative data needs structured, digestible interactivity.
+         2. Performance Radar: Chart.js Radar. Goal: Compare. Justification: Perfect for multivariate comparison (Speed, Quality, Scale) between two states (Before/After).
+         3. Content Production Speed: Chart.js Bar. Goal: Compare/Change. Justification: Visualizes the "dramatic increase" in content velocity mentioned in the report.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans leading-relaxed selection:bg-blue-100">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="font-bold text-xl text-slate-900 tracking-tight">GameDev<span class="text-blue-600">.AI</span> Insight</div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('hero')" class="text-slate-600 hover:text-blue-600 font-medium transition-colors">홈</button>
+                    <button onclick="scrollToSection('roles')" class="text-slate-600 hover:text-blue-600 font-medium transition-colors">역할 변화</button>
+                    <button onclick="scrollToSection('metrics')" class="text-slate-600 hover:text-blue-600 font-medium transition-colors">개발 효율성</button>
+                    <button onclick="scrollToSection('strategy')" class="text-slate-600 hover:text-blue-600 font-medium transition-colors">생존 전략</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="pt-16 pb-12 md:pt-24 md:pb-20 bg-gradient-to-b from-white to-slate-100">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold mb-6">2025 트렌드 리포트</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">AI 시대, 게임 개발의 패러다임 시프트</h1>
+            <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+                더 이상 단순한 프로그래머나 아티스트가 아닙니다. <br>
+                AI 도구의 활용이 생존을 결정하며, 모든 직군은 <strong>'진정한 게임 개발자'</strong>로 재탄생하고 있습니다.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button onclick="scrollToSection('roles')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:-translate-y-1">
+                    변화 탐색하기
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 1: Role Transformation -->
+    <section id="roles" class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">1. 개발자 역할의 근본적 변화</h2>
+                <p class="text-slate-600 text-lg">
+                    전통적인 직군 경계가 흐려지고 있습니다. 아래 직군 카드를 클릭하여 AI가 각 역할을 어떻게 <strong>'게임 개발자(Game Developer)'</strong>라는 하나의 거대한 정체성으로 통합하고 확장시키는지 확인해 보세요.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Role Cards generated by JS -->
+                <div id="role-programmer" class="role-card p-6 border border-slate-200 rounded-xl bg-slate-50 hover:shadow-md" onclick="selectRole('programmer')">
+                    <div class="text-3xl mb-3">💻</div>
+                    <h3 class="font-bold text-xl mb-2">프로그래머</h3>
+                    <p class="text-sm text-slate-500">코드 작성 중심의 기술 전문가</p>
+                </div>
+                <div id="role-planner" class="role-card p-6 border border-slate-200 rounded-xl bg-slate-50 hover:shadow-md" onclick="selectRole('planner')">
+                    <div class="text-3xl mb-3">📝</div>
+                    <h3 class="font-bold text-xl mb-2">기획자</h3>
+                    <p class="text-sm text-slate-500">시스템 설계 및 문서 작성</p>
+                </div>
+                <div id="role-server" class="role-card p-6 border border-slate-200 rounded-xl bg-slate-50 hover:shadow-md" onclick="selectRole('server')">
+                    <div class="text-3xl mb-3">🖥️</div>
+                    <h3 class="font-bold text-xl mb-2">서버 담당</h3>
+                    <p class="text-sm text-slate-500">네트워크 및 인프라 구축</p>
+                </div>
+                <div id="role-artist" class="role-card p-6 border border-slate-200 rounded-xl bg-slate-50 hover:shadow-md" onclick="selectRole('artist')">
+                    <div class="text-3xl mb-3">🎨</div>
+                    <h3 class="font-bold text-xl mb-2">아티스트</h3>
+                    <p class="text-sm text-slate-500">비주얼 리소스 생산</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="role-detail-panel" class="bg-blue-50 border border-blue-100 rounded-2xl p-8 transition-all duration-300">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/3 text-center">
+                        <div class="text-6xl mb-4" id="detail-icon">🚀</div>
+                        <h3 class="text-2xl font-bold text-blue-900" id="detail-title">게임 개발자 (Game Developer)</h3>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h4 class="font-bold text-slate-800 mb-2 border-b border-blue-200 pb-2">AI 도입 후의 변화</h4>
+                        <p id="detail-desc" class="text-slate-700 leading-relaxed mb-4">
+                            모든 직군은 AI를 도구로 활용하여 단순 반복 업무에서 벗어납니다. 
+                            프로그래머는 알고리즘 설계자가 되고, 아티스트는 비주얼 디렉터가 됩니다.
+                            결국 <strong>'게임을 만드는 사람'</strong>이라는 본질적인 가치에 집중하게 됩니다.
+                        </p>
+                        <ul id="detail-points" class="space-y-2 text-slate-700">
+                            <li class="flex items-start"><span class="mr-2 text-blue-500">●</span>직군 간의 경계 융합</li>
+                            <li class="flex items-start"><span class="mr-2 text-blue-500">●</span>전체적인 게임 퀄리티와 재미에 집중</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Metrics Dashboard -->
+    <section id="metrics" class="py-16 bg-slate-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">2. 개발 속도와 규모의 혁신</h2>
+                <p class="text-slate-600 text-lg">
+                    AI 툴 활용 능력은 단순한 편의성을 넘어 <strong>생존과 직결</strong>됩니다. 
+                    효율성 연구와 빠른 알고리즘 제작, 그리고 비약적인 컨텐츠 생산 속도 변화를 데이터로 확인해 보세요.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Chart 1: Radar Comparison -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
+                        <span class="bg-blue-100 text-blue-600 rounded-lg p-1 mr-2 text-sm">비교 분석</span>
+                        전통적 개발 vs AI 기반 개발
+                    </h3>
+                    <p class="text-sm text-slate-500 mb-4 h-10">
+                        알고리즘 제작 속도, 데이터 양산 능력 등 핵심 지표에서 AI 도입 시 효율성이 극대화됩니다.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="efficiencyRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Content Speed -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center">
+                        <span class="bg-green-100 text-green-600 rounded-lg p-1 mr-2 text-sm">트렌드</span>
+                        컨텐츠 개발 속도 변화
+                    </h3>
+                    <p class="text-sm text-slate-500 mb-4 h-10">
+                        기획서 품질 일관성 유지와 함께 전반적인 데이터 양산 속도가 비약적으로 증가합니다.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="speedBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Survival Strategy -->
+    <section id="strategy" class="py-16 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="mb-12 text-center">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">3. AI 시대 생존 및 성장 로드맵</h2>
+                <p class="text-slate-600 text-lg max-w-3xl mx-auto">
+                    변화에 적응하지 못하면 도태됩니다. 개발자는 어떻게 AI를 받아들이고 성장해야 할까요?
+                    리포트에서 제시하는 핵심 실행 계획입니다.
+                </p>
+            </div>
+
+            <div class="relative border-l-4 border-slate-200 ml-4 md:ml-8 space-y-12">
+                <!-- Step 1 -->
+                <div class="relative pl-8 md:pl-12 step-item group cursor-default">
+                    <div class="step-marker absolute -left-[14px] top-0 bg-white border-4 border-slate-300 text-slate-400 font-bold rounded-full w-10 h-10 flex items-center justify-center transition-colors group-hover:border-blue-500 group-hover:text-blue-600">1</div>
+                    <div class="bg-slate-50 rounded-lg p-6 hover:bg-blue-50 transition-colors border border-slate-100 hover:border-blue-100">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">AI 툴 활용 능력 확보</h4>
+                        <p class="text-slate-600">AI 툴을 '어떻게' 활용하느냐가 생존 여부를 결정합니다. 단순 사용자가 아닌, 도구를 지배하는 전문가가 되어야 합니다.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative pl-8 md:pl-12 step-item group cursor-default">
+                    <div class="step-marker absolute -left-[14px] top-0 bg-white border-4 border-slate-300 text-slate-400 font-bold rounded-full w-10 h-10 flex items-center justify-center transition-colors group-hover:border-blue-500 group-hover:text-blue-600">2</div>
+                    <div class="bg-slate-50 rounded-lg p-6 hover:bg-blue-50 transition-colors border border-slate-100 hover:border-blue-100">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">효율성 연구 및 계획 수정</h4>
+                        <p class="text-slate-600">기존의 개발 파이프라인을 고수하지 마십시오. AI를 통한 효율성을 끊임없이 연구하고, 계획을 즉각적으로 수정할 수 있는 유연성을 길러야 합니다.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative pl-8 md:pl-12 step-item group cursor-default">
+                    <div class="step-marker absolute -left-[14px] top-0 bg-white border-4 border-slate-300 text-slate-400 font-bold rounded-full w-10 h-10 flex items-center justify-center transition-colors group-hover:border-blue-500 group-hover:text-blue-600">3</div>
+                    <div class="bg-slate-50 rounded-lg p-6 hover:bg-blue-50 transition-colors border border-slate-100 hover:border-blue-100">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">빠른 알고리즘 및 데이터 양산</h4>
+                        <p class="text-slate-600">연구 시작 단계부터 AI를 도입하여 빠른 알고리즘 제작과 전반적인 데이터 양산 속도를 확보하십시오. 기획서의 품질 일관성 또한 AI로 보장할 수 있습니다.</p>
+                    </div>
+                </div>
+
+                 <!-- Step 4 -->
+                 <div class="relative pl-8 md:pl-12 step-item group cursor-default">
+                    <div class="step-marker absolute -left-[14px] top-0 bg-white border-4 border-slate-300 text-slate-400 font-bold rounded-full w-10 h-10 flex items-center justify-center transition-colors group-hover:border-blue-500 group-hover:text-blue-600">4</div>
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-6 text-white shadow-lg transform transition-transform hover:scale-[1.01]">
+                        <h4 class="text-xl font-bold mb-2">궁극적 목표: Game Developer로의 재탄생</h4>
+                        <p class="text-blue-100">직군의 한계를 넘어, AI를 통해 게임의 재미와 가치를 창출하는 통합된 개발자로 거듭나십시오.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-10">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="mb-2 font-semibold text-slate-300">AI Impact on Game Development Report</p>
+            <p class="text-sm">본 페이지는 제공된 리포트 원문을 기반으로 생성된 인터랙티브 요약입니다.</p>
+            <div class="mt-8 pt-8 border-t border-slate-800 text-xs">
+                &copy; 2025 Future of Gaming Analysis.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data Store
+        const roleData = {
+            'programmer': {
+                icon: '💻',
+                title: '프로그래머 (Programmer)',
+                desc: '기존에는 문법과 로직 구현에 많은 시간을 쏟았으나, AI 도입 후에는 <strong>아키텍처 설계와 최적화</strong>, 그리고 AI가 작성한 코드의 검수 및 통합에 집중합니다. 단순 코딩이 아닌 "엔지니어링"으로 영역이 확장됩니다.',
+                points: ['반복 코딩 자동화', '빠른 알고리즘 프로토타이핑', '시스템 구조 설계 집중']
+            },
+            'planner': {
+                icon: '📝',
+                title: '기획자 (Planner)',
+                desc: '아이디어를 문서화하는 과정이 빨라집니다. AI를 통해 <strong>기획서의 품질 일관성</strong>을 유지하고, 방대한 설정 데이터를 빠르게 생성하여 시뮬레이션 해볼 수 있습니다.',
+                points: ['기획서 초안 자동 생성', '밸런스 데이터 시뮬레이션', '일관된 문서 품질 유지']
+            },
+            'server': {
+                icon: '🖥️',
+                title: '서버 프로그래머 (Server Dev)',
+                desc: '서버 부하 테스트 및 더미 데이터 생성에 AI를 활용합니다. <strong>보안 취약점 자동 분석</strong> 및 효율적인 DB 쿼리 최적화 등을 통해 안정성을 확보하는 데 주력합니다.',
+                points: ['부하 테스트 자동화', '쿼리 최적화 지원', '인프라 효율성 증대']
+            },
+            'artist': {
+                icon: '🎨',
+                title: '아티스트 (Artist)',
+                desc: '리소스 제작 속도가 비약적으로 상승합니다. 단순 작업에서 벗어나 AI 결과물을 리터칭하고, 전체적인 <strong>아트 디렉팅 및 스타일 일관성</strong>을 관리하는 역할로 진화합니다.',
+                points: ['에셋 대량 생산', '컨셉 시안 고속 도출', '아트 디렉팅 중심 업무']
+            }
+        };
+
+        // State Management
+        let currentRole = null;
+        let radarChart = null;
+        let barChart = null;
+
+        // --- Functions ---
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function selectRole(roleKey) {
+            // Update UI State
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(`role-${roleKey}`).classList.add('active');
+
+            // Update Content
+            const data = roleData[roleKey];
+            const panel = document.getElementById('role-detail-panel');
+            
+            // Fade out effect
+            panel.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                document.getElementById('detail-icon').textContent = data.icon;
+                document.getElementById('detail-title').textContent = data.title;
+                document.getElementById('detail-desc').innerHTML = data.desc;
+                
+                const pointsList = document.getElementById('detail-points');
+                pointsList.innerHTML = '';
+                data.points.forEach(point => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-start';
+                    li.innerHTML = `<span class="mr-2 text-blue-500">●</span>${point}`;
+                    pointsList.appendChild(li);
+                });
+
+                // Fade in
+                panel.style.opacity = '1';
+            }, 150);
+        }
+
+        function initCharts() {
+            // 1. Radar Chart: Efficiency Comparison
+            const ctxRadar = document.getElementById('efficiencyRadarChart').getContext('2d');
+            radarChart = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['개발 속도', '데이터 양산', '알고리즘 제작', '품질 일관성', '비용 효율'],
+                    datasets: [{
+                        label: '전통적 개발 방식',
+                        data: [40, 30, 40, 60, 50],
+                        fill: true,
+                        backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                        borderColor: 'rgb(148, 163, 184)',
+                        pointBackgroundColor: 'rgb(148, 163, 184)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(148, 163, 184)'
+                    }, {
+                        label: 'AI 기반 개발',
+                        data: [95, 90, 85, 88, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(59, 130, 246)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#e2e8f0' },
+                            pointLabels: {
+                                font: { size: 12, family: 'sans-serif', weight: 'bold' },
+                                color: '#475569'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Bar Chart: Content Speed
+            const ctxBar = document.getElementById('speedBarChart').getContext('2d');
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['초기 기획', '프로토타입', '에셋 양산', 'QA/테스트', '최종 런칭'],
+                    datasets: [{
+                        label: '소요 시간 (주 단위)',
+                        data: [4, 8, 12, 6, 4], // Hypothetical Traditional Data (slower)
+                        backgroundColor: '#cbd5e1',
+                        order: 2
+                    }, {
+                        label: 'AI 도입 후 예상 시간 (주 단위)',
+                        data: [1, 2, 3, 2, 1], // Hypothetical AI Data (faster)
+                        backgroundColor: '#3b82f6',
+                        order: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: {
+                            display: true,
+                            text: '개발 단계별 소요 시간 단축 (낮을수록 빠름)',
+                            font: { size: 14 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            title: { display: true, text: '주 (Weeks)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set default role
+            selectRole('programmer');
+            // Init charts
+            initCharts();
+        });
+
+    </script>
+</body>
+</html>

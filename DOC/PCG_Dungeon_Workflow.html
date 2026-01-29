@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+        h2 { color: #0078D7; border-bottom: 2px solid #0078D7; padding-bottom: 10px; margin-top: 30px; }
+        h3 { color: #2c3e50; margin-top: 20px; }
+        .step { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #0078D7; }
+        .code-snippet { background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 5px; font-family: 'Consolas', monospace; font-size: 0.9em; overflow-x: auto; }
+        .highlight { color: #e74c3c; font-weight: bold; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 5px; }
+        .note { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 5px solid #ffeeba; }
+    </style>
+</head>
+<body>
+
+    <h1>🏰 Dungeon Generator + PCG Workflow</h1>
+    <p>새로 구현한 <b>Custom PCG Node (Pull 방식)</b>를 사용하여 던전을 생성하고 꾸미는 전체 작업 흐름입니다.</p>
+
+    <div class="step">
+        <h3>1. PCG 그래프 생성 (에셋 준비)</h3>
+        <p>각 던전 요소(문, 벽, 바닥 등)를 위한 개별 PCG 그래프를 생성합니다.</p>
+        <ul>
+            <li>콘텐츠 브라우저 우클릭 &rarr; <b>PCG &rarr; PCG Graph</b> 생성 (예: <code>PCG_Dungeon_Door</code>)</li>
+            <li>그래프를 열고 <b>"Dungeon Data Reader"</b> 노드를 추가합니다.</li>
+            <li>노드 설정(Settings)에서 <b>Target Tile Type</b>을 <code>Door</code>로 설정합니다.</li>
+            <li>Reader 노드 뒤에 <b>Static Mesh Spawner</b> 등을 연결하여 원하는 문(Door) 에셋을 배치하도록 구성합니다.</li>
+        </ul>
+        <div class="note">
+            💡 <b>팁:</b> 벽(Wall), 바닥(Floor), 복도(Corridor)용 그래프도 동일한 방식으로 생성하되, Target Tile Type만 다르게 설정하면 됩니다.
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>2. 테마 에셋 설정 (연결)</h3>
+        <p><code>DungeonThemeAsset</code>에 생성한 PCG 그래프를 등록하여 던전 생성기가 이를 사용하도록 합니다.</p>
+        <ul>
+            <li>사용 중인 <b>DungeonThemeAsset</b>을 엽니다. (예: <code>DA_DungeonTheme_Default</code>)</li>
+            <li><b>PCG Settings</b> 섹션을 찾습니다.</li>
+            <li><b>Compatibility Mode</b>를 <code>BSP</code>로 설정합니다 (BSP 알고리즘 전용 기능 활성화).</li>
+            <li><code>Door PCG Graph</code> 슬롯에 방금 만든 <code>PCG_Dungeon_Door</code>를 할당합니다.</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>3. 던전 생성 및 실행 (Runtime Flow)</h3>
+        <p>게임 실행 시(또는 에디터 버튼 클릭 시) 내부적으로 일어나는 과정입니다.</p>
+        <ol>
+            <li><b>Generate Grid:</b> <code>DungeonLevelGenerator</code>가 알고리즘(BSP)을 돌려 그리드 데이터(방, 복도, 문 위치)를 생성합니다.</li>
+            <li><b>Cache Data:</b> 생성된 그리드 데이터가 <code>DungeonTileRenderer</code>의 <code>CachedGrid</code> 변수에 저장됩니다.</li>
+            <li><b>Spawn PCG:</b> Renderer가 <code>Theme</code>에 설정된 PCG 그래프들을 위한 <b>PCGComponent</b>를 동적으로 생성합니다.</li>
+            <li><b>Exec PCG (Pull):</b> PCG 그래프가 실행되면서 <b>"Dungeon Data Reader"</b> 노드가 작동합니다.
+                <ul>
+                    <li>노드는 <code>GetCachedGrid()</code>를 통해 아까 저장된 그리드 데이터에 접근합니다.</li>
+                    <li>지정된 타일(예: 문)의 좌표를 찾아 <b>PCG Point</b>로 변환하여 출력합니다.</li>
+                </ul>
+            </li>
+            <li><b>Visual Spawn:</b> 연결된 Spawner가 해당 포인트에 실제 메쉬를 생성합니다.</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h3>4. 확인 및 반복 (Verification)</h3>
+        <ul>
+            <li>레벨에 배치된 <b>DungeonLevelGenerator</b> 액터를 선택합니다.</li>
+            <li><b>Generate Dungeon</b> 버튼을 누릅니다.</li>
+            <li>문(Door) 위치에 PCG로 설정한 메쉬가 생성되었는지 확인합니다.</li>
+            <li>모양을 바꾸고 싶다면? C++ 재컴파일 없이 <b>PCG 그래프만 수정</b>하면 즉시 반영됩니다! 🚀</li>
+        </ul>
+    </div>
+
+</body>
+</html>
