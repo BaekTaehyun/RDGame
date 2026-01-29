@@ -8,6 +8,12 @@
 #include "Rendering/DungeonChunkStreamer.h"
 #include "DungeonFullTestActor.generated.h"
 
+class UPCGComponent;
+class UPCGGraph;
+class UPCGPointData; // Forward Decl
+
+
+
 /**
  * Advanced Test Actor for Dungeon Generator Plugin
  * Exposes all features of UDungeonTileRenderer for comprehensive testing.
@@ -22,13 +28,16 @@ public:
     // --- Level Save/Load Support ---
     virtual void PostLoad() override;
     
-    // 생성된 던전인지 여부 (레벨 저장 시 함께 저장됨)
+    // ?성???전?? ?? (?벨 ??????께 ??됨)
     UPROPERTY(SaveGame)
     bool bWasGenerated = false;
 
-    // 저장된 그리드 데이터 (레벨 저장 시 함께 저장됨)
+    // ??된 그리???이??(?벨 ??????께 ??됨)
     UPROPERTY(SaveGame)
     FDungeonGrid StoredGrid;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Core")
+    class UDungeonThemeAsset* DungeonTheme;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Core")
     int32 Seed = 12345;
@@ -43,7 +52,7 @@ public:
     EDungeonAlgorithmType Algorithm = EDungeonAlgorithmType::BSP;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Core", meta = (ClampMin = "1", ClampMax = "5"))
-    int32 CorridorWidth = 3; // 복도 폭
+    int32 CorridorWidth = 3; // 복도 ??
 
     // --- Renderer Settings Exposed ---
 
@@ -70,7 +79,7 @@ public:
     bool bGenerateFloor = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Generation")
-    bool bGenerateFloorUnderWalls = true; // 벽 아래에도 바닥 생성
+    bool bGenerateFloorUnderWalls = true; // ??래?도 바닥 ?성
 
     // --- LOD Settings ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon LOD")
@@ -81,7 +90,7 @@ public:
 
     // --- Asset Settings ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Assets")
-    TMap<uint8, UStaticMesh*> WallMeshTable;
+    TMap<int32, UStaticMesh*> WallMeshTable;
 
     // --- Material Settings ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Materials")
@@ -101,7 +110,7 @@ public:
     int32 ChunkSize = 10;
 
     // --- Mesh Merging Settings (Phase 4: Chunk-based) ---
-    // 청크 단위 메시 머징 활성화 (컬링 효율 유지하면서 드로우콜 감소)
+    // ? ?위 메시 머징 ?성??(컬링 ?율 ???면???로?콜 감소)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Mesh Merging")
     bool bEnableChunkMerging = false;
 
@@ -109,15 +118,15 @@ public:
     bool bRemoveOriginalAfterMerge = true;
 
     // --- Streaming Settings (Phase 4) ---
-    // 카메라 기반 청크 스트리밍 활성화
+    // 카메??기반 ? ?트리밍 ?성??
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Streaming")
     bool bEnableChunkStreaming = false;
 
-    // 스트리밍 거리 (청크 단위, 예: 3 = 7x7 청크 활성화)
+    // ?트리밍 거리 (? ?위, ?? 3 = 7x7 ? ?성??
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Streaming", meta = (ClampMin = "1", ClampMax = "10", EditCondition = "bEnableChunkStreaming"))
     int32 StreamingDistance = 3;
 
-    // 스트리밍 업데이트 주기 (초)
+    // ?트리밍 ?데?트 주기 (?
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dungeon Streaming", meta = (ClampMin = "0.1", ClampMax = "5.0", EditCondition = "bEnableChunkStreaming"))
     float StreamingUpdateInterval = 0.5f;
 
@@ -134,19 +143,21 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UHierarchicalInstancedStaticMeshComponent* PropMesh;
 
-    // 동적 생성된 Wall HISM 추적용 (for cleanup)
+    // --- Chunking & Streamer ---
+
+    // ?적 ?성??Wall HISM 추적??(for cleanup)
     UPROPERTY(VisibleAnywhere, Transient, Category = "Generated")
     TArray<UHierarchicalInstancedStaticMeshComponent*> CreatedWallHISMs;
 
-    // 청크별 HISM 맵 (ChunkCoord -> HISMs) - 스트리밍/머징용
-    // Note: TMap<FIntPoint, TArray<...>>는 UPROPERTY 지원 안됨
+    // ??HISM ?(ChunkCoord -> HISMs) - ?트리밍/머징??
+    // Note: TMap<FIntPoint, TArray<...>>??UPROPERTY 지???됨
     TMap<FIntPoint, TArray<UHierarchicalInstancedStaticMeshComponent*>> ChunkHISMMap;
 
-    // 청크별 머지된 메시 맵 (ChunkCoord -> MergedMesh)
+    // ??머???메시 ?(ChunkCoord -> MergedMesh)
     UPROPERTY(VisibleAnywhere, Transient, Category = "Generated")
     TMap<FIntPoint, UDynamicMeshComponent*> ChunkMergedWallMap;
 
-    // 청크 스트리머 컴포넌트
+    // ? ?트리머 컴포?트
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UDungeonChunkStreamer* ChunkStreamer;
 
@@ -156,6 +167,8 @@ public:
 
     UFUNCTION(CallInEditor, Category = "Dungeon Action")
     void Clear();
+    
+    // Note: Landscape Generation moved to ADungeonWorldBuilder
 
 protected:
     virtual void BeginPlay() override;

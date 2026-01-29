@@ -24,7 +24,7 @@ public:
   // 0011 = 북동 코너
   // ... 등
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Meshes")
-  TMap<uint8, UStaticMesh *> WallMeshTable;
+  TMap<int32, UStaticMesh *> WallMeshTable;
 
   // 천장 메시
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ceiling")
@@ -34,13 +34,15 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Floor")
   UStaticMesh *FloorMesh;
 
-  // 타일 크기 (언리얼 유닛)
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-  float TileSize = 100.0f;
+
 
   // 벽 높이
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
   float WallHeight = 300.0f;
+
+  // 타일 크기 (Generate 시 Grid 좌표를 월드 좌표로 변환하는데 사용)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+  float TileSize = 100.0f;
 
   // 벽 피봇 오프셋
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
@@ -178,4 +180,12 @@ private:
 
   // 다이나믹 머티리얼 적용 (HISM)
   void ApplyDynamicMaterial(UHierarchicalInstancedStaticMeshComponent* HISM);
+
+	// --- PCG Data Access ---
+public:
+	const FDungeonGrid* GetCachedGrid() const { return &CachedGrid; }
+
+protected:
+	// 내부 로직용 그리드 캐시
+	FDungeonGrid CachedGrid;
 };

@@ -19,7 +19,8 @@ enum class EPCGDungeonTileFilter : uint8
 	CornerWall,   // Wall tiles with L-shaped walkable adjacency (corners)
 	ThroughWall,  // Wall tiles with walkable on both sides (N+S or E+W)
 	Corridor,
-	Door
+	Door,
+	Walkable      // All walkable tiles (Floor, Corridor, Door, Stair)
 };
 
 UCLASS(BlueprintType, ClassGroup = (PCG), meta=(DisplayName="Dungeon Data Reader", Keywords="dungeon reader grid tile"))

@@ -52,10 +52,6 @@ protected:
 	/** Cached theme for tile size data */
 	const UDungeonThemeAsset* CachedTheme = nullptr;
 
-	/** Keep strong reference to spawned components to prevent GC */
-	UPROPERTY()
-	TArray<TObjectPtr<class UPCGComponent>> SpawnedPCGComponents;
-
 	/** Helper to spawn a single PCG graph */
 	void SpawnPCGGraph(AActor* Owner, UPCGGraph* Graph, const FName& Name, int32 Seed);
 };

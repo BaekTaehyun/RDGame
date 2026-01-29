@@ -76,7 +76,7 @@ public:
 
   // Asset References (BSP)
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assets | BSP")
-  TMap<uint8, UStaticMesh *> BSPWallMeshes;
+  TMap<int32, UStaticMesh *> BSPWallMeshes;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assets | BSP")
   UStaticMesh *BSPCeilingMesh;

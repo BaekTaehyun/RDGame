@@ -86,10 +86,28 @@ void CoreBSPGenerator::CreateRooms(std::shared_ptr<CoreBSPNode> Node,
     Node->RoomWidth = RoomWidth;
     Node->RoomHeight = RoomHeight;
 
+    // Set Floor tiles for the room interior
     for (int32_t Y = Node->RoomY; Y < Node->RoomY + RoomHeight; Y++) {
       for (int32_t X = Node->RoomX; X < Node->RoomX + RoomWidth; X++) {
         if (Grid.IsValid(X, Y)) {
           Grid.GetTile(X, Y).Type = ETileType::Floor;
+        }
+      }
+    }
+    
+    // Add Wall border around the room (1 tile thick)
+    int32_t WallMinX = Node->RoomX - 1;
+    int32_t WallMaxX = Node->RoomX + RoomWidth;
+    int32_t WallMinY = Node->RoomY - 1;
+    int32_t WallMaxY = Node->RoomY + RoomHeight;
+    
+    for (int32_t Y = WallMinY; Y <= WallMaxY; Y++) {
+      for (int32_t X = WallMinX; X <= WallMaxX; X++) {
+        if (Grid.IsValid(X, Y)) {
+          // Only set Wall if tile is None (don't overwrite Floor or other types)
+          if (Grid.GetTile(X, Y).Type == ETileType::None) {
+            Grid.GetTile(X, Y).Type = ETileType::Wall;
+          }
         }
       }
     }
@@ -121,32 +139,72 @@ void CoreBSPGenerator::ConnectRooms(std::shared_ptr<CoreBSPNode> Node,
 
 void CoreBSPGenerator::CreateCorridor(CoreDungeonGrid &Grid, int32_t X1,
                                       int32_t Y1, int32_t X2, int32_t Y2) {
+  // Logic Update Confirmation
+  // UE_LOG(LogTemp, Log, TEXT("CoreBSPGenerator: Running Directional Corridor Logic V2"));
+
   int32_t X = X1;
   int32_t Y = Y1;
 
   // 복도 폭 계산 (중앙 기준 양쪽으로 확장)
   int32_t HalfWidth = CorridorWidth / 2;
 
-  // 수평 이동 (X 방향)
-  while (X != X2) {
-    // 복도 폭만큼 타일 생성
-    for (int32_t Offset = -HalfWidth; Offset < CorridorWidth - HalfWidth; Offset++) {
-      if (Grid.IsValid(X, Y + Offset)) {
-        Grid.GetTile(X, Y + Offset).Type = ETileType::Corridor;
+  // 헬퍼 람다: 특정 위치의 타일이 방(Floor)인지 확인
+  auto IsFloor = [&](int32 tx, int32 ty) {
+      if (!Grid.IsValid(tx, ty)) return false;
+      return Grid.GetTile(tx, ty).Type == ETileType::Floor;
+  };
+
+  auto SetTile = [&](int32 tx, int32 ty, ETileType NewType) {
+      if (!Grid.IsValid(tx, ty)) return;
+      ETileType CurrentType = Grid.GetTile(tx, ty).Type;
+      
+      // Protect Floors (Rooms) and existing Doors
+      if (CurrentType == ETileType::Floor || CurrentType == ETileType::Door) return;
+
+      // Force overwrite Walls or None to ensure path is clear
+      Grid.GetTile(tx, ty).Type = NewType;
+  };
+  
+  // Helper to set Wall around a Corridor tile (for proper wall rendering)
+  auto SetWallAround = [&](int32 cx, int32 cy) {
+      for (int32 dy = -1; dy <= 1; dy++) {
+          for (int32 dx = -1; dx <= 1; dx++) {
+              if (dx == 0 && dy == 0) continue;
+              int32 wx = cx + dx;
+              int32 wy = cy + dy;
+              if (Grid.IsValid(wx, wy) && Grid.GetTile(wx, wy).Type == ETileType::None) {
+                  Grid.GetTile(wx, wy).Type = ETileType::Wall;
+              }
+          }
       }
-    }
-    X += (X2 > X) ? 1 : -1;
+  };
+
+  // 수평 이동 (X 방향)
+  int32_t StepX = (X2 > X1) ? 1 : ((X2 < X1) ? -1 : 0);
+  if (StepX != 0) {
+      while (X != X2) {
+          // Simply place Corridor tiles (no Door logic)
+          for (int32_t Offset = -HalfWidth; Offset < CorridorWidth - HalfWidth; Offset++) {
+              int32 ty = Y + Offset;
+              SetTile(X, ty, ETileType::Corridor);
+              SetWallAround(X, ty); // Add walls around corridor
+          }
+          X += StepX;
+      }
   }
   
   // 수직 이동 (Y 방향)
-  while (Y != Y2) {
-    // 복도 폭만큼 타일 생성
-    for (int32_t Offset = -HalfWidth; Offset < CorridorWidth - HalfWidth; Offset++) {
-      if (Grid.IsValid(X + Offset, Y)) {
-        Grid.GetTile(X + Offset, Y).Type = ETileType::Corridor;
+  int32_t StepY = (Y2 > Y1) ? 1 : ((Y2 < Y1) ? -1 : 0);
+  if (StepY != 0) {
+      while (Y != Y2) {
+          // Simply place Corridor tiles (no Door logic)
+          for (int32_t Offset = -HalfWidth; Offset < CorridorWidth - HalfWidth; Offset++) {
+              int32 tx = X + Offset;
+              SetTile(tx, Y, ETileType::Corridor);
+              SetWallAround(tx, Y); // Add walls around corridor
+          }
+          Y += StepY;
       }
-    }
-    Y += (Y2 > Y) ? 1 : -1;
   }
 }
 
@@ -161,7 +219,7 @@ CoreBSPGenerator::GenerateMultiFloor(const CoreMultiFloorConfig &Config,
   // 순차적 생성 (Core에서는 단순성을 위해 순차 처리, 병렬 처리는 호출자에게
   // 위임 가능)
   for (int32_t i = 0; i < Config.NumFloors; i++) {
-    CoreDungeonGrid Grid(Config.Width, Config.Height, ETileType::Wall);
+    CoreDungeonGrid Grid(Config.Width, Config.Height, ETileType::None);
     CoreBSPGenerator Generator; // 기본 설정 사용 또는 Config 전달
     Generator.Generate(Grid, Random, Logger);
     MultiFloor.Floors[i] = Grid;

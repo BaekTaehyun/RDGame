@@ -2,6 +2,8 @@
 #include "Rendering/DungeonChunkStreamer.h" 
 #include "Data/DungeonThemeAsset.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "PCGComponent.h"
+#include "PCGGraph.h" // Added for UPCGGraph definition
 
 UDungeonTileRenderer::UDungeonTileRenderer() {
     TileSize = 100.0f;
@@ -197,6 +199,9 @@ void UDungeonTileRenderer::GenerateBSPTilesMultiMesh(
         return;
     }
 
+    // PCG 데이터 접근을 위해 그리드 캐싱 (Bitmasking 등에 사용)
+    CachedGrid = Grid;
+
     // 기존 HISM 정리
     OutCreatedHISMs.Empty();
     if (CeilingHISM) CeilingHISM->ClearInstances();
@@ -313,6 +318,8 @@ void UDungeonTileRenderer::GenerateBSPTilesMultiMesh(
                     GridOutput += TEXT(".");
                 } else if (Tile.Type == ETileType::Corridor) {
                     GridOutput += TEXT("+");
+                } else if (Tile.Type == ETileType::Door) {
+                    GridOutput += TEXT("D");
                 } else {
                     GridOutput += TEXT(" ");
                 }
@@ -631,6 +638,8 @@ void UDungeonTileRenderer::ApplyTheme(const UDungeonThemeAsset* Theme) {
     CeilingMesh = Theme->CeilingMesh;
     FloorMesh = Theme->FloorMesh;
 
+
+
     // Convert Wall Mesh Table (int32 -> uint8)
     WallMeshTable.Empty();
     for (const auto& Pair : Theme->WallMeshTable) {
@@ -644,3 +653,5 @@ void UDungeonTileRenderer::ApplyTheme(const UDungeonThemeAsset* Theme) {
          WallMeshTable.Add(0, Theme->FallbackWallMesh);
     }
 }
+
+

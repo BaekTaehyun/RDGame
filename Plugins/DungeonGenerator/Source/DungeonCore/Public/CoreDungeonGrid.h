@@ -15,13 +15,13 @@ public:
 
   CoreDungeonGrid() : Width(0), Height(0) {}
   CoreDungeonGrid(int32_t InWidth, int32_t InHeight,
-                  ETileType InitialType = ETileType::Wall) {
+                  ETileType InitialType = ETileType::None) {
     Init(InWidth, InHeight, InitialType);
   }
 
   // 그리드 초기화
   void Init(int32_t InWidth, int32_t InHeight,
-            ETileType InitialType = ETileType::Wall) {
+            ETileType InitialType = ETileType::None) {
     Width = InWidth;
     Height = InHeight;
     Tiles.resize(Width * Height);

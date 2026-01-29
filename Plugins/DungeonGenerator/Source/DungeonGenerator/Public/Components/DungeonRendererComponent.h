@@ -90,6 +90,65 @@ public:
      */
     void HandlePostLoad(bool bIsPIE);
 
+	/**
+	 * Manually cache grid (e.g. before Landscape generation).
+	 * Useful to ensure GetCachedGrid() returns valid data for tools.
+	 */
+	void CacheGrid(const FDungeonGrid& Grid) { CachedGrid = Grid; }
+
+	/**
+	 * Access the last generated Grid data. Used by PCG Data Readers.
+	 */
+	const FDungeonGrid* GetCachedGrid() const { return &CachedGrid; }
+
+	/**
+	 * Access the last used Theme. Used by PCG Data Readers for TileSize, etc.
+	 */
+	const UDungeonThemeAsset* GetCachedTheme() const { return CachedTheme; }
+
+	/**
+	 * Access the cached Landscape world size. Set by DungeonLandscapeTool.
+	 * Returns (0,0) if no Landscape was generated.
+	 * Note: This is a STATIC value shared across all instances.
+	 */
+	static FVector2D GetCachedLandscapeWorldSize() { return CachedLandscapeWorldSize; }
+
+	/**
+	 * Set the cached Landscape world size. Called by DungeonLandscapeTool after Landscape generation.
+	 * Note: This is a STATIC value shared across all instances.
+	 */
+	static void SetCachedLandscapeWorldSize(const FVector2D& WorldSize) { CachedLandscapeWorldSize = WorldSize; }
+
+	/**
+	 * Thread-safe static accessor for PCG nodes.
+	 * Returns the last active DungeonRendererComponent (set during GenerateDungeon).
+	 * This avoids needing TActorIterator which is not thread-safe.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Dungeon")
+	static UDungeonRendererComponent* GetLastActiveRenderer() { return LastActiveRenderer; }
+
+	/** Sets the last active renderer. Called during GenerateDungeon(). */
+	static void SetLastActiveRenderer(UDungeonRendererComponent* Renderer) { LastActiveRenderer = Renderer; }
+
+private:
+	/** Static cached reference for thread-safe access from PCG nodes */
+	static UDungeonRendererComponent* LastActiveRenderer;
+
+protected:
+	/** Central storage of the grid data for sub-renderers and PCG readers */
+	FDungeonGrid CachedGrid;
+
+	/** Central storage of the theme for PCG readers */
+	UPROPERTY()
+	TObjectPtr<const UDungeonThemeAsset> CachedTheme;
+
+	/** Cached Landscape world size for coordinate calculation in PCG nodes (STATIC - shared across all instances) */
+	static FVector2D CachedLandscapeWorldSize;
+
+	/** Specialized Renderer for PCG logic */
+	UPROPERTY(Transient)
+	TObjectPtr<class UDungeonPCGRenderer> PCGRenderer;
+
 private:
 	// Helper to parse component names into chunk coords (Legacy support)
 	// TODO: Use Component Tags in future

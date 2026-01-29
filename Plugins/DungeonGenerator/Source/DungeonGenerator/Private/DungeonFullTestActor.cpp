@@ -1,8 +1,14 @@
 #include "DungeonFullTestActor.h"
+#include "Data/DungeonThemeAsset.h"
 #include "ObjectPlacer.h"
 #include "Algorithms/BSPGenerator.h"
 #include "Algorithms/CellularAutomataGenerator.h"
 #include "Rendering/DungeonMeshMerger.h"
+#include "Utils/DungeonPCGHelper.h"
+#include "PCGComponent.h"
+#include "PCGGraph.h"
+
+
 
 ADungeonFullTestActor::ADungeonFullTestActor() {
     PrimaryActorTick.bCanEverTick = false;
@@ -31,6 +37,44 @@ void ADungeonFullTestActor::Generate() {
 
     FDungeonGrid Grid;
     
+    // Theme Override Logic
+    if (DungeonTheme) {
+        UE_LOG(LogTemp, Log, TEXT("DungeonFullTestActor: Applying settings from Theme '%s'"), *DungeonTheme->GetName());
+        
+        // Geometry
+        TileSize = DungeonTheme->TileSize;
+        WallHeight = DungeonTheme->WallHeight;
+        WallPivotOffset = DungeonTheme->WallPivotOffset;
+        FloorPivotOffset = DungeonTheme->FloorPivotOffset;
+        CeilingPivotOffset = DungeonTheme->CeilingPivotOffset;
+
+        // Meshes
+        WallMeshTable = DungeonTheme->WallMeshTable;
+        if (DungeonTheme->FallbackWallMesh) {
+             // Ensure fallback is available if table misses
+             if (!WallMeshTable.Contains(0)) WallMeshTable.Add(0, DungeonTheme->FallbackWallMesh);
+        }
+        
+        if (FloorMesh) FloorMesh->SetStaticMesh(DungeonTheme->FloorMesh);
+        if (CeilingMesh) CeilingMesh->SetStaticMesh(DungeonTheme->CeilingMesh);
+        
+        // Features
+        bGenerateFloor = DungeonTheme->bGenerateFloor;
+        bGenerateCeiling = DungeonTheme->bGenerateCeiling;
+        bGenerateFloorUnderWalls = DungeonTheme->bGenerateFloorUnderWalls;
+        
+        // LOD
+        bUseLOD = DungeonTheme->bUseLOD;
+        LODDistances = DungeonTheme->LODDistances;
+        
+        // Materials
+        bUseDynamicMaterials = DungeonTheme->bUseDynamicMaterials;
+        WetnessIntensity = DungeonTheme->WetnessIntensity;
+        MossIntensity = DungeonTheme->MossIntensity;
+    } else {
+        UE_LOG(LogTemp, Log, TEXT("DungeonFullTestActor: No Theme assigned. Using Actor properties directly."));
+    }
+
     // Editor Generation Logic
     UE_LOG(LogTemp, Log, TEXT("DungeonFullTestActor: Generating Dungeon..."));
     
@@ -84,25 +128,17 @@ void ADungeonFullTestActor::Generate() {
         Renderer->bUseChunking = bUseChunking;
         Renderer->ChunkSize = ChunkSize;
 
-        // Mesh Setup - WallMeshTable is passed directly
-        UE_LOG(LogTemp, Warning, TEXT("DungeonFullTestActor: WallMeshTable.Num() = %d"), WallMeshTable.Num());
+        Renderer->ChunkSize = ChunkSize;
         
-        if (WallMeshTable.Num() > 0) {
+        // Note: PCG Logic Removed (Migrated to ADungeonWorldBuilder)
+        bool bSkipWallHISM = false;
+
+        // Mesh Setup
+        if (!bSkipWallHISM && WallMeshTable.Num() > 0) {
             Renderer->WallMeshTable = WallMeshTable;
-            UE_LOG(LogTemp, Warning, TEXT("DungeonFullTestActor: Using WallMeshTable with %d entries"), Renderer->WallMeshTable.Num());
-            
-            // 각 엔트리 로깅
-            for (auto& Pair : Renderer->WallMeshTable) {
-                UE_LOG(LogTemp, Warning, TEXT("  Mask %d: %s"), 
-                    Pair.Key, 
-                    Pair.Value ? *Pair.Value->GetName() : TEXT("NULL"));
-            }
-        } else if (WallMesh && WallMesh->GetStaticMesh()) {
-            // Fallback to simple mode if table is empty
-            Renderer->WallMeshTable.Add(0, WallMesh->GetStaticMesh());
-            UE_LOG(LogTemp, Warning, TEXT("DungeonFullTestActor: Using WallMesh fallback"));
-        } else {
-            UE_LOG(LogTemp, Error, TEXT("DungeonFullTestActor: No wall meshes configured! WallMeshTable is empty and WallMesh has no mesh."));
+        } else if (!bSkipWallHISM && WallMesh && WallMesh->GetStaticMesh()) {
+             // Fallback
+             Renderer->WallMeshTable.Add(0, WallMesh->GetStaticMesh());
         }
 
         if (FloorMesh && FloorMesh->GetStaticMesh()) {
@@ -140,7 +176,6 @@ void ADungeonFullTestActor::Generate() {
         FBox NavBounds = NavBuilder->CalculateNavBounds(Grid, FloorPivotOffset);
         NavBuilder->TriggerNavMeshRebuild(GetWorld(), NavBounds);
     }
-
 
 
     // 청크 맵 및 스트리머 재구축

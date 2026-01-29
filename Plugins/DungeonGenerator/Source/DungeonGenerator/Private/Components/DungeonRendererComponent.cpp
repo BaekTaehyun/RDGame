@@ -7,6 +7,9 @@
 #include "Rendering/DungeonChunkStreamer.h"
 #include "Rendering/DungeonMeshMerger.h"
 
+// Static variable definition for thread-safe PCG access
+UDungeonRendererComponent* UDungeonRendererComponent::LastActiveRenderer = nullptr;
+FVector2D UDungeonRendererComponent::CachedLandscapeWorldSize = FVector2D::ZeroVector;
 
 UDungeonRendererComponent::UDungeonRendererComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -17,6 +20,10 @@ void UDungeonRendererComponent::BeginPlay() {
   // Note: Streaming initialization is typically handled by the Actor or
   // Streamer Component
 }
+
+#include "Rendering/DungeonPCGRenderer.h"
+#include "PCGComponent.h"
+#include "Subsystems/PCGSubsystem.h"
 
 void UDungeonRendererComponent::GenerateDungeon(
     const FDungeonGrid &Grid, const FDungeonGenConfig &Config,
@@ -30,106 +37,145 @@ void UDungeonRendererComponent::GenerateDungeon(
   // Always clear previous generation to avoid duplicates (Zombies)
   ClearDungeon();
 
+  // Cache the Grid for PCG Readers
+  CachedGrid = Grid;
+  UE_LOG(LogTemp, Warning, TEXT("DungeonRenderer: CachedGrid Updated. Size=%dx%d"), Grid.Width, Grid.Height);
+  
+  // Determine 2D dimensions
+  int32 SizeX = Grid.Width;
+  int32 SizeY = Grid.Height;
+
+  // Calculate simple checksum to verify grid changes
+  int32 GridChecksum = 0;
+  for(const auto& Tile : Grid.Tiles)
+  {
+      GridChecksum += (int32)Tile.Type;
+  }
+  UE_LOG(LogTemp, Warning, TEXT("DungeonRenderer: Generating Dungeon. Grid Checksum: %d (Seed: %d)"), GridChecksum, Config.Seed);
+
+  // Cache the Theme for PCG Readers (TileSize, etc.)
+  CachedTheme = Theme;
+
+  // Set static reference for thread-safe PCG access
+  SetLastActiveRenderer(this);
+
   AActor *Owner = GetOwner();
   if (!Owner)
     return;
 
-  // Ensure Renderer exists
-  if (!TileRenderer) {
-    TileRenderer = NewObject<UDungeonTileRenderer>(this);
-  }
-
-  // Apply Theme
-  TileRenderer->ApplyTheme(Theme);
-
-  // Set ChunkSize from Config (Used for grouping)
-  TileRenderer->ChunkSize = Config.ChunkSize;
-  TileRenderer->bUseChunking = Config.bUseChunking;
-
-  // Ensure Floor/Ceiling HISMs exist
-  if (!FloorHISM) {
-    FloorHISM = NewObject<UHierarchicalInstancedStaticMeshComponent>(
-        Owner, TEXT("FloorHISM"));
-    FloorHISM->SetupAttachment(Owner->GetRootComponent());
-    // Navigation 비활성화 (StaticMesh 없이 Register 시 크래시 방지)
-    FloorHISM->SetCanEverAffectNavigation(false);
-    FloorHISM->RegisterComponent();
-  } else {
-    FloorHISM->ClearInstances();
-  }
-
-  if (!CeilingHISM) {
-    CeilingHISM = NewObject<UHierarchicalInstancedStaticMeshComponent>(
-        Owner, TEXT("CeilingHISM"));
-    CeilingHISM->SetupAttachment(Owner->GetRootComponent());
-    // Navigation 비활성화 (StaticMesh 없이 Register 시 크래시 방지)
-    CeilingHISM->SetCanEverAffectNavigation(false);
-    CeilingHISM->RegisterComponent();
-  } else {
-    CeilingHISM->ClearInstances();
-  }
-
-  // Generate Meshes (HISMs)
-  TileRenderer->GenerateBSPTilesMultiMesh(Grid, Owner, CeilingHISM, FloorHISM,
-                                          CreatedWallHISMs);
-
-  // Populate ChunkHISMMap from CreatedWallHISMs directly
-  ChunkHISMMap.Empty();
-  for (UHierarchicalInstancedStaticMeshComponent *HISM : CreatedWallHISMs) {
-    if (IsValid(HISM)) {
-      // Parse Tags for Chunk Coord (Faster than name parsing)
-      // Assuming GenerateBSPTilesMultiMesh already added tags
-      int32 ChunkX = 0;
-      int32 ChunkY = 0;
-      bool bFound = false;
-
-      for (const FName &Tag : HISM->ComponentTags) {
-        FString TagStr = Tag.ToString();
-        if (TagStr.StartsWith(TEXT("ChunkX:"))) {
-          ChunkX = FCString::Atoi(*TagStr.Mid(7));
-          bFound = true;
-        } else if (TagStr.StartsWith(TEXT("ChunkY:"))) {
-          ChunkY = FCString::Atoi(*TagStr.Mid(7));
-          bFound = true;
-        }
+  // --- 1. LEGACY Tile Rendering (HISM) ---Legacy Only) ---
+  if (Config.RenderMode == EDungeonRenderMode::LegacyTile)
+  {
+      // Ensure Renderer exists
+      if (!TileRenderer) {
+        TileRenderer = NewObject<UDungeonTileRenderer>(this);
       }
 
-      if (bFound) {
-        ChunkHISMMap.FindOrAdd(FIntPoint(ChunkX, ChunkY)).Add(HISM);
+      // Apply Theme
+      TileRenderer->ApplyTheme(Theme);
+
+      // Set ChunkSize from Config (Used for grouping)
+      TileRenderer->ChunkSize = Config.ChunkSize;
+      TileRenderer->bUseChunking = Config.bUseChunking;
+
+      // Ensure Floor/Ceiling HISMs exist
+      if (!FloorHISM) {
+        FloorHISM = NewObject<UHierarchicalInstancedStaticMeshComponent>(
+            Owner, TEXT("FloorHISM"));
+        FloorHISM->SetupAttachment(Owner->GetRootComponent());
+        FloorHISM->SetCanEverAffectNavigation(false);
+        FloorHISM->RegisterComponent();
+      } else {
+        FloorHISM->ClearInstances();
       }
-    }
-  }
 
-  // Mesh Merging
-  if (Config.bEnableChunkMerging) {
-    // Merge HISMs per chunk
-    MergedChunkMeshes = UDungeonMeshMerger::MergeHISMsPerChunk(
-        Owner, ChunkHISMMap, TEXT("MergedDungeon"));
+      if (!CeilingHISM) {
+        CeilingHISM = NewObject<UHierarchicalInstancedStaticMeshComponent>(
+            Owner, TEXT("CeilingHISM"));
+        CeilingHISM->SetupAttachment(Owner->GetRootComponent());
+        CeilingHISM->SetCanEverAffectNavigation(false);
+        CeilingHISM->RegisterComponent();
+      } else {
+        CeilingHISM->ClearInstances();
+      }
 
-    if (Config.bRemoveOriginalAfterMerge) {
-      // Destroy original HISMs
+      // Generate Meshes (HISMs)
+      TileRenderer->GenerateBSPTilesMultiMesh(Grid, Owner, CeilingHISM, FloorHISM,
+                                              CreatedWallHISMs);
+
+      // --- Post-Process for Legacy (Merging / Maps) ---
+
+      // Populate ChunkHISMMap from CreatedWallHISMs directly
+      ChunkHISMMap.Empty();
       for (UHierarchicalInstancedStaticMeshComponent *HISM : CreatedWallHISMs) {
         if (IsValid(HISM)) {
-          HISM->DestroyComponent();
+          int32 ChunkX = 0;
+          int32 ChunkY = 0;
+          bool bFound = false;
+
+          for (const FName &Tag : HISM->ComponentTags) {
+            FString TagStr = Tag.ToString();
+            if (TagStr.StartsWith(TEXT("ChunkX:"))) {
+              ChunkX = FCString::Atoi(*TagStr.Mid(7));
+              bFound = true;
+            } else if (TagStr.StartsWith(TEXT("ChunkY:"))) {
+              ChunkY = FCString::Atoi(*TagStr.Mid(7));
+              bFound = true;
+            }
+          }
+
+          if (bFound) {
+            ChunkHISMMap.FindOrAdd(FIntPoint(ChunkX, ChunkY)).Add(HISM);
+          }
         }
       }
-      CreatedWallHISMs.Empty();
-      ChunkHISMMap.Empty();
-    }
+
+      // Mesh Merging
+      if (Config.bEnableChunkMerging) {
+        // Merge HISMs per chunk
+        MergedChunkMeshes = UDungeonMeshMerger::MergeHISMsPerChunk(
+            Owner, ChunkHISMMap, TEXT("MergedDungeon"));
+
+        if (Config.bRemoveOriginalAfterMerge) {
+          // Destroy original HISMs
+          for (UHierarchicalInstancedStaticMeshComponent *HISM : CreatedWallHISMs) {
+            if (IsValid(HISM)) {
+              HISM->DestroyComponent();
+            }
+          }
+          CreatedWallHISMs.Empty();
+          ChunkHISMMap.Empty();
+        }
+      }
+
+      // Update Streamer if provided
+      if (ChunkStreamer) {
+        ChunkStreamer->ChunkHISMMap = ChunkHISMMap;
+        ChunkStreamer->ChunkMergedMeshMap = MergedChunkMeshes;
+
+        // Force Show All initially
+        ChunkStreamer->ShowAllChunks();
+      }
+  }
+  else
+  {
+      // Clean up legacy components if they exist (Mode switch)
+      if (FloorHISM) { FloorHISM->DestroyComponent(); FloorHISM = nullptr; }
+      if (CeilingHISM) { CeilingHISM->DestroyComponent(); CeilingHISM = nullptr; }
+      // CreatedWallHISMs should be handled by ClearDungeon() called at start, but ensuring logic safety
   }
 
-  // Update Streamer if provided
-  if (ChunkStreamer) {
-    ChunkStreamer->ChunkHISMMap = ChunkHISMMap;
-    ChunkStreamer->ChunkMergedMeshMap = MergedChunkMeshes;
-
-    // Force Show All initially
-    ChunkStreamer->ShowAllChunks();
+  // --- 2. PCG Rendering (New) ---
+  if (!PCGRenderer) {
+	  PCGRenderer = NewObject<UDungeonPCGRenderer>(this);
   }
+  PCGRenderer->GeneratePCG(Grid, Owner, Theme, Config.Seed);
+
+
 }
 
 void UDungeonRendererComponent::ClearDungeon() {
-  // Destroy all managed HISMs
+  // Destroy all managed HISMs (Legacy mode)
   for (UHierarchicalInstancedStaticMeshComponent *HISM : CreatedWallHISMs) {
     if (IsValid(HISM)) {
       HISM->DestroyComponent();
@@ -138,13 +184,22 @@ void UDungeonRendererComponent::ClearDungeon() {
   CreatedWallHISMs.Empty();
   ChunkHISMMap.Empty();
 
-  // Destroy Merged Meshes
+  // Destroy Merged Meshes (Legacy mode)
   for (auto &Pair : MergedChunkMeshes) {
     if (Pair.Value) {
       Pair.Value->DestroyComponent();
     }
   }
   MergedChunkMeshes.Empty();
+
+  // Cleanup PCG - ensure PCGRenderer exists (may be null after level load due to Transient)
+  AActor* Owner = GetOwner();
+  if (Owner) {
+	  if (!PCGRenderer) {
+		  PCGRenderer = NewObject<UDungeonPCGRenderer>(this);
+	  }
+	  PCGRenderer->Cleanup(Owner);
+  }
 }
 
 void UDungeonRendererComponent::RebuildChunkMaps() {

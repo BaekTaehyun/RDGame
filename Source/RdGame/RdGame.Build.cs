@@ -33,7 +33,8 @@ public class RdGame : ModuleRules
             "GameFeatures",
             "AsyncMixin",
             "ControlFlows",
-            "CommonLoadingScreen"
+            "CommonLoadingScreen",
+            "ApplicationCore"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

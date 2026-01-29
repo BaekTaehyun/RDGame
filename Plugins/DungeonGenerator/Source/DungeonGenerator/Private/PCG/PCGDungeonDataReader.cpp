@@ -7,6 +7,8 @@
 #include "Data/DungeonThemeAsset.h"
 #include "Helpers/PCGHelpers.h"
 #include "Data/PCGPointData.h"
+#include "LandscapeProxy.h"
+#include "EngineUtils.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PCGDungeonDataReader)
 
@@ -41,6 +43,7 @@ FString UPCGDungeonDataReaderSettings::GetAdditionalTitleInformation() const
 	case EPCGDungeonTileFilter::Wall: return TEXT("Wall");
 	case EPCGDungeonTileFilter::Corridor: return TEXT("Corridor");
 	case EPCGDungeonTileFilter::Door: return TEXT("Door");
+	case EPCGDungeonTileFilter::Walkable: return TEXT("Walkable");
 	default: return TEXT("All");
 	}
 }
@@ -83,18 +86,33 @@ bool FPCGDungeonDataReaderElement::ExecuteInternal(FPCGContext* Context) const
 	check(Settings);
 
 	// 1. Find Dungeon Generator Actor (any actor with DungeonRendererComponent)
+	// First try the target actor from context
 	AActor* TargetActor = Context->GetTargetActor(nullptr);
-	if (!TargetActor)
+	UDungeonRendererComponent* RendererComp = nullptr;
+	
+	if (TargetActor)
 	{
-		PCGE_LOG(Warning, GraphAndLog, LOCTEXT("MissingTargetActor", "PCG Component has no target actor."));
-		return true;
+		RendererComp = TargetActor->FindComponentByClass<UDungeonRendererComponent>();
 	}
-
-	// 2. Access Renderer to get Grid
-	UDungeonRendererComponent* RendererComp = TargetActor->FindComponentByClass<UDungeonRendererComponent>();
+	
+	// If not found on target actor, try to find via the PCGSubsystem's cached reference
+	// NOTE: We cannot use TActorIterator here because PCG nodes run on worker threads!
+	// Instead, we use a static cached reference that was set when the dungeon was generated.
 	if (!RendererComp)
 	{
-		PCGE_LOG(Warning, GraphAndLog, LOCTEXT("MissingRenderer", "Target Actor must have a DungeonRendererComponent (e.g., DungeonLevelGenerator, DungeonWorldBuilder)."));
+		// Try to get from static cache (set by DungeonWorldBuilder during generation)
+		RendererComp = UDungeonRendererComponent::GetLastActiveRenderer();
+		if (RendererComp)
+		{
+			TargetActor = RendererComp->GetOwner();
+			UE_LOG(LogTemp, Log, TEXT("PCGDungeonDataReader: Found DungeonRendererComponent via static cache on %s"), 
+				TargetActor ? *TargetActor->GetName() : TEXT("(null)"));
+		}
+	}
+	
+	if (!RendererComp)
+	{
+		PCGE_LOG(Warning, GraphAndLog, LOCTEXT("MissingRenderer", "No DungeonRendererComponent found. Generate Dungeon first."));
 		return true;
 	}
 	// Access Centrally Cached Grid from Component
@@ -127,15 +145,26 @@ bool FPCGDungeonDataReaderElement::ExecuteInternal(FPCGContext* Context) const
 	// 4. Iterate Grid and Create Points
 	// Get TileSize from Theme (consistent with Landscape generation)
 	const UDungeonThemeAsset* Theme = RendererComp->GetCachedTheme();
-	const double TileSize = Theme ? Theme->TileSize : 100.0;
+	double TileSize = Theme ? Theme->TileSize : 100.0;
+	
+	// NOTE: Cannot use TActorIterator here because PCG nodes run on worker threads!
+	// Use cached Landscape world size from DungeonRendererComponent instead.
+	FVector ActorLocation = FVector::ZeroVector;
+	
+	// Check for cached Landscape world size (set by DungeonLandscapeTool) - STATIC variable
+	FVector2D CachedLandscapeSize = UDungeonRendererComponent::GetCachedLandscapeWorldSize();
+	if (CachedLandscapeSize.X > 0.0 && Grid.Width > 0)
+	{
+		// Calculate actual TileSize from cached Landscape world size
+		TileSize = CachedLandscapeSize.X / Grid.Width;
+		UE_LOG(LogTemp, Log, TEXT("PCGDungeonDataReader: Using cached Landscape size. EffectiveTileSize=%.2f (LandscapeSize=%.1f / GridWidth=%d)"),
+			TileSize, CachedLandscapeSize.X, Grid.Width);
+	}
 	
 	if (!Theme)
 	{
-		PCGE_LOG(Warning, GraphAndLog, LOCTEXT("MissingTheme", "Theme not cached. Using default TileSize=100.0. This may cause coordinate mismatch with Landscape."));
+		PCGE_LOG(Warning, GraphAndLog, LOCTEXT("MissingTheme", "Theme not cached."));
 	}
-	
-	// Get Actor's world location as origin for the grid
-	const FVector ActorLocation = TargetActor->GetActorLocation();
 	
 	// Debug: Count tile types
 	int32 CountNone = 0, CountFloor = 0, CountWall = 0, CountCorridor = 0, CountDoor = 0;
@@ -284,12 +313,21 @@ bool FPCGDungeonDataReaderElement::ExecuteInternal(FPCGContext* Context) const
 				break;
 			case EPCGDungeonTileFilter::Corridor: bMatch = (Tile.Type == ETileType::Corridor); break;
 			case EPCGDungeonTileFilter::Door: bMatch = (Tile.Type == ETileType::Door); break;
+			case EPCGDungeonTileFilter::Walkable: 
+				bMatch = (Tile.Type == ETileType::Floor || 
+				          Tile.Type == ETileType::Corridor || 
+				          Tile.Type == ETileType::Door || 
+				          Tile.Type == ETileType::Stair); 
+				break;
 			}
 
 			if (bMatch)
 			{
 				FTransform Transform;
-				// Calculate point location to match Heightmap center
+				// Calculate point location to match Landscape texture coordinates exactly
+				// Landscape World Size = Grid.Width * TileSize (from DungeonLandscapeTool)
+				// Each grid tile maps to TileSize world units
+				// Point should be at center of tile: (X + 0.5) * TileSize
 				FVector PointLocation = ActorLocation + FVector((X + 0.5) * TileSize, (Y + 0.5) * TileSize, 0.0);
 				
 				// Get pivot offset from Theme (will be applied after rotation is calculated)

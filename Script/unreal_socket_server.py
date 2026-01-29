@@ -263,6 +263,63 @@ def unreal_tick(delta_seconds):
                     else:
                         result = {"error": f"Nodes not found. Up:{up_node is not None}, Down:{down_node is not None}"}
 
+            elif command == "inspect_pcg_graph":
+                graph_path = payload.get("graph_path")
+                # Try to use new C++ Helper because we need Edges
+                try:
+                    if hasattr(unreal, "DungeonAssetUtils"):
+                        json_str = unreal.DungeonAssetUtils.analyze_pcg_topology(graph_path)
+                        result = {"method": "cpp", "data": json_str}
+                    else:
+                        result = {"method": "python_basic", "error": "DungeonAssetUtils C++ plugin required for full inspection"}
+                except Exception as e:
+                    result = {"error": f"Inspection Failed: {e}"}
+
+            elif command == "get_pcg_node_properties":
+                graph_path = payload.get("graph_path")
+                node_name = payload.get("node_name")
+                prop_names = payload.get("property_names", [])
+                
+                graph_asset = unreal.load_asset(graph_path)
+                if not graph_asset:
+                     result = {"error": "Graph not found"}
+                else:
+                    target_node = None
+                    for n in graph_asset.nodes:
+                        if n.get_name() == node_name:
+                            target_node = n
+                            break
+                            
+                    if target_node:
+                        settings = target_node.get_settings()
+                        if settings:
+                            values = {}
+                            errors = []
+                            for p_name in prop_names:
+                                try:
+                                    # Try Get Editor Property
+                                    val = settings.get_editor_property(p_name)
+                                    # Convert Unreal Types to JSON-friendly
+                                    if isinstance(val, unreal.Vector):
+                                        values[p_name] = {"x": val.x, "y": val.y, "z": val.z}
+                                    elif isinstance(val, unreal.Rotator):
+                                        values[p_name] = {"pitch": val.pitch, "yaw": val.yaw, "roll": val.roll}
+                                    elif isinstance(val, (unreal.Object, unreal.Class)):
+                                        values[p_name] = val.get_name()
+                                    else:
+                                        # Basic types
+                                        values[p_name] = val
+                                except Exception as e:
+                                    # Special handling involves looking into MeshSelectors which is complex
+                                    # For now just verify direct properties
+                                    errors.append(f"{p_name}: {str(e)}")
+                            
+                            result = {"status": "success", "properties": values, "errors": errors}
+                        else:
+                            result = {"error": "Node has no settings"}
+                    else:
+                        result = {"error": f"Node '{node_name}' not found"}
+
             elif command == "set_pcg_node_properties":
                 graph_path = payload.get("graph_path")
                 node_name = payload.get("node_name")
@@ -281,6 +338,7 @@ def unreal_tick(delta_seconds):
                     if target_node:
                         settings = target_node.get_settings()
                         if settings:
+                            settings.modify() # Ensure transaction
                             successes = []
                             errors = []
                             
@@ -387,6 +445,132 @@ def unreal_tick(delta_seconds):
                             result = {"error": "Node has no settings"}
                     else:
                         result = {"error": "Node not found"}
+
+            # --- New PCG Graph Manipulation Tools ---
+            elif command == "add_pcg_node":
+                # Create a new node in the graph
+                graph_path = payload.get("graph_path")
+                node_class = payload.get("node_class") # e.g. "PCGStaticMeshSpawnerSettings"
+                node_name = payload.get("node_name") # Optional: Try to rename after creation
+                position_x = payload.get("position_x", 0)
+                position_y = payload.get("position_y", 0)
+                
+                graph = unreal.load_asset(graph_path)
+                if not graph:
+                    result = {"error": "Graph not found"}
+                else:
+                    try:
+                        # 1. Resolve Class
+                        # Settings class is usually what we add, and PCGGraph creates a Node for it.
+                        # OR we add a PCGNode with specific Settings.
+                        # API: UPCGGraph::AddNode(UPCGSettings* InSettings)
+                        
+                        settings_cls = unreal.load_class(None, node_class) if "/" in node_class else getattr(unreal, node_class, None)
+                        
+                        if not settings_cls:
+                            # Try adding 'PCG' prefix or 'Settings' suffix if missing
+                            if not settings_cls: settings_cls = getattr(unreal, f"PCG{node_class}Settings", None)
+                            if not settings_cls: settings_cls = getattr(unreal, f"{node_class}Settings", None)
+                        
+                        if not settings_cls:
+                            result = {"error": f"Class {node_class} not found"}
+                        else:
+                            # Instantiate Settings
+                            new_settings = unreal.PCGGraph.create_graph_settings(settings_cls, graph) # Wrapper?
+                            # Standard Way: graph.add_node_of_type(settings_cls) ?
+                            # Unreal Python API for PCG is tricky.
+                            # Proper way: graph.add_node_instance(settings_object)
+                            
+                            node = graph.add_node_of_type(settings_cls)
+                            
+                            if node:
+                                # Rename if requested (This acts as 'Name' in graph, not Asset Name)
+                                if node_name:
+                                    # PCGNode names are often auto-generated.
+                                    pass 
+                                
+                                # Set Position
+                                node.set_node_position(int(position_x), int(position_y))
+                                
+                                result = {"status": "success", "node_name": node.get_name()}
+                            else:
+                                result = {"error": "Failed to create node"}
+                    except Exception as e:
+                        result = {"error": str(e)}
+
+            elif command == "connect_pcg_nodes":
+                graph_path = payload.get("graph_path")
+                up_node_name = payload.get("upstream_node")
+                down_node_name = payload.get("downstream_node")
+                
+                graph = unreal.load_asset(graph_path)
+                if not graph:
+                    result = {"error": "Graph not found"}
+                else:
+                    up_node = None
+                    down_node = None
+                    for n in graph.nodes:
+                        if n.get_name() == up_node_name: up_node = n
+                        if n.get_name() == down_node_name: down_node = n
+                    
+                    if up_node and down_node:
+                        try:
+                            # graph.add_edge(up_node, "Out", down_node, "In")
+                            # Note: Pin labels might vary.
+                            # We can try C++ Utility if Python fails, but let's try direct first.
+                            graph.add_edge(up_node, "Out", down_node, "In")
+                            result = {"status": "success"}
+                        except Exception as e:
+                            result = {"error": str(e)}
+                    else:
+                        result = {"error": "Nodes not found"}
+
+            elif command == "set_pcg_node_position":
+                graph_path = payload.get("graph_path")
+                node_name = payload.get("node_name")
+                x = payload.get("x")
+                y = payload.get("y")
+                
+                graph = unreal.load_asset(graph_path)
+                if not graph:
+                    result = {"error": "Graph not found"}
+                else:
+                    found = False
+                    for n in graph.nodes:
+                        if n.get_name() == node_name:
+                            n.set_node_position(int(x), int(y))
+                            found = True
+                            break
+                    if found:
+                        result = {"status": "success"}
+                    else:
+                        result = {"error": "Node not found"}
+
+            elif command == "execute_python":
+                code = payload.get("code")
+                desc = payload.get("description", "Executing Remote Script...")
+                if not code:
+                    result = {"error": "No code provided"}
+                else:
+                    import io
+                    import contextlib
+                    output_buffer = io.StringIO()
+                    
+                    # Wrap in SlowTask for Editor UI Feedback
+                    with unreal.ScopedSlowTask(1.0, desc) as slow_task:
+                        slow_task.make_dialog(True) # Show Cancel button
+                        try:
+                            # Redirect Stdout
+                            with contextlib.redirect_stdout(output_buffer):
+                                print(f"--- Start: {desc} ---")
+                                # Helper: Inject 'slow_task' into globals so the script can update it!
+                                exec(code, globals(), {"slow_task": slow_task})
+                                print(f"--- End: {desc} ---")
+                                
+                            result = {"output": output_buffer.getvalue()}
+                        except Exception as e:
+                            # traceback.print_exc() 
+                            result = {"error": str(e), "output": output_buffer.getvalue()}
 
             elif command == "ping":
                 result = "pong"

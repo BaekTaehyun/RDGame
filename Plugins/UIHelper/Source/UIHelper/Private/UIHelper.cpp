@@ -1,0 +1,18 @@
+#include "UIHelper.h"
+
+#define LOCTEXT_NAMESPACE "FUIHelperModule"
+
+void FUIHelperModule::StartupModule()
+{
+	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+}
+
+void FUIHelperModule::ShutdownModule()
+{
+	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
+	// we call this function before unloading the module.
+}
+
+#undef LOCTEXT_NAMESPACE
+	
+IMPLEMENT_MODULE(FUIHelperModule, UIHelper)

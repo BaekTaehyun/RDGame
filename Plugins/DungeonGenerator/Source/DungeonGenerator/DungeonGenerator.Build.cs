@@ -10,7 +10,9 @@ public class DungeonGenerator : ModuleRules
         "ProceduralMeshComponent",
         "NavigationSystem",
         "GeometryScriptingCore",  // Phase 3: Mesh Merging
-        "GeometryFramework"       // Provides UDynamicMeshComponent and UDynamicMesh
+        "GeometryFramework",       // Provides UDynamicMeshComponent and UDynamicMesh
+        "PCG",                     // Added for PCG Graph references in Theme
+        "Landscape"                // For ALandscape in SpawnedLandscape
     };
     private static readonly string[] PrivateDependencyModuleNamesArray =
     {
@@ -24,11 +26,17 @@ public class DungeonGenerator : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        // Public 폴더를 include 경로에 추가
+        // Public include paths
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
 
         PublicDependencyModuleNames.AddRange(PublicDependencyModuleNamesArray);
 
         PrivateDependencyModuleNames.AddRange(PrivateDependencyModuleNamesArray);
+
+        // Editor-only modules for GEditor, ActorFactory
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.Add("UnrealEd");
+        }
     }
 }

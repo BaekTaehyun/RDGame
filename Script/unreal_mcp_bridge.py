@@ -186,6 +186,17 @@ class UnrealMCPBridge:
                 }
             },
             {
+                "name": "inspect_pcg_graph",
+                "description": "Inspects a PCG graph and return its topology (nodes and connections) as JSON.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "graph_path": {"type": "string", "description": "Path to the PCG Graph asset"}
+                    },
+                    "required": ["graph_path"]
+                }
+            },
+            {
                 "name": "set_pcg_node_properties",
                 "description": "Sets properties on a PCG Node's settings object.",
                 "inputSchema": {
@@ -199,6 +210,35 @@ class UnrealMCPBridge:
                         }
                     },
                     "required": ["graph_path", "node_name", "properties"]
+                }
+            },
+            {
+                "name": "get_pcg_node_properties",
+                "description": "Reads properties from a PCG Node's settings object.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "graph_path": {"type": "string", "description": "Path to the PCG Graph asset"},
+                        "node_name": {"type": "string", "description": "Name of the node to read"},
+                        "property_names": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of property names to read (e.g. ['CellSize', 'MeshEntries'])"
+                        }
+                    },
+                    "required": ["graph_path", "node_name", "property_names"]
+                }
+            },
+            {
+                "name": "execute_unreal_script",
+                "description": "Executes arbitrary Python code in the Unreal Engine process and returns stdout.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "code": {"type": "string", "description": "Python code to execute"},
+                        "description": {"type": "string", "description": "Description of what the code does (for logging)"}
+                    },
+                    "required": ["code"]
                 }
             }
         ]
@@ -237,8 +277,8 @@ class UnrealMCPBridge:
                 
                 return {"jsonrpc": "2.0", "id": msg_id, "result": {"content": content}}
                 
-            elif tool_name in ["create_pcg_graph", "add_pcg_node", "connect_pcg_nodes", "set_pcg_node_properties"]:
-                # Pass through directly mapping arguments
+            elif tool_name in ["create_pcg_graph", "add_pcg_node", "connect_pcg_nodes", "set_pcg_node_properties", "get_pcg_node_properties", "inspect_pcg_graph", "set_pcg_node_position"]:
+                # Generic pass-through for PCG tools
                 payload = {"command": tool_name}
                 payload.update(tool_args)
                 res_data = self.connect_and_send(payload)
@@ -251,6 +291,21 @@ class UnrealMCPBridge:
                 
                 return {"jsonrpc": "2.0", "id": msg_id, "result": {"content": content}}
                 
+            elif tool_name == "execute_unreal_script":
+                code = tool_args.get("code")
+                res_data = self.connect_and_send({"command": "execute_python", "code": code})
+                
+                content = []
+                if "error" in res_data:
+                    out = res_data.get("output", "")
+                    content = [{"type": "text", "text": f"Error: {res_data['error']}\nOutput:\n{out}"}]
+                elif "output" in res_data:
+                    content = [{"type": "text", "text": res_data["output"]}]
+                else:
+                    content = [{"type": "text", "text": json.dumps(res_data, indent=2)}]
+                    
+                return {"jsonrpc": "2.0", "id": msg_id, "result": {"content": content}}
+
             else:
                  return {
                     "jsonrpc": "2.0",
